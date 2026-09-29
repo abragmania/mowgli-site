@@ -8,30 +8,69 @@
 <link rel="icon" href="/mowgli-site/mowgli-mark.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Temporary list of every profiled company (Adam, 2026-09-29: "for my temporary viewing pleasure"); a normal top-nav section, the Monitor is home. -->
+<!-- Temporary list of every profiled company (Adam, 2026-09-29: "for my temporary viewing pleasure"); a normal top-nav section. Its header is the Monitor's, exactly. -->
 <style>
-:root{--ink:#eef1f8;--mut:#9aa3b8;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
-*{box-sizing:border-box;margin:0}
-body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1c2a4a 0%,#0b1020 55%,#070a14 100%) fixed;color:var(--ink);font:500 15px Manrope,system-ui,sans-serif;padding:2.2rem clamp(16px,4vw,4rem)}
-header{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.6rem;flex-wrap:wrap}
-.navm{display:flex;align-items:center;gap:1.4rem}
-.navm .home{display:flex;align-items:center;gap:.6rem;text-decoration:none;flex:none}
-.navm .home span{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.45rem;letter-spacing:.2px;color:#f3f0e8}
+:root{--sp:#05090c;--c1:#0e2a2e;--c2:#0b1d26;--c3:#10262a;--tint:#2f8a86;--dust:#8fd6c8;
+ --ease:cubic-bezier(.3,.7,.2,1);--dur:.32s;--gap:clamp(16px,1.8vw,48px);--rgap:clamp(14px,2.6vh,40px);--op:.56;
+ --card:rgb(12 20 26 / var(--op));--cardbd:rgba(255,255,255,.13);--blur:blur(18px) saturate(1.15);
+ --ink:#f2f5f6;--ink2:#cdd5d8;--mut:#93a1a6;--line:rgba(255,255,255,.10);--sub:rgba(255,255,255,.07);--sub2:rgba(255,255,255,.13);
+ --chip:#efedea;--up:#5fd3a2;--dn:#ff8f80;--sh:0 18px 50px rgba(0,0,0,.35);
+ --accx:#9fdcd2;--accbg:rgba(80,170,160,.22)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:clamp(11px,min(.7vw,1.38vh),18px)}
+body{background:radial-gradient(ellipse at 40% -10%,#0e2a2e 0%,#0a1a20 45%,#05090c 100%) fixed;color:var(--ink);font-family:Manrope,system-ui,sans-serif;min-height:100vh;padding:clamp(12px,2.2vh,32px) clamp(20px,2.6vw,66px)}
+.pad{background:var(--card);border:1px solid var(--cardbd);box-shadow:var(--sh);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.pad{border-radius:22px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.head{display:flex;align-items:center;gap:1.6rem}
+.home{display:flex;align-items:center;gap:.6rem;text-decoration:none;flex:none}
+.home img{width:2.1rem;height:2.1rem;filter:drop-shadow(0 0 8px color-mix(in oklab,var(--tint) 70%,transparent))}
+.home span{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.45rem;color:#f3f0e8}
+.srch{display:flex;align-items:center;gap:.55rem;width:min(26rem,100%);padding:.5rem .6rem .5rem .85rem;border-radius:30px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);cursor:text}
+.srch svg{width:1rem;height:1rem;fill:none;stroke:#b9c4c8;stroke-width:1.6;flex:none}
+.srch input{flex:1;min-width:0;background:none;border:0;outline:0;font:500 .9rem Manrope;color:#eef3f4}
+.srch input::placeholder{color:#94a2a7}
+.srch kbd{font:700 .72rem Manrope;color:#b9c4c8;border:1px solid rgba(255,255,255,.22);border-radius:6px;padding:.05rem .4rem}
+.srch:focus-within{border-color:color-mix(in oklab,var(--tint) 60%,#fff);background:rgba(255,255,255,.1)}
+.pg{font-size:.8rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aab8bc;opacity:.85}
 .tnav{display:flex;gap:.3rem}.tnav a{font-size:.8rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#aab4ba;text-decoration:none;padding:.35rem .8rem;border-radius:20px;opacity:.85}.tnav a:hover{color:#fff;opacity:1}.tnav a.on{color:#fff;background:rgba(255,255,255,.1);opacity:1}
 .tnav a.soon{opacity:.38;cursor:default}.tnav a.soon:hover{color:#aab4ba;opacity:.38}
-h1{font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:800}
-input{margin-left:auto;background:var(--card);border:1px solid var(--line);border-radius:999px;color:var(--ink);font:inherit;padding:.5rem 1rem;width:min(22rem,100%)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem}
-.grid a{display:flex;align-items:center;gap:.8rem;padding:.7rem .8rem;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;transition:background .15s}
+.stat{margin-left:auto;display:flex;align-items:center;gap:.7rem;font-size:.85rem;color:var(--ink2);padding:.55rem 1.1rem;border-radius:30px}
+.stat i{width:.55rem;height:.55rem;border-radius:50%;background:var(--up);box-shadow:0 0 8px var(--up)}
+.stat.off i{background:var(--mut);box-shadow:none}.stat.bad i{background:#e8c53a;box-shadow:0 0 8px #e8c53a}
+.stat b{color:var(--ink)}
+.srch{position:relative}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + .4rem);z-index:60;display:none;flex-direction:column;padding:.35rem;border-radius:16px;background:rgba(10,18,22,.94);border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.sugg.on{display:flex}
+.sugg a{display:grid;grid-template-columns:3.6rem 3.4rem 1fr;align-items:center;gap:.6rem;padding:.35rem .5rem;border-radius:10px;color:#dfe6e8;text-decoration:none;font:500 .85rem Manrope}
+.sugg a b{font-weight:800;letter-spacing:.5px;color:#fff}
+.sugg a img{height:1.3rem;width:3.4rem;object-fit:contain;background:var(--chip);border-radius:6px;padding:.1rem .3rem}
+.sugg a .nl{height:1.3rem;width:3.4rem;border-radius:6px;background:rgba(255,255,255,.08)}
+.sugg a.sel,.sugg a:hover{background:rgba(255,255,255,.1)}
+.stat[hidden]{display:none}
+.body{margin-top:clamp(14px,2.4vh,38px)}
+.bar2{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
+.bar2 h1{font-size:.8rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);font-weight:800}
+.bar2 input{margin-left:auto;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;color:var(--ink);font:500 14px Manrope,system-ui,sans-serif;padding:8px 16px;width:min(22rem,100%);outline:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.grid a{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:14px;background:var(--card);border:1px solid var(--cardbd);color:var(--ink);text-decoration:none;transition:background .15s;font:500 14px Manrope,system-ui,sans-serif}
 .grid a:hover{background:rgba(255,255,255,.12)}
-.grid img{width:4.4rem;height:2.2rem;object-fit:contain;background:#f4f2ee;border-radius:8px;padding:.25rem .4rem;flex:none}
-.grid b{display:block;font-weight:800;letter-spacing:.04em;font-size:.85rem}
-.grid span{display:block;color:var(--mut);font-size:.85rem;line-height:1.25}
+.grid img{width:70px;height:35px;object-fit:contain;background:#f4f2ee;border-radius:8px;padding:4px 6px;flex:none}
+.grid b{display:block;font-weight:800;letter-spacing:.04em;font-size:13px}
+.grid span{display:block;color:var(--mut);font-size:13px;line-height:1.25}
 </style>
 </head>
 <body>
-<header><div class="navm"><a class="home" href="/mowgli-site/" title="Mowgli"><img src="/mowgli-site/mowgli-mark.svg" alt="" style="width:2.1rem;height:2.1rem"><span>Mowgli</span></a><nav class="tnav"><a href="/mowgli-site/">Monitor</a><a class="soon" title="coming">News</a><a class="soon" title="coming">Performance</a><a href="/mowgli-site/list/" class="on" aria-current="page">List</a></nav></div><h1 id="n">Companies</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies" autofocus></header>
+<div class="head">
+  <a class="home" href="/mowgli-site/" title="Mowgli home"><img src="/mowgli-site/mowgli-mark.svg" alt=""><span>Mowgli</span></a>
+  <label class="srch"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="m10.4 10.4 3.4 3.4"/></svg><input id="q" type="search" placeholder="Search a company or ticker…" aria-label="Search a company or ticker" autocomplete="off"><kbd>/</kbd><div class="sugg" id="sugg"></div></label>
+  <nav class="tnav"><a href="/mowgli-site/">Monitor</a><a class="soon" title="coming">News</a><a class="soon" title="coming">Performance</a><a href="/mowgli-site/list/" class="on" aria-current="page">List</a></nav>
+  <div class="stat pad off" id="stat" hidden><i></i><span></span></div>
+</div>
+<div class="body">
+<div class="bar2"><h1 id="n">Companies</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies"></div>
 <div class="grid" id="g"></div>
+</div>
 <script src="/mowgli-site/config.js"></script>
 <script src="/mowgli-site/site.js"></script>
 <script>
@@ -46,8 +85,46 @@ fetch(MG.companiesUrl()).then((r) => r.json()).then((list) => {
   all = list.sort((a, b) => a.name.localeCompare(b.name));
   document.getElementById('n').textContent = `Companies · ${all.length}`;
   draw('');
+  setupSwitcher();
 });
 document.getElementById('f').addEventListener('input', (e) => draw(e.target.value));
+
+/* header search: same as the Monitor and company page */
+function setupSwitcher() {
+  const q = document.getElementById('q'), box = document.getElementById('sugg');
+  let sel = 0, hits = [];
+  const show = () => {
+    const s = q.value.trim().toUpperCase();
+    if (!s) { box.classList.remove('on'); return; }
+    hits = all.filter((c) => c.ticker.startsWith(s) || c.aliases.some((a) => a.startsWith(s))).concat(all.filter((c) => !c.ticker.startsWith(s) && !c.aliases.some((a) => a.startsWith(s)) && c.name.toUpperCase().includes(s))).slice(0, 8);
+    sel = 0;
+    box.innerHTML = hits.map((c, i) => `<a href="${MG.pageUrl(c.ticker)}" class="${i === sel ? 'sel' : ''}">${c.logo ? `<img src="${esc(c.logo)}" alt="">` : '<span class="nl"></span>'}<b>${esc(c.ticker)}</b><span>${esc(c.name)}</span></a>`).join('') || '<a><span></span><b></b><span>No match among the profiled companies</span></a>';
+    box.classList.add('on');
+  };
+  q.addEventListener('input', show);
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = (sel + (e.key === 'ArrowDown' ? 1 : hits.length - 1)) % Math.max(1, hits.length); [...box.children].forEach((a, i) => a.classList.toggle('sel', i === sel)); }
+    else if (e.key === 'Enter' && hits[sel]) location.href = MG.pageUrl(hits[sel].ticker);
+    else if (e.key === 'Escape') { q.value = ''; box.classList.remove('on'); q.blur(); }
+  });
+  q.addEventListener('blur', () => setTimeout(() => box.classList.remove('on'), 150));
+  addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); q.focus(); } });
+}
+
+/* market-status pill, same wording as the Monitor; hidden if no data can be had */
+(async () => {
+  const TXT = { open: 'Market open', 'pre-market': 'Pre-market', 'after hours': 'After hours', closed: 'Market closed' };
+  let p = null, stale = false;
+  try { const u = MG.monitorUrl(); if (!u) throw 0; p = await fetch(u).then((r) => { if (!r.ok) throw 0; return r.json(); }); stale = !!p.stale; }
+  catch { try { p = await fetch(MG.monitorBakedUrl()).then((r) => r.json()); stale = true; } catch { return; } }
+  const q = new Date(p.quoteTime || p.asOf);
+  const et = q.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
+  const d = q.toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', day: 'numeric', month: 'short' });
+  const st = document.getElementById('stat');
+  st.className = 'stat pad' + (stale ? ' bad' : p.session === 'open' ? '' : ' off');
+  st.querySelector('span').innerHTML = stale ? `<b>Stale</b> · live data not answering; showing prices as of <b>${et} ET</b>, ${d}` : `${TXT[p.session] || 'Market'} · prices as of <b>${et} ET</b>, ${d}`;
+  st.hidden = false;
+})();
 </script>
 </body>
 </html>

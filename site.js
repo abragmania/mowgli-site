@@ -15,6 +15,8 @@
     companiesUrl: () => (isStatic ? `${base}data/companies.json` : '/api/companies'),
     // Monitor: local server answers /api/monitor; the published site asks the Worker, and falls back to the copy baked at publish
     monitorUrl() { return isStatic ? (this.quoteWorker ? `${this.quoteWorker}/monitor` : '') : '/api/monitor'; },
+    logosUrl: () => (isStatic ? `${base}data/logos.json` : '/api/monitor/logos'),
+    logoBase: isStatic ? `${base}logos/` : '/logos/',
     monitorBakedUrl: () => (isStatic ? `${base}data/monitor.json` : ''),
     pageUrl: (t) => (isStatic ? `${base}c/${enc(t)}/` : `/c/${enc(t)}`),
     tickerFromPath() {

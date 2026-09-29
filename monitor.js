@@ -14,7 +14,9 @@ const heat = (v) => { if (v == null) return '#3a4148'; const t = Math.max(-1, Ma
 const fp = (v, d = 2) => (v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d) + '%');
 const cls = (v) => (v > 0 ? 'up' : v < 0 ? 'dn' : 'fl');
 const money = (v) => (v == null ? '—' : v >= 1e12 ? '$' + (v / 1e12).toFixed(2) + 'T' : '$' + (v / 1e9).toFixed(0) + 'B');
-const wavg = (arr, k) => { let s = 0, w = 0; arr.forEach((x) => { if (x[k] != null && x.cap) { s += x[k] * x.cap; w += x.cap; } }); return w ? s / w : null; };
+// weights use each company's own size (a company with several share classes is counted once)
+const sz = (s) => s.size ?? s.cap ?? 0;
+const wavg = (arr, k) => { let s = 0, w = 0; arr.forEach((x) => { if (x[k] != null && sz(x)) { s += x[k] * sz(x); w += sz(x); } }); return w ? s / w : null; };
 
 let P = null;            // the payload being shown
 let D = { stocks: [], etf: {}, watch: [], breadthHist: [] };
@@ -24,7 +26,8 @@ const LINK = new Map();  // Yahoo-style symbol -> canonical folder ticker
 const LOGO = new Map();  // Yahoo-style symbol -> logo url
 const ysym = (s) => String(s || '').toUpperCase().replace(/[./ ]/g, '-');
 const isMine = (t) => LINK.has(ysym(t));
-const logo = (t) => LOGO.get(ysym(t)) || null;
+const LOGOFILES = {};    // every committed logo file by Yahoo-style symbol
+const logo = (t) => LOGO.get(ysym(t)) || (LOGOFILES[ysym(t)] ? MG.logoBase + LOGOFILES[ysym(t)] : null);
 const co = (t) => (isMine(t) ? ` data-co="${esc(LINK.get(ysym(t)))}"` : '');
 
 /* ---------- sky: one teal family, leaning green on up days and red-violet on down days ---------- */
@@ -81,7 +84,7 @@ function drawWatch() {
     const d3 = w.d3m && w.d3m.length ? w.d3m[0] : null;
     const m3 = !has || d3 == null ? '—' : yld ? `<span class="${cls(w.p - d3)}">${(w.p - d3 >= 0 ? '+' : '−') + Math.abs((w.p - d3) * 100).toFixed(0)} bp</span>` : `<span class="${cls(w.m3)}">${fp(w.m3, 1)}</span>`;
     return `<div class="wt pad" title="${esc(w.n)}: line is today so far; dashed line is yesterday's close"><div class="n">${esc(w.n)}</div><div class="r">3 mo ${m3}</div><div class="p">${p}</div><div class="c ${cls(w.ch)}">${c}</div>${spark(w.intra || [], w.prev)}</div>`;
-  }).join('') + `<div class="add" title="Pick another chart to keep an eye on (editor not built yet)"><div><b>+</b>add chart</div></div>`;
+  }).join('');
 }
 
 /* ---------- treemap ---------- */
@@ -114,10 +117,10 @@ function groups(list, sub) {
   return [...out, other].filter((g) => g.list.length);
 }
 function nest(gs, W, H, big, click) {
-  let h = ''; squarify(gs.map((g) => ({ ...g, v: g.list.reduce((a, s) => a + (s.cap || 0), 0) })), 0, 0, W, H).forEach((g) => {
+  let h = ''; squarify(gs.map((g) => ({ ...g, v: g.list.reduce((a, s) => a + sz(s), 0) })), 0, 0, W, H).forEach((g) => {
     const hh = g.h > 60 && g.w > 70 ? 22 : 0, v = wavg(g.list, S.p);
     h += `<div class="grp" style="${box(g)}">${hh ? `<div class="gh" ${click ? `data-z="${esc(click(g))}"` : ''} title="${esc(g.name)} ${fp(v)}">${g.badge ? '<span class="badge">Mowgli</span>' : ''}${esc(g.name)}<b class="${cls(v)}">${fp(v, 1)}</b></div>` : ''}`;
-    squarify(g.list.map((s) => ({ s, v: s.cap || 0 })), 0, hh, g.w - G, g.h - G - hh).forEach((c) => { h += click ? coCell(c.s, c, big).replace('class="cell', 'data-z="' + esc(click(g)) + '" class="cell') : coCell(c.s, c, big); }); h += '</div>';
+    squarify(g.list.map((s) => ({ s, v: sz(s) })), 0, hh, g.w - G, g.h - G - hh).forEach((c) => { h += click ? coCell(c.s, c, big).replace('class="cell', 'data-z="' + esc(click(g)) + '" class="cell') : coCell(c.s, c, big); }); h += '</div>';
   }); return h;
 }
 const legend = (note) => { const c = CAP[S.p]; $('legend').innerHTML = `<span>${fp(-c, 0)}</span><div class="sc">${[-1, -.66, -.33, 0, .33, .66, 1].map((t) => `<i style="background:${heat(t * c)}"></i>`).join('')}</div><span>${fp(c, 0)}</span><span class="note">${note}</span>`; };
@@ -128,9 +131,9 @@ function drawMap() {
   const el = $('map'), W = el.clientWidth, H = el.clientHeight; const [sec, sub] = S.zoom ? S.zoom.split('/') : [];
   const secName = sec && Object.keys(ETF).find((k) => ETF[k] === sec); let h = '', crumb = `<a data-z="">S&amp;P 500</a>`;
   if (!secName) { /* level 0: sectors */
-    const items = Object.keys(ETF).map((n) => ({ n, e: ETF[n], v: (bySec[n] || []).reduce((a, s) => a + (s.cap || 0), 0), mv: D.etf[ETF[n]]?.[S.p] ?? null }));
+    const items = Object.keys(ETF).map((n) => ({ n, e: ETF[n], v: (bySec[n] || []).reduce((a, s) => a + sz(s), 0), mv: D.etf[ETF[n]]?.[S.p] ?? null }));
     squarify(items, 0, 0, W, H).forEach((r) => {
-      const top = (bySec[r.n] || []).slice().sort((a, b) => (b.cap || 0) - (a.cap || 0)).slice(0, 3); const fs = Math.max(R() * .85, Math.min(R() * 1.5, Math.sqrt(r.w * r.h) / 13));
+      const top = (bySec[r.n] || []).slice().sort((a, b) => sz(b) - sz(a)).slice(0, 3); const fs = Math.max(R() * .85, Math.min(R() * 1.5, Math.sqrt(r.w * r.h) / 13));
       h += `<div class="cell sec" data-z="${r.e}" style="${box(r, `background:${heat(r.mv)};font-size:${fs}px`)}" title="${esc(r.n)}: sector fund ${r.e} ${fp(r.mv)} · click to zoom"><div class="nm">${esc(SHORT[r.n] || r.n)}</div><div class="mv">${fp(r.mv)}</div>${r.h > fs * 6 && r.w > fs * 16 ? `<div class="sm">${r.e} · ${top.map((s) => `${esc(s.s)} ${fp(s[S.p], 1)}`).join(' · ')}</div>` : ''}</div>`;
     });
     crumb = `<span class="cur">S&amp;P 500</span><span class="note" style="margin-left:.5rem;font-weight:600">click a sector to zoom in</span>`;
@@ -140,7 +143,7 @@ function drawMap() {
     crumb += `<span class="sep">›</span><span class="cur">${esc(secName)}</span><span class="note" style="margin-left:.5rem;font-weight:600">sector fund ${sec} ${fp(D.etf[sec]?.[S.p])}</span>`;
   } else { /* level 2: one sub-industry, Mowgli groups where we have them */
     const list = (bySec[secName] || []).filter((s) => s.sub === sub), gs = groups(list, sub);
-    h = gs ? nest(gs, W, H, true, null) : squarify(list.map((s) => ({ s, v: s.cap || 0 })), 0, 0, W, H).map((c) => coCell(c.s, c, true)).join('');
+    h = gs ? nest(gs, W, H, true, null) : squarify(list.map((s) => ({ s, v: sz(s) })), 0, 0, W, H).map((c) => coCell(c.s, c, true)).join('');
     crumb += `<span class="sep">›</span><a data-z="${sec}">${esc(secName)}</a><span class="sep">›</span><span class="cur">${esc(sub)}</span>${gs ? '<span class="badge" style="margin-left:.4rem">Mowgli breakdown</span>' : ''}`;
   }
   el.innerHTML = h; $('crumb').innerHTML = crumb;
@@ -195,7 +198,8 @@ function drawBreadth() {
 
 /* ---------- movers ---------- */
 function drawMovers() {
-  const bigco = D.stocks.filter((s) => s.cap != null && s.cap >= 1e11 && s.d != null).sort((a, b) => b.d - a.d);
+  const seen = new Set();
+  const bigco = D.stocks.filter((s) => s.cap != null && s.cap >= 1e11 && s.d != null).sort((a, b) => b.d - a.d || sz(b) - sz(a)).filter((s) => { const k = s.co || s.s; if (seen.has(k)) return false; seen.add(k); return true; });
   const mrow = (s) => { const lg = logo(s.s); return `<div class="mr"${co(s.s)} title="${esc(s.n)} · ${money(s.cap)}${isMine(s.s) ? ' · click to open the company' : ''}"><div class="lg${lg ? '' : ' tx'}">${lg ? `<img src="${esc(lg)}" alt="">` : esc(s.s)}</div><div class="nm"><b>${esc(s.s)}</b>${esc(s.n)}</div><div class="v ${cls(s.d)}">${fp(s.d)}</div></div>`; };
   $('mvn').textContent = bigco.length + ' companies';
   $('mv2').innerHTML = bigco.length ? `<div><h5>Up most</h5>${bigco.slice(0, 5).map(mrow).join('')}</div><div><h5>Down most</h5>${bigco.slice(-5).reverse().map(mrow).join('')}</div>` : '';
@@ -272,6 +276,7 @@ async function refresh() {
 }
 (async () => {
   try {
+    try { Object.assign(LOGOFILES, await fetch(MG.logosUrl()).then((r) => r.json())); } catch { /* grey ticker boxes instead */ }
     COMPANIES = await fetch(MG.companiesUrl()).then((r) => r.json());
     for (const c of COMPANIES) for (const t of [c.ticker, ...c.aliases]) { LINK.set(ysym(t), c.ticker); if (c.logo) LOGO.set(ysym(t), c.logo); }
   } catch { /* the page still works, without links and logos */ }
