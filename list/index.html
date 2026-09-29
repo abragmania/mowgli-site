@@ -7,14 +7,18 @@
 <title>Companies · Mowgli</title>
 <link rel="icon" href="/mowgli-site/mowgli-mark.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
-<!-- Temporary list of every profiled company (Adam, 2026-09-29: "for my temporary viewing pleasure"); the Monitor replaces it as home later. -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Temporary list of every profiled company (Adam, 2026-09-29: "for my temporary viewing pleasure"); a normal top-nav section, the Monitor is home. -->
 <style>
 :root{--ink:#eef1f8;--mut:#9aa3b8;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box;margin:0}
 body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1c2a4a 0%,#0b1020 55%,#070a14 100%) fixed;color:var(--ink);font:500 15px Manrope,system-ui,sans-serif;padding:2.2rem clamp(16px,4vw,4rem)}
 header{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.6rem;flex-wrap:wrap}
-header a.home{color:var(--ink);text-decoration:none;font-weight:800;font-size:1.2rem}
+.navm{display:flex;align-items:center;gap:1.4rem}
+.navm .home{display:flex;align-items:center;gap:.6rem;text-decoration:none;flex:none}
+.navm .home span{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.45rem;letter-spacing:.2px;color:#f3f0e8}
+.tnav{display:flex;gap:.3rem}.tnav a{font-size:.8rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#aab4ba;text-decoration:none;padding:.35rem .8rem;border-radius:20px;opacity:.85}.tnav a:hover{color:#fff;opacity:1}.tnav a.on{color:#fff;background:rgba(255,255,255,.1);opacity:1}
+.tnav a.soon{opacity:.38;cursor:default}.tnav a.soon:hover{color:#aab4ba;opacity:.38}
 h1{font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:800}
 input{margin-left:auto;background:var(--card);border:1px solid var(--line);border-radius:999px;color:var(--ink);font:inherit;padding:.5rem 1rem;width:min(22rem,100%)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem}
@@ -26,7 +30,7 @@ input{margin-left:auto;background:var(--card);border:1px solid var(--line);borde
 </style>
 </head>
 <body>
-<header><a class="home" href="/mowgli-site/"><img src="/mowgli-site/mowgli-mark.svg" alt="" style="width:2rem;height:2rem;vertical-align:middle;margin-right:.5rem">Mowgli</a><h1 id="n">Companies</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies" autofocus></header>
+<header><div class="navm"><a class="home" href="/mowgli-site/" title="Mowgli"><img src="/mowgli-site/mowgli-mark.svg" alt="" style="width:2.1rem;height:2.1rem"><span>Mowgli</span></a><nav class="tnav"><a href="/mowgli-site/">Monitor</a><a class="soon" title="coming">News</a><a class="soon" title="coming">Performance</a><a href="/mowgli-site/list/" class="on" aria-current="page">List</a></nav></div><h1 id="n">Companies</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies" autofocus></header>
 <div class="grid" id="g"></div>
 <script src="/mowgli-site/config.js"></script>
 <script src="/mowgli-site/site.js"></script>

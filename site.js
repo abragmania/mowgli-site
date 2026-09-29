@@ -13,6 +13,9 @@
     quoteWorker: isStatic ? String(cfg.quoteWorker || '').replace(/\/+$/, '') : '',
     companyUrl: (t) => (isStatic ? `${base}data/company/${enc(t)}.json` : `/api/company/${enc(t)}`),
     companiesUrl: () => (isStatic ? `${base}data/companies.json` : '/api/companies'),
+    // Monitor: local server answers /api/monitor; the published site asks the Worker, and falls back to the copy baked at publish
+    monitorUrl() { return isStatic ? (this.quoteWorker ? `${this.quoteWorker}/monitor` : '') : '/api/monitor'; },
+    monitorBakedUrl: () => (isStatic ? `${base}data/monitor.json` : ''),
     pageUrl: (t) => (isStatic ? `${base}c/${enc(t)}/` : `/c/${enc(t)}`),
     tickerFromPath() {
       const parts = location.pathname.split('/').filter(Boolean);
