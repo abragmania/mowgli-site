@@ -1,0 +1,663 @@
+{
+ "note": "Company logos, saved once and kept in git so both machines and the public site share them. Source: Wikimedia Commons or the English Wikipedia infobox logo. A rebrand gets a new file; git history keeps the old one.",
+ "logos": {
+  "ABNB": {
+   "file": "ABNB.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28",
+   "check": "verify it is the standard Airbnb mark"
+  },
+  "AMAT": {
+   "file": "AMAT.svg"
+  },
+  "AMD": {
+   "file": "AMD.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "AMZN": {
+   "file": "AMZN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "ARM": {
+   "file": "ARM.svg"
+  },
+  "ASML": {
+   "file": "ASML.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "AVGO": {
+   "file": "AVGO.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "BKNG": {
+   "file": "BKNG.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "CCL": {
+   "file": "CCL.png"
+  },
+  "CZR": {
+   "file": "CZR.svg"
+  },
+  "DKNG": {
+   "file": "DKNG.svg"
+  },
+  "EXPE": {
+   "file": "EXPE.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "FANDUEL": {
+   "file": "FANDUEL.svg"
+  },
+  "FLUT": {
+   "file": "FLUT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28",
+   "check": "verify current Flutter mark"
+  },
+  "GOOGL": {
+   "file": "GOOGL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "H": {
+   "file": "H.svg"
+  },
+  "HLT": {
+   "file": "HLT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "IHG": {
+   "file": "IHG.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "INTC": {
+   "file": "INTC.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "KLAC": {
+   "file": "KLAC.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "LRCX": {
+   "file": "LRCX.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "LVS": {
+   "file": "LVS.png"
+  },
+  "MAR": {
+   "file": "MAR.svg"
+  },
+  "META": {
+   "file": "META.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "MGM": {
+   "file": "MGM.svg"
+  },
+  "MSFT": {
+   "file": "MSFT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "NCLH": {
+   "file": "NCLH.svg"
+  },
+  "NVDA": {
+   "file": "NVDA.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "ORCL": {
+   "file": "ORCL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "PENN": {
+   "file": "PENN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "QCOM": {
+   "file": "QCOM.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "RCL": {
+   "file": "RCL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "SSNLF": {
+   "file": "SSNLF.svg"
+  },
+  "TSM": {
+   "file": "TSM.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "WH": {
+   "file": "WH.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "WYNN": {
+   "file": "WYNN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28",
+   "check": "Wynn Las Vegas property logo, not the Wynn Resorts corporate mark; replace when found"
+  },
+  "AMT": {
+   "file": "AMT.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "ASTS": {
+   "file": "ASTS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "CHTR": {
+   "file": "CHTR.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "CMCSA": {
+   "file": "CMCSA.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "ECHO": {
+   "file": "ECHO.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "ERIC": {
+   "file": "ERIC.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "IDCC": {
+   "file": "IDCC.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "NOK": {
+   "file": "NOK.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "T": {
+   "file": "T.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "TMUS": {
+   "file": "TMUS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "VOD": {
+   "file": "VOD.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "VZ": {
+   "file": "VZ.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "BTI": {
+   "file": "BTI.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "MO": {
+   "file": "MO.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "PM": {
+   "file": "PM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "AAPL": {
+   "file": "AAPL.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "ADBE": {
+   "file": "ADBE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "ANET": {
+   "file": "ANET.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "AWK": {
+   "file": "AWK.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "AYI": {
+   "file": "AYI.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "BLK": {
+   "file": "BLK.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "BRK": {
+   "file": "BRK.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CASY": {
+   "file": "CASY.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CAT": {
+   "file": "CAT.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CAVA": {
+   "file": "CAVA.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CCJ": {
+   "file": "CCJ.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CEG": {
+   "file": "CEG.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CELH": {
+   "file": "CELH.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CME": {
+   "file": "CME.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "COST": {
+   "file": "COST.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CRM": {
+   "file": "CRM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CRWD": {
+   "file": "CRWD.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CTAS": {
+   "file": "CTAS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "CVNA": {
+   "file": "CVNA.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "DE": {
+   "file": "DE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "DIS": {
+   "file": "DIS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "DUOL": {
+   "file": "DUOL.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "EOG": {
+   "file": "EOG.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "EQIX": {
+   "file": "EQIX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "EQT": {
+   "file": "EQT.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "FCX": {
+   "file": "FCX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "FITB": {
+   "file": "FITB.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "GRAB": {
+   "file": "GRAB.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "HCA": {
+   "file": "HCA.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "HD": {
+   "file": "HD.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "HIMS": {
+   "file": "HIMS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "IONQ": {
+   "file": "IONQ.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "ISRG": {
+   "file": "ISRG.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "KKR": {
+   "file": "KKR.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "KMI": {
+   "file": "KMI.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "KO": {
+   "file": "KO.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "LEU": {
+   "file": "LEU.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29",
+   "check": "only 169px wide (site publishes nothing larger)"
+  },
+  "LIN": {
+   "file": "LIN.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "LMND": {
+   "file": "LMND.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "LNG": {
+   "file": "LNG.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "MCD": {
+   "file": "MCD.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "MCK": {
+   "file": "MCK.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "MDB": {
+   "file": "MDB.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "MOS": {
+   "file": "MOS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "NEE": {
+   "file": "NEE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "NFLX": {
+   "file": "NFLX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "NKE": {
+   "file": "NKE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "NOW": {
+   "file": "NOW.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "NUE": {
+   "file": "NUE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "O": {
+   "file": "O.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "OKLO": {
+   "file": "OKLO.png",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "PG": {
+   "file": "PG.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "PGR": {
+   "file": "PGR.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "PLD": {
+   "file": "PLD.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "PLTR": {
+   "file": "PLTR.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "RKLB": {
+   "file": "RKLB.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "ROP": {
+   "file": "ROP.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SBUX": {
+   "file": "SBUX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SCHW": {
+   "file": "SCHW.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SPCX": {
+   "file": "SPCX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SPOT": {
+   "file": "SPOT.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "TDG": {
+   "file": "TDG.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "TMO": {
+   "file": "TMO.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "TOST": {
+   "file": "TOST.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "TSLA": {
+   "file": "TSLA.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "UBER": {
+   "file": "UBER.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "UNH": {
+   "file": "UNH.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "UNP": {
+   "file": "UNP.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "UPS": {
+   "file": "UPS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "URI": {
+   "file": "URI.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "V": {
+   "file": "V.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "VRTX": {
+   "file": "VRTX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "VST": {
+   "file": "VST.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "WM": {
+   "file": "WM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29",
+   "check": "Wikipedia file is titled \"partial logo\": shows the WM mark only, confirm"
+  },
+  "WMT": {
+   "file": "WMT.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29",
+   "check": "spark mark only, no wordmark"
+  },
+  "GE": {
+   "file": "GE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "JPM": {
+   "file": "JPM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SLB": {
+   "file": "SLB.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SPGI": {
+   "file": "SPGI.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "XOM": {
+   "file": "XOM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "LLY": {
+   "file": "LLY.svg",
+   "source": "commons.wikimedia.org (File:Eli Lilly and Company.svg; Wikipedia infobox logo field empty)",
+   "fetched": "2026-09-29"
+  },
+  "KSPI": {
+   "file": "KSPI.svg",
+   "source": "commons.wikimedia.org (File:Kaspi.kz logo.svg; Wikipedia infobox logo field empty)",
+   "fetched": "2026-09-29"
+  },
+  "SMR": {
+   "file": "SMR.png",
+   "source": "nuscalepower.com (horizontal blue logo with tagline, 622x206)",
+   "fetched": "2026-09-29"
+  },
+  "TMDX": {
+   "file": "TMDX.png",
+   "source": "transmedics.com (official white wordmark recoloured to brand maroon #9E1C33 from the site icon, because only a white header logo is published; 1042x174)",
+   "fetched": "2026-09-29",
+   "check": "recoloured, eyeball it"
+  }
+ }
+}

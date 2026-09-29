@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="mowgli-static" content="/mowgli-site/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Companies · Mowgli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<!-- Temporary list of every profiled company (Adam, 2026-09-29: "for my temporary viewing pleasure"); the Monitor replaces it as home later. -->
+<style>
+:root{--ink:#eef1f8;--mut:#9aa3b8;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1c2a4a 0%,#0b1020 55%,#070a14 100%) fixed;color:var(--ink);font:500 15px Manrope,system-ui,sans-serif;padding:2.2rem clamp(16px,4vw,4rem)}
+header{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.6rem;flex-wrap:wrap}
+header a.home{color:var(--ink);text-decoration:none;font-weight:800;font-size:1.2rem}
+h1{font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:800}
+input{margin-left:auto;background:var(--card);border:1px solid var(--line);border-radius:999px;color:var(--ink);font:inherit;padding:.5rem 1rem;width:min(22rem,100%)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem}
+.grid a{display:flex;align-items:center;gap:.8rem;padding:.7rem .8rem;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;transition:background .15s}
+.grid a:hover{background:rgba(255,255,255,.12)}
+.grid img{width:4.4rem;height:2.2rem;object-fit:contain;background:#f4f2ee;border-radius:8px;padding:.25rem .4rem;flex:none}
+.grid b{display:block;font-weight:800;letter-spacing:.04em;font-size:.85rem}
+.grid span{display:block;color:var(--mut);font-size:.85rem;line-height:1.25}
+</style>
+</head>
+<body>
+<header><a class="home" href="/mowgli-site/">Mowgli</a><h1 id="n">Companies</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies" autofocus></header>
+<div class="grid" id="g"></div>
+<script src="/mowgli-site/config.js"></script>
+<script src="/mowgli-site/site.js"></script>
+<script>
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let all = [];
+function draw(q) {
+  q = q.trim().toLowerCase();
+  const rows = all.filter((c) => !q || c.ticker.toLowerCase().includes(q) || c.name.toLowerCase().includes(q));
+  document.getElementById('g').innerHTML = rows.map((c) => `<a href="${MG.pageUrl(c.ticker)}">${c.logo ? `<img src="${esc(c.logo)}" alt="">` : ''}<div><b>${esc(c.ticker)}</b><span>${esc(c.name)}</span></div></a>`).join('');
+}
+fetch(MG.companiesUrl()).then((r) => r.json()).then((list) => {
+  all = list.sort((a, b) => a.name.localeCompare(b.name));
+  document.getElementById('n').textContent = `Companies · ${all.length}`;
+  draw('');
+});
+document.getElementById('f').addEventListener('input', (e) => draw(e.target.value));
+</script>
+</body>
+</html>

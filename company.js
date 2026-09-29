@@ -1,0 +1,433 @@
+/* Mowgli company page: renders /api/company/:ticker into the approved Deep Field tiles, then fills the
+   price-dependent figures from /api/quote/:ticker. No mock data: a section without data does not appear,
+   a missing figure shows as a dash, and every number carries its source on hover (title). */
+(() => {
+'use strict';
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const T = (s) => (s ? ` title="${esc(s)}"` : '');
+const DASH = '<span class="dash">—</span>';
+const ticker = MG.tickerFromPath();
+
+/* ---------- formatting ---------- */
+const SYM = { USD: '$', TWD: 'NT$', EUR: '€', GBP: '£', CAD: 'C$', JPY: '¥' };
+function money(v, cur = 'USD') {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null;
+  const s = SYM[cur] ?? cur + ' ', a = Math.abs(v), neg = v < 0 ? '−' : '';
+  let t;
+  if (a >= 1e12) t = (a / 1e12).toFixed(2) + 'T';
+  else if (a >= 1e11) t = (a / 1e9).toFixed(0) + 'B';
+  else if (a >= 1e10) t = (a / 1e9).toFixed(1) + 'B';
+  else if (a >= 1e9) t = (a / 1e9).toFixed(2) + 'B';
+  else if (a >= 1e8) t = (a / 1e6).toFixed(0) + 'M';
+  else if (a >= 1e6) t = (a / 1e6).toFixed(1) + 'M';
+  else if (a >= 1e3) t = (a / 1e3).toFixed(0) + 'K';
+  else t = a.toFixed(0);
+  return neg + s + t;
+}
+const perShare = (v, cur = 'USD') => (typeof v === 'number' ? (v < 0 ? '−' : '') + (SYM[cur] ?? cur + ' ') + Math.abs(v).toFixed(2) : null);
+const pct = (p, dp = 1) => (typeof p === 'number' && Number.isFinite(p) ? (p < 0 ? '−' : '') + Math.abs(p).toFixed(Math.abs(p) >= 100 ? 0 : dp) + '%' : null);
+const spct = (p, dp = 1) => (typeof p === 'number' ? (p > 0 ? '+' : '') + pct(p, dp) : null);
+const cls = (p) => (typeof p === 'number' ? (p > 0 ? 'up' : p < 0 ? 'dn' : '') : '');
+const shortDate = (d) => { const t = Date.parse(d); return Number.isFinite(t) ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : d; };
+function growthHtml(g, cur, extraTitle = '') {
+  if (!g) return DASH;
+  if (g.nm) return `<span${T('n.m. (not meaningful): ' + (g.reason || '') + (extraTitle ? '\n' + extraTitle : ''))}>n.m.</span>`;
+  if (g.words) return `<span${T(`Change ${money(g.change, cur) || g.change}${extraTitle ? '\n' + extraTitle : ''}`)}>${esc(g.words)}</span>`;
+  return `<span class="${cls(g.pct)}"${T(extraTitle)}>${spct(g.pct)}</span>`;
+}
+const firstSentence = (s) => { if (!s) return ''; const m = s.match(/^(.{40,}?[.!?])\s/); return m ? m[1] : s; };
+
+/* ---------- colours: the design's Deep Field sky, keyed on sector and the logo's own colour ---------- */
+const SECTORS = {
+  travel: { sp: '#120b16', c: ['#7a3450', '#1f6070', '#8a4a26'], dust: '#ffc49a' },
+  semis: { sp: '#04100f', c: ['#0e6258', '#1f3596', '#3a2a8a'], dust: '#8ff0dc' },
+  telecom: { sp: '#070b1c', c: ['#1c4a92', '#0e6a82', '#46287e'], dust: '#9fd4ff' },
+  staples: { sp: '#100b06', c: ['#7a5222', '#2f5a33', '#6a2e1c'], dust: '#ffd79a' },
+  default: { sp: '#08091a', c: ['#2c2e6a', '#302056', '#18345e'], dust: '#aa96ff' } };
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const A = hex(a), B = hex(b); return '#' + A.map((v, i) => Math.round(v * (1 - t) + B[i] * t).toString(16).padStart(2, '0')).join(''); };
+function stars(cv, n, col, maxA, maxR, seed) {
+  const W = cv.width = innerWidth, Hh = cv.height = innerHeight, x = cv.getContext('2d'); x.clearRect(0, 0, W, Hh);
+  const [r, g, b] = hex(col), c = r + ',' + g + ',' + b; let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647; const N = Math.round(n * W * Hh / (2560 * 1300));
+  for (let i = 0; i < N; i++) {
+    const px = rnd() * W, py = rnd() * Hh, rad = Math.pow(rnd(), 3) * maxR + .35, a = (.15 + rnd() * .85) * maxA;
+    x.beginPath(); x.arc(px, py, rad, 0, 6.283); x.fillStyle = 'rgba(' + c + ',' + a.toFixed(3) + ')'; x.fill();
+    if (rad > maxR * .7) { const gr = x.createRadialGradient(px, py, 0, px, py, rad * 5); gr.addColorStop(0, 'rgba(' + c + ',' + (a * .35).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + c + ',0)'); x.fillStyle = gr; x.beginPath(); x.arc(px, py, rad * 5, 0, 6.283); x.fill(); }
+  }
+}
+let DUST = '#aa96ff';
+function applyTheme(theme) {
+  const sec = SECTORS[theme.sky] || SECTORS.default, fam = theme.brand || sec.c[0], hint = sec.c[0];
+  const c = [mix(mix(fam, hint, .12), '#05060d', .5), mix(fam, '#05060d', .66), mix(mix(fam, hint, .2), '#05060d', .74)];
+  const r = document.body.style;
+  DUST = mix(fam, '#ffffff', .45);
+  r.setProperty('--sp', mix(fam, '#04050a', .93)); ['--c1', '--c2', '--c3'].forEach((k, i) => r.setProperty(k, c[i]));
+  r.setProperty('--tint', fam); r.setProperty('--dust', DUST); r.setProperty('--brand', fam);
+  // accent (dates, chips) lifted until it reads on the dark cards: relative luminance at least 0.30
+  const lum = (h) => hex(h).map((v) => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }).reduce((a, v, i) => a + v * [.2126, .7152, .0722][i], 0);
+  let acc = fam; for (let k = 1; lum(acc) < .30 && k <= 10; k++) acc = mix(fam, '#ffffff', k * .08);
+  r.setProperty('--acc', acc);
+  r.setProperty('--op', .56); r.setProperty('--bop', .35);
+  drawStars();
+}
+function drawStars() { stars($('#st1'), 1400, mix('#dce1ff', DUST, .15), .7, 1.4, 11); stars($('#st2'), 120, mix('#fff5e1', DUST, .25), .9, 2.0, 29); }
+function sizeBand() { const h = $('.head').getBoundingClientRect(); document.body.style.setProperty('--bandh', (h.bottom + Math.max(18, h.height * .28)) + 'px'); }
+
+/* ---------- tiles ---------- */
+const XP = '<button class="xp" aria-label="Expand"><svg viewBox="0 0 16 16"><path class="o" d="M9 2h5v5M7 14H2V9M14 2 9.5 6.5M2 14l4.5-4.5"/><path class="c" d="M10 6h4M6 10H2M10 6V2M6 10v4"/></svg></button>';
+const CHIP = { company: 'Company ›', money: 'Business ›', brands: 'Brands ›', fin: 'Financials ›', earn: 'Earnings ›', next: 'Plans ›' };
+const tile = (id, label, peek, std, full, door = '') =>
+  `<section class="tile ${id}" data-id="${id}"><div class="in"><div class="th"><div class="lbl">${label}</div><div class="doorl">${door}<span class="door xpl" title="Expand">${CHIP[id]}</span></div>${XP}</div><div class="peek">${peek}</div><div class="body"><div class="std${id === 'company' ? ' bsx' : ''}">${std}</div><div class="full">${full}</div></div></div></section>`;
+const kv = (label, val, note = '', title = '') => (val ? `<div class="kv"${T(title)}><span>${label}</span><b>${val}</b><i>${note}</i></div>` : '');
+const sec = (h, inner) => (inner ? `<div class="sec">${h ? `<h5>${h}</h5>` : ''}${inner}</div>` : '');
+
+function profileSrc(c, extra) {
+  return [extra, c.profileReviewed && `Company profile (data/companies/${c.ticker}/profile.json), reviewed ${c.profileReviewed}${c.profileAgainst ? ' against ' + c.profileAgainst : ''}`].filter(Boolean).join('\n');
+}
+
+function basicsTile(c) {
+  const tick = [c.displayTicker, c.exchange].filter(Boolean).join(' · ');
+  const classes = c.classTickers ? `<p class="bcl">Several share classes, one company: <b>${c.classTickers.map(esc).join(', ')}</b></p>` : '';
+  const gics = c.gics ? `<p class="bcl"${T(c.gics.note)}>Conventionally filed as <b>${esc(c.gics.sector)}${c.gics.industry ? ' › ' + esc(c.gics.industry) : ''}</b> (GICS)</p>` : '';
+  const std = `<div class="bid"><div><p class="btk">${esc(tick)}</p>${classes}${c.description ? `<p${T(profileSrc(c))}>${esc(firstSentence(c.description))}</p>` : ''}${gics}</div></div>
+    <div class="sg b4"><div id="v-mv"><span>Market value</span><b>${DASH}</b></div>${c.hq ? `<div${T(profileSrc(c, c.hq.note))}><span>Headquarters</span><b>${esc(c.hq.text)}</b></div>` : ''}<div id="v-dy"><span>Dividend yield</span><b>${DASH}</b></div><div id="v-by"><span>Buyback yield (prev 12 / next 12)</span><b>${DASH} / ${DASH}</b></div></div>`;
+  const vi = c.valuationInputs, sh = vi.shares;
+  const ident = [
+    kv('Legal name', esc(c.legalName), c.cik ? 'CIK ' + esc(c.cik) : ''),
+    kv('Exchange · ticker', esc(tick), c.classTickers ? 'classes: ' + esc(c.classTickers.join(', ')) : ''),
+    kv('Fiscal year ends', esc(c.fiscalYearEnd)),
+    kv('Founded', c.founded ? esc(c.founded.value) : '', 'profile', profileSrc(c)),
+    kv('Employees', c.employees ? c.employees.value.toLocaleString('en-US') : '', c.employees?.asOf ? 'as of ' + esc(c.employees.asOf) : '', profileSrc(c, c.employees?.note)),
+    kv('Website', c.website ? `<a href="${esc(c.website)}" target="_blank" rel="noopener" style="color:var(--accx)">${esc(c.website.replace(/^https?:\/\/(www\.)?/, ''))}</a>` : ''),
+    kv('Headquarters', c.hq ? esc(c.hq.text) : '', '', profileSrc(c, c.hq?.note)),
+  ].join('');
+  const shares = [
+    sh ? kv(`Shares outstanding, ${esc(shortDate(sh.date))}`, (sh.value / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M', esc(sh.source.form || ''), `${sh.combined ? sh.combined + '\n' : ''}${sh.source.form} filed ${sh.source.filed} · accession ${sh.source.accn} · ${sh.source.tag || ''}`) : '',
+    vi.sharesPerADS ? kv('Shares per ADS', String(vi.sharesPerADS), 'filing', vi.adsNote || '') : '',
+    '<div id="v-mvline"></div>',
+    vi.declaredDividend ? kv(`Dividend declared: $${vi.declaredDividend.annual.toFixed(2)} a year per share${vi.declaredDividend.quarterly ? ` ($${vi.declaredDividend.quarterly.toFixed(2)} a quarter)` : ''}`, '<span id="v-dy2">—</span>', 'at today\'s price', vi.declaredDividend.source) : '',
+    vi.authorisationText ? `<div class="kv"${T('Company profile: ' + vi.authorisationText)}><span>Buyback authorisation: ${esc(vi.authorisationText.length > 160 ? vi.authorisationText.slice(0, 157) + '…' : vi.authorisationText)}</span><b></b><i>profile</i></div>` : '',
+  ].join('');
+  const full = sec('Identity', ident) + sec('Shares &amp; value', shares) + (c.description && c.description !== firstSentence(c.description) ? sec('What it does', `<div class="note" style="font-size:.84em;color:var(--ink2)">${esc(c.description)}</div>`) : '');
+  const peek = `<span id="v-peek">${c.hq ? esc(c.hq.text) : esc(c.displayTicker)}</span>`;
+  return tile('company', 'Basics', peek, std, full);
+}
+
+const SW = ['#6f7fd8', '#3f9fb4', '#5fae7d', '#e0a34a', '#c77d9a', '#b08a3e', '#8f7fd0', '#a6a3b8'];
+function moneyTile(c) {
+  const bl = c.businessLines;
+  if (!bl.length) return '';
+  const lineSrc = (b) => profileSrc(c, [b.revenue && `Revenue ${money(b.revenue.amount, b.revenue.currency)}${b.revenue.period ? ', ' + b.revenue.period : ''}`, b.revenueNote, b.shareBasis, b.source].filter(Boolean).join(' · '));
+  const groups = [];
+  for (const b of bl) { let g = groups.find((x) => x.key === (b.group || '')); if (!g) groups.push(g = { key: b.group || '', lines: [] }); g.lines.push(b); }
+  const block = (lines, key) => {
+  const withShare = lines.filter((b) => typeof b.share?.fraction === 'number' && b.share.fraction > 0);
+  const bar = withShare.length ? `<div class="tbar">${withShare.map((b, i) => `<div style="flex:${b.share.fraction};background:${SW[i % SW.length]}"${T(b.name + ': ' + pct(b.share.fraction * 100, 0) + ' of revenue\n' + lineSrc(b))}>${b.share.fraction >= .08 ? pct(b.share.fraction * 100, 0) : ''}</div>`).join('')}</div>` : '';
+  const rows = lines.map((b) => {
+    const i = withShare.indexOf(b);
+    const sw = i >= 0 ? `<span class="tsw" style="background:${SW[i % SW.length]};display:inline-block;width:.7em;height:.7em;border-radius:3px;margin-right:.45em"></span>` : '';
+    const share = b.share?.fraction != null ? pct(b.share.fraction * 100, 0) : b.share?.text ? esc(b.share.text) : DASH;
+    return `<tr${T(lineSrc(b))}><td class="wrap">${sw}${esc(b.name)}${b.how ? `<div class="bl-how">${esc(b.how.length > 170 ? b.how.slice(0, 167) + '…' : b.how)}</div>` : ''}</td><td class="n"><b>${share}</b></td></tr>`;
+  }).join('');
+  return `<div>${key ? `<h5>${esc(key.replace(/^by /i, 'By '))}</h5>` : ''}${bar}<table class="hk ut"><tr><th>Business line</th><th class="n">% of revenue</th></tr>${rows}</table></div>`;
+  };
+  const withShare = bl.filter((b) => typeof b.share?.fraction === 'number' && b.share.fraction > 0 && (b.group || '') === groups[0].key);
+  const std = groups.map((g) => block(g.lines, groups.length > 1 ? g.key || 'Other lines' : '')).join('<div style="height:1.1em"></div>');
+  const frows = bl.map((b) => {
+    const rev = b.revenue ? `<span${T(lineSrc(b))}>${money(b.revenue.amount, b.revenue.currency)}</span>${b.revenue.period ? `<small>${esc(b.revenue.period)}</small>` : ''}` : DASH;
+    const op = b.operatingProfit ? `<span${T(profileSrc(c, [b.operatingProfit.label, b.operatingProfit.period, b.operatingProfit.note].filter(Boolean).join(' · ')))}>${money(b.operatingProfit.amount, b.operatingProfit.currency)}</span>${b.operatingProfit.label ? `<small>${esc(b.operatingProfit.label)}</small>` : ''}` : DASH;
+    const mg = b.margin ? `<span${T(profileSrc(c, b.margin.label))}>${pct(b.margin.fraction * 100)}</span>` : DASH;
+    return `<tr><td class="wrap">${esc(b.name)}${b.description ? `<div class="bl-how">${esc(b.description)}</div>` : ''}</td><td class="n">${rev}</td><td class="n">${op}</td><td class="n">${mg}</td><td class="wrap">${b.marketShare ? esc(b.marketShare) : DASH}</td></tr>`;
+  }).join('');
+  const full = sec('Each line in figures (company profile)', `<table class="tt ut"><tr><th>Line</th><th class="n">Revenue</th><th class="n">Operating profit</th><th class="n">Margin</th><th>Market share</th></tr>${frows}</table>`);
+  const top = withShare.slice().sort((a, b) => b.share.fraction - a.share.fraction)[0];
+  const peek = top ? `<b>${esc(top.name)}</b> ${pct(top.share.fraction * 100, 0)} of revenue` : `${bl.length} business line${bl.length > 1 ? 's' : ''}`;
+  return tile('money', 'How it makes money', peek, std, full);
+}
+
+function brandsTile(c) {
+  const br = c.brands;
+  if (!br.length) return '';
+  const short = (s) => (s ? s.split(/;\s/)[0] : '');
+  const src = (b) => profileSrc(c, [b.share, b.note, b.source].filter(Boolean).join(' · '));
+  const anyShare = br.some((b) => b.share);
+  const rows = br.slice(0, 12).map((b) => `<tr${T(src(b))}><td>${esc(b.name)}</td><td class="wrap">${esc(b.segment || '')}</td>${anyShare ? `<td class="wrap">${b.share ? esc(short(b.share)) : DASH}</td>` : ''}</tr>`).join('');
+  const std = `<div><table class="hk"><tr><th>Brand or subsidiary</th><th>Part of</th>${anyShare ? '<th>Share</th>' : ''}</tr>${rows}</table>${br.length > 12 ? `<div class="note" style="margin-top:.4em">${br.length - 12} more on expand</div>` : ''}</div>`;
+  const frows = br.map((b) => `<tr${T(src(b))}><td>${esc(b.name)}</td><td class="wrap">${esc(b.segment || '')}</td><td class="wrap">${b.share ? esc(b.share) : DASH}</td><td class="wrap">${esc(b.note || '')}</td></tr>`).join('');
+  const full = sec('Every brand and subsidiary (company profile)', `<table class="tt"><tr><th>Name</th><th>Part of</th><th>Share</th><th>Note</th></tr>${frows}</table>`);
+  const peek = br.slice(0, 3).map((b) => `<b>${esc(b.name)}</b>`).join(' · ') + (br.length > 3 ? ` +${br.length - 3}` : '');
+  return tile('brands', 'Brands &amp; subsidiaries', peek, std, full);
+}
+
+function spark(series, fmt, cur) {
+  if (!series || !series.some(Boolean)) return '';
+  const vals = series.map((x) => (x ? x.v : null)), got = vals.filter((v) => v != null);
+  const mx = Math.max(...got, 0), mn = Math.min(...got, 0);
+  return `<div class="spk">${vals.map((v, i) => v == null ? `<i style="height:0;background:none"${T('missing')}></i>` : `<i style="height:${Math.max(6, (v - mn) / (mx - mn || 1) * 100)}%${v < 0 ? ';background:color-mix(in oklab,var(--dn) 55%,transparent)' : ''}"${T((series[i].src ? '' : '') + fmt(v, cur) + (series[i].src ? '\n' + series[i].src : ''))}></i>`).join('')}</div>`;
+}
+
+function finTile(c) {
+  const f = c.fin;
+  if (!f) return '';
+  const h = f.headline, cur = f.currency, ch = f.chart || {};
+  const years = ch.years || [];
+  const axis = years.length ? `<div class="spx"><span>${years[0]}</span><span>${years[years.length - 1]}</span></div>` : '';
+  const card = (label, valHtml, title, sp, em) => `<div class="mc"><span>${label}</span><b${T(title)}>${valHtml}</b>${sp ? sp + axis : ''}${em ? `<em>${em}</em>` : ''}</div>`;
+  const g = h.revenueGrowth || {};
+  const cards = [];
+  cards.push(card(`Revenue · ${h.revenue ? h.revenue.basis : ''}`, h.revenue ? money(h.revenue.v, cur) : DASH, h.revenue ? `${h.revenue.label}\n${h.revenue.src}` : 'No revenue in the filings data', spark(ch.revenue, money, cur), h.revenue ? esc(h.revenue.label) : ''));
+  if (!c.isBank) cards.push(card(`Cash earnings${h.cashEarnings ? ' · ' + h.cashEarnings.basis : ''}`, h.cashEarnings ? money(h.cashEarnings.v, cur) : DASH,
+    h.cashEarnings ? `Operating cash flow − capital spending − stock-based pay (A4), ${h.cashEarnings.label}\n${h.cashEarnings.src}` : 'Not shown: one of operating cash flow, capital spending or stock-based pay is missing from the filings data for the same period',
+    spark(ch.cashEarnings, money, cur), h.cashEarnings ? esc(h.cashEarnings.label) : 'an input is missing'));
+  const mcard = (label, m) => card(`${label} · ${m ? m.basis : ''}`, m ? (m.nm ? 'n.m.' : pct(m.pct)) : DASH, m ? `${m.nm ? 'n.m.: ' + m.reason + '\n' : ''}${m.computed ? 'Gross profit computed as revenue − cost of revenue (A3)\n' : ''}${m.label}\n${m.src}` : 'An input is missing from the filings data', null, m ? esc(m.label) : '');
+  const om = h.operatingMargin;
+  if (!c.isBank) cards.push(card(`Operating margin · ${om ? om.basis : ''}`, om ? (om.nm ? 'n.m.' : pct(om.pct)) : DASH, om ? `${om.label}\n${om.src}` : (c.isBank ? 'Banks report no operating income line' : 'An input is missing from the filings data'), spark(ch.operatingMargin, (v) => pct(v)), om ? esc(om.label) : ''));
+  if (c.isBank) cards.push(mcard('Net margin', h.netMargin));
+  cards.push(card('Revenue growth · quarter', g.quarter ? growthHtml(g.quarter, cur) : DASH, g.quarter ? `${g.quarter.label}\n${g.quarter.src}` : 'No same-quarter comparison in the filings data', null, g.quarter ? esc(g.quarter.label) : ''));
+  cards.push(card('Revenue growth · year', g.year ? growthHtml(g.year, cur) : DASH, g.year ? `${g.year.label}\n${g.year.src}` : 'No prior fiscal year in the filings data', null, g.year ? esc(g.year.label) : ''));
+  if (!c.isBank || cards.length < 6) cards.push(card('Revenue, 5-year yearly growth', g.cagr5 ? (g.cagr5.nm ? 'n.m.' : spct(g.cagr5.pct)) : DASH, g.cagr5 ? `${g.cagr5.nm ? 'n.m.: ' + g.cagr5.reason + '\n' : ''}${g.cagr5.label}\n${g.cagr5.src}` : 'Needs both end years in the filings data', null, g.cagr5 ? esc(g.cagr5.label) : ''));
+  const notes = [];
+  if (!c.isBank) notes.push('Cash earnings = operating cash flow − capital spending − stock-based pay.');
+  if (c.isBank) notes.push('Banks show no capital spending or cash earnings: their operating cash flow swings with lending and deposits.');
+  if (c.isInsurer) notes.push('Insurers collect premiums long before claims are paid, so a growing insurer’s cash flow looks better than its profit.');
+  if (years.length) notes.push(`Bars run ${years[0]} to ${years[years.length - 1]}.`);
+  if (cur !== 'USD') notes.push(`Figures in ${cur}, as filed.`);
+  const std = `<div class="v-self mg">${cards.slice(0, 6).join('')}</div><div class="v-self note" style="margin-top:.5em">${esc(notes.join(' '))}</div>`;
+
+  const table = (t, title) => {
+    if (!t || !t.rows.length) return '';
+    // Most recent period on the left, older periods to the right (Adam, D64); the API sends oldest first.
+    const head = `<tr><th></th>${[...t.cols].reverse().map((x) => `<th>${esc(x)}</th>`).join('')}</tr>`;
+    const body = t.rows.map((r) => `<tr${T(r.missing)}><td class="lbl2">${esc(r.label)}</td>${[...r.cells].reverse().map((x) => {
+      if (!x) return `<td${T(r.missing || 'Not in the filings data for this period')}>${DASH}</td>`;
+      const v = r.unit === 'perShare' ? perShare(x.v, cur) : money(x.v, cur);
+      const y = x.yoy ? (x.yoy.pct != null ? `<small class="${cls(x.yoy.pct)}">${spct(x.yoy.pct)}</small>` : `<small>${esc(x.yoy.words || 'n.m.')}</small>`) : '<small>&nbsp;</small>';
+      return `<td${T((x.computed ? 'computed · ' : '') + x.src)}>${v}${y}</td>`;
+    }).join('')}</tr>`).join('');
+    return sec(title, `<table class="ft">${head}${body}</table>`);
+  };
+  const margins = [
+    kv('Gross margin', h.grossMargin ? (h.grossMargin.nm ? 'n.m.' : pct(h.grossMargin.pct)) : '', h.grossMargin ? esc(h.grossMargin.label) + (h.grossMargin.computed ? ' · computed' : '') : '', h.grossMargin ? h.grossMargin.src : ''),
+    kv('Operating margin', om ? (om.nm ? 'n.m.' : pct(om.pct)) : '', om ? esc(om.label) : '', om ? om.src : ''),
+    kv('Net margin', h.netMargin ? (h.netMargin.nm ? 'n.m.' : pct(h.netMargin.pct)) : '', h.netMargin ? esc(h.netMargin.label) : '', h.netMargin ? h.netMargin.src : ''),
+  ].join('');
+  const full = `<div class="v-self" style="flex-direction:column">${sec('Margins', margins)}${table(f.annual, 'Annual · growth vs the year before')}${table(f.quarterly, 'Quarterly · growth vs the same quarter a year earlier')}</div>`;
+  const lbl = `<span class="v-self">Financials${h.revenue ? ' · ' + esc(h.revenue.label) : ''}</span>`;
+  const door = '<span class="door soon" title="coming">Full financials (coming)</span>';
+  const peek = [h.revenue && `Revenue <b>${money(h.revenue.v, cur)}</b>`, g.quarter?.pct != null && `<b class="${cls(g.quarter.pct)}">${spct(g.quarter.pct)}</b> last quarter`, om && om.pct != null && `operating margin <b>${pct(om.pct)}</b>`].filter(Boolean).join(' · ');
+  return tile('fin', lbl, peek, std, full, door);
+}
+
+function resultClass(r) { const s = String(r || '').toLowerCase(); return /beat|raised/.test(s) ? 'beat' : /miss|cut|lower/.test(s) ? 'miss' : 'inl'; }
+function metricMoney(metric, v) {
+  if (typeof v !== 'number') return esc(v);
+  const m = String(metric);
+  const sign = v < 0 ? '−' : '';
+  if (/\(\$M\)/.test(m)) return `${sign}$${Math.abs(v).toLocaleString('en-US')}M`;
+  if (/\(\$B\)/.test(m)) return `${sign}$${Math.abs(v).toFixed(2)}B`;
+  if (/EPS/i.test(m)) return `${sign}$${Math.abs(v).toFixed(2)}`;
+  return `${sign}${Math.abs(v).toLocaleString('en-US')}`;
+}
+function expectationRows(q) {
+  if (!q) return '';
+  const rows = (q.items || []).filter((it) => typeof it.expected === 'number' && typeof it.actual === 'number').map((it) => {
+    const rc = resultClass(it.result), gp = it.gap != null && it.expected ? (it.gap / Math.abs(it.expected)) * 100 : null;
+    const w = gp != null ? Math.min(50, Math.max(2, Math.abs(gp) * 5)) : 0;
+    const bar = gp != null ? `<span class="gb"><i class="${rc}" style="${gp >= 0 ? 'left' : 'right'}:50%;width:${w.toFixed(1)}%"></i></span>` : '';
+    const gapTxt = it.gap != null ? `${it.gap > 0 ? '+' : ''}${metricMoney(it.metric, it.gap)}${gp != null ? ', ' + spct(gp) : ''}` : '';
+    return `<div class="er2"${T(`Expected: ${it.expectedBy || 'source not named'}\n${it.source || ''}`)}><span>${esc(it.metric.replace(/\s*\(\$[MB]\)/, ''))}</span><span><span class="bd ${rc}">${esc(String(it.result).toUpperCase())}</span>${bar}<small class="g-${rc}">${esc(gapTxt)}</small> <span class="efig">${metricMoney(it.metric, it.actual)} vs ${metricMoney(it.metric, it.expected)}</span></span></div>`;
+  }).join('');
+  const gd = q.guidance ? `<div class="er2"${T((q.guidance.prior ? 'Prior: ' + q.guidance.prior + '\n' : '') + (q.guidance.source || ''))}><span>Guidance</span><span><span class="bd ${resultClass(q.guidance.change)}">${esc(String(q.guidance.change || '').toUpperCase())}</span> <small>${esc(q.guidance.new || '')}</small></span></div>` : '';
+  return rows + gd;
+}
+function reactionLine(q, note) {
+  const r = q?.reaction;
+  if (!r || (typeof r.nextDay !== 'number' && typeof r.nextWeek !== 'number')) return '';
+  return `<div class="er1"${T([note, r.note, r.closes, r.source].filter(Boolean).join('\n'))}>Stock: report day <b class="${cls(r.nextDay)}">${spct(r.nextDay) || '—'}</b> · week after <b class="${cls(r.nextWeek)}">${spct(r.nextWeek) || '—'}</b></div>`;
+}
+function actualRows(qq, cur) {
+  const row = (label, x, fmt) => (x ? `<div class="er2"${T(x.src)}><span>${label}</span><span><b>${fmt(x.v, cur)}</b> ${x.yoy ? (x.yoy.pct != null ? `<small class="${cls(x.yoy.pct)}">${spct(x.yoy.pct)} vs a year earlier</small>` : `<small>${esc(x.yoy.words)}</small>`) : ''}</span></div>` : '');
+  return row('Revenue', qq.revenue, money) + row('Diluted EPS', qq.eps, perShare);
+}
+function earnTile(c) {
+  const qs = c.fin?.quarters || [];
+  if (!qs.length) return '';
+  const cur = c.fin.currency, latest = qs[0];
+  const E = c.earnings, byLabel = new Map((E?.quarters || []).map((q) => [q.period, q]));
+  const eq = byLabel.get(latest.label);
+  const briefs = (eq?.briefs || []).slice(0, 3).map((b) => `<li${T(b.text + (b.source ? '\n' + b.source : ''))}><b>${esc(b.text.split(/[:;]/)[0])}</b>${b.text.includes(':') ? ' · ' + esc(b.text.split(':').slice(1).join(':').trim().split(/;\s|\.\s/)[0]) : ''}</li>`).join('');
+  let upNext = '';
+  const nx = E?.next;
+  if (nx && nx.expectedDate && nx.dateSource) {
+    const exp = (nx.items || []).filter((i) => typeof i.expected === 'number' && i.source).map((i) => `<span${T(`${i.expectedBy || ''}\n${i.source}`)}>${esc(i.metric)} expected <b>${metricMoney(/EPS/i.test(i.metric) ? 'EPS' : i.metric, i.expected)}</b></span>`).join(' · ');
+    upNext = `<div class="enx"${T(nx.dateSource)}>Up next · <b>${esc(shortDate(nx.expectedDate))}</b>${nx.dateConfirmed ? '' : ' (expected, not confirmed)'}${exp ? ' · ' + exp : ''}</div>`;
+  }
+  const std = `<div class="ers">${actualRows(latest, cur)}${expectationRows(eq)}</div>${briefs ? `<ul class="eb">${briefs}</ul>` : ''}${reactionLine(eq, E?.reactionNote)}${upNext}`;
+  const efq = qs.slice(1).map((q) => {
+    const e = byLabel.get(q.label);
+    const efb = (e?.briefs || []).map((b) => `<li${T(b.source)}>${esc(b.text)}</li>`).join('');
+    return `<div class="efq"><h5>${esc(q.label)}${e?.reportDate ? ' · ' + esc(shortDate(e.reportDate)) : q.filed ? ` · ${esc(q.form || '')} filed ${esc(shortDate(q.filed))}` : ''}</h5>${actualRows(q, cur)}${expectationRows(e)}${e ? reactionLine(e, E.reactionNote).replace('class="er1"', 'class="er2"') : ''}${efb ? `<ul class="efb">${efb}</ul>` : ''}${e?.reaction?.note ? `<div class="ecov">${esc(e.reaction.note)}</div>` : ''}</div>`;
+  }).join('');
+  const full = efq ? `<div class="efqs">${efq}</div>` : '';
+  const when = eq?.reportDate ? `, ${shortDate(eq.reportDate).replace(/ \d{4}$/, '')}` : '';
+  const peek = [latest.revenue && `Revenue <b>${money(latest.revenue.v, cur)}</b>${latest.revenue.yoy?.pct != null ? ` <b class="${cls(latest.revenue.yoy.pct)}">${spct(latest.revenue.yoy.pct)}</b>` : ''}`, latest.eps && `EPS <b>${perShare(latest.eps.v, cur)}</b>`].filter(Boolean).join(' · ');
+  return tile('earn', `Earnings · ${esc(latest.label)}${esc(when)}`, peek, std, full);
+}
+
+function nextTile(c) {
+  const w = c.whatsNext;
+  if (!w.length) return '';
+  const src = (x) => profileSrc(c, [x.note, x.source].filter(Boolean).join(' · '));
+  const std = `<div>${w.slice(0, 4).map((x) => `<div class="nx"${T(src(x))}><time>${esc(x.when)}</time><div>${esc(x.text.length > 150 ? x.text.slice(0, 147) + '…' : x.text)}</div></div>`).join('')}</div>`;
+  const full = sec('Everything dated in the company profile', w.map((x) => `<div class="nx"${T(src(x))}><time>${esc(x.when)}</time><div>${esc(x.text)}${x.note ? `<div class="note">${esc(x.note)}</div>` : ''}${x.source ? `<div class="note">Source: ${esc(x.source)}</div>` : ''}</div></div>`).join(''));
+  return tile('next', 'What’s next', `<b>${esc(w[0].when)}</b> ${esc(w[0].text.slice(0, 90))}${w[0].text.length > 90 ? '…' : ''}`, std, full);
+}
+
+/* ---------- expand in place (from the design) ---------- */
+let open = null;
+function setOpen(id) {
+  open = id === open ? null : id;
+  const field = $('#field'), t = open ? field.querySelector(`.tile[data-id="${open}"]`) : null;
+  field.querySelectorAll('.tile').forEach((x) => { x.classList.toggle('open', x === t); x.classList.toggle('shrunk', !!t && x !== t); });
+  const col = t ? t.closest('.fcol') : null;
+  field.querySelectorAll('.fcol').forEach((x) => { x.style.flexGrow = col ? (x === col ? 2.6 : .7) : 1; });
+}
+
+/* ---------- quote ---------- */
+let C = null;
+function renderQuote(q) {
+  const p = $('#pxp'), cEl = $('#pxc');
+  if (!q || q.price == null) { p.textContent = '—'; cEl.className = 'c stale'; cEl.innerHTML = `<small${T(q?.error || '')}>price unavailable</small>`; return; }
+  const ads = C.valuationInputs.sharesPerADS ? ' per ADS' : '';
+  p.innerHTML = `$${q.price.toFixed(2)}`;
+  p.title = `${q.symbol}${ads} · ${q.source}${q.fetchedAt ? ' · fetched ' + q.fetchedAt : ''}`;
+  const ch = typeof q.change === 'number' ? `${q.change >= 0 ? '+' : '−'}${Math.abs(q.change).toFixed(2)} (${spct(q.changePct, 2)}) today` : '';
+  cEl.className = 'c ' + cls(q.change) + (q.stale ? ' stale' : '');
+  cEl.innerHTML = `${ch}<small${T(q.stale ? 'Last good quote; live source failed: ' + (q.error || '') : '')}>${esc(q.session || '')}${q.time ? ' · ' + esc(q.time.replace(/^[A-Z][a-z]{2} \d{1,2}, \d{4} /, '')) : ''}${q.stale ? ' · stale' : ''}</small>`;
+  const v = q.valuation || {};
+  const mv = v.marketValue;
+  const set = (id, html, title) => { const el = document.getElementById(id); if (!el) return; el.querySelector('b').innerHTML = html; if (title) el.title = title; else el.removeAttribute('title'); };
+  set('v-mv', mv ? money(mv.v) : DASH, mv ? `${mv.src}\nPrice: ${q.symbol} ${q.price}${q.stale ? ' (stale)' : ''}` : 'No share count in the filings data');
+  const dy = v.dividendYield;
+  set('v-dy', dy && dy.pct != null ? pct(dy.pct, 2) : DASH, dy ? dy.src : 'No dividend stated in the profile or paid over the last 12 months in the filings data');
+  const bp = v.buybackPrev, bn = v.buybackNext;
+  const prevTxt = bp && bp.pct != null ? pct(bp.pct) : DASH;
+  const nextTxt = bn && bn.pct != null ? pct(bn.pct) : bn && bn.longWindow ? money(bn.amount) + ' to ' + shortDate(bn.expiry) : DASH;
+  set('v-by', `${prevTxt} / ${nextTxt}`, [bp ? 'Prev 12: ' + bp.src : 'Prev 12: no buyback figure for the last 12 months in the filings data', bn ? 'Next 12: ' + bn.src : 'Next 12: ' + (v.buybackNextNote || 'no dated authorisation stated')].join('\n\n'));
+  const pk = document.getElementById('v-peek');
+  if (pk && mv) pk.innerHTML = `Worth <b>${money(mv.v)}</b>${C.hq ? ' · ' + esc(C.hq.text) : ''}`;
+  const line = document.getElementById('v-mvline');
+  if (line && mv) line.innerHTML = kv(`Market value: today's price${C.valuationInputs.sharesPerADS ? ' per ADS ÷ ' + C.valuationInputs.sharesPerADS : ''} × shares at ${esc(shortDate(mv.sharesDate))}`, money(mv.v), 'computed', mv.src);
+  const d2 = document.getElementById('v-dy2');
+  if (d2) d2.textContent = dy && dy.pct != null ? pct(dy.pct, 2) : '—';
+}
+let lastLive = null;
+async function loadQuote() {
+  if (!MG.isStatic) {
+    try { const r = await fetch(`/api/quote/${encodeURIComponent(C.ticker)}`); renderQuote(await r.json()); }
+    catch (e) { renderQuote({ price: null, error: e.message }); }
+    return;
+  }
+  // Published site: the live price comes from the Cloudflare relay; if it is unavailable the price baked at
+  // publish time is shown, labelled with its date and "stale", never a blank.
+  try {
+    if (!MG.quoteWorker) throw new Error('no live price relay configured');
+    const r = await fetch(`${MG.quoteWorker}/quote?t=${encodeURIComponent(C.ticker)}`);
+    const q = await r.json();
+    if (!r.ok || q.price == null) throw new Error((q.error && q.error.message) || q.error || 'no live price');
+    const { valuation } = await import(MG.base + 'valuation.mjs');
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    lastLive = { ...q, valuation: valuation(C.valuationInputs, q.price, today) };
+    renderQuote(lastLive);
+  } catch (e) {
+    if (lastLive) { renderQuote({ ...lastLive, stale: true, error: e.message }); return; }
+    const b = C.bakedQuote;
+    if (!b || b.price == null) { renderQuote({ price: null, error: e.message }); return; }
+    renderQuote({ ...b, stale: true, session: `price as of ${String(b.bakedAt || '').slice(0, 10)}`, time: null, error: `${e.message}; showing the price captured when the site was published (${b.bakedAt})` });
+  }
+}
+
+/* ---------- switcher ---------- */
+let LIST = [];
+function setupSwitcher() {
+  const q = $('#q'), box = $('#sugg');
+  let sel = 0, hits = [];
+  const show = () => {
+    const s = q.value.trim().toUpperCase();
+    if (!s) { box.classList.remove('on'); return; }
+    hits = LIST.filter((c) => c.ticker.startsWith(s) || c.aliases.some((a) => a.startsWith(s))).concat(LIST.filter((c) => !c.ticker.startsWith(s) && !c.aliases.some((a) => a.startsWith(s)) && c.name.toUpperCase().includes(s))).slice(0, 8);
+    sel = 0;
+    box.innerHTML = hits.map((c, i) => `<a href="${MG.pageUrl(c.ticker)}" class="${i === sel ? 'sel' : ''}">${c.logo ? `<img src="${esc(c.logo)}" alt="">` : '<span class="nl"></span>'}<b>${esc(c.ticker)}</b><span>${esc(c.name)}</span></a>`).join('') || '<a><span></span><b></b><span>No match among the profiled companies</span></a>';
+    box.classList.add('on');
+  };
+  q.addEventListener('input', show);
+  q.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = (sel + (e.key === 'ArrowDown' ? 1 : hits.length - 1)) % Math.max(1, hits.length); [...box.children].forEach((a, i) => a.classList.toggle('sel', i === sel)); }
+    else if (e.key === 'Enter' && hits[sel]) location.href = MG.pageUrl(hits[sel].ticker);
+    else if (e.key === 'Escape') { q.value = ''; box.classList.remove('on'); q.blur(); }
+  });
+  q.addEventListener('blur', () => setTimeout(() => box.classList.remove('on'), 150));
+  addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); q.focus(); } });
+  fetch(MG.companiesUrl()).then((r) => r.json()).then((l) => { LIST = l; }).catch(() => {});
+}
+
+/* ---------- page ---------- */
+function render(c) {
+  C = c;
+  document.title = `${c.name} · Mowgli`;
+  applyTheme(c.theme);
+  const hero = $('#hero'), b = document.body;
+  $('#hname').textContent = c.name;
+  $('#htick').textContent = [c.displayTicker, (c.exchange || '').split(/[\s(;,]/)[0]].filter(Boolean).join(' · ');
+  if (c.logo) {
+    b.style.setProperty('--logo', `url("${c.logo.url}")`);
+    $('#hreal').src = c.logo.url;
+    b.dataset.multi = c.logo.multi ? '1' : '0';
+    b.dataset.named = '1';
+    $('#hsub').textContent = c.name;
+    const im = new Image();
+    im.onload = () => { const a = (im.naturalWidth || 300) / (im.naturalHeight || 100); b.style.setProperty('--hlw', (3.6 * a) + 'rem'); };
+    im.src = c.logo.url;
+  } else { hero.classList.add('nologo'); b.dataset.named = '0'; }
+
+  const tiles = { company: basicsTile(c), money: moneyTile(c), brands: brandsTile(c), fin: finTile(c), next: nextTile(c), earn: earnTile(c) };
+  const field = $('#field');
+  // three content-sized columns; each tile goes to the shortest column, so an absent tile leaves no gap
+  field.innerHTML = '<div class="fcol"></div><div class="fcol"></div><div class="fcol"></div>';
+  const cols = [...field.children];
+  for (const id of ['company', 'money', 'next', 'brands', 'fin', 'earn']) {
+    if (!tiles[id]) continue;
+    const tmp = document.createElement('div'); tmp.innerHTML = tiles[id];
+    cols.reduce((a, x) => (x.offsetHeight < a.offsetHeight ? x : a)).appendChild(tmp.firstElementChild);
+  }
+  cols.forEach((x, i) => { if (!x.children.length) x.remove(); else [...x.children].forEach((t) => { t.dataset.c = i; }); });
+  field.querySelectorAll('.tile').forEach((t) => t.addEventListener('click', (e) => { if (e.target.closest('a')) return; setOpen(t.dataset.id); }));
+
+  const lf = c.fin?.latestFiling;
+  const parts = [
+    lf && `SEC EDGAR filings to ${lf.form} filed ${lf.filed}`,
+    c.profileReviewed && `company profile reviewed ${c.profileReviewed}`,
+    c.earnings && `earnings expectations and reactions: earnings.json as of ${c.earnings.asOf}`,
+    'price: Nasdaq real-time last sale (Yahoo fallback)',
+    c.logo?.source && `logo: ${c.logo.source}`,
+  ].filter(Boolean);
+  const src = $('#src');
+  src.textContent = 'Sources: ' + parts.join(' · ');
+  src.title = [lf && `Latest filing: ${lf.form} filed ${lf.filed}, accession ${lf.accn}`, c.profileAgainst && `Profile reviewed against: ${c.profileAgainst}`, c.profileConflicts ? `${c.profileConflicts} open data conflict(s) recorded in the profile` : '', (c.fin?.conflicts || []).length ? `${c.fin.conflicts.length} open conflict(s) in the financials` : ''].filter(Boolean).join('\n');
+  sizeBand();
+}
+
+addEventListener('resize', () => { sizeBand(); drawStars(); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) setOpen(open); });
+setupSwitcher();
+document.body.classList.add('instant');
+fetch(MG.companyUrl(ticker)).then(async (r) => {
+  const j = await r.json();
+  if (!r.ok) { applyTheme({ sky: 'default' }); document.body.insertAdjacentHTML('beforeend', `<div class="err">${esc(j.error || 'Not found')}</div>`); return; }
+  render(j);
+  loadQuote();
+  setInterval(loadQuote, 30000);
+  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('instant')));
+}).catch((e) => { document.body.insertAdjacentHTML('beforeend', `<div class="err">Could not load: ${esc(e.message)}</div>`); });
+})();
