@@ -1,11 +1,31 @@
 {
  "note": "Company logos, saved once and kept in git so both machines and the public site share them. Source: Wikimedia Commons or the English Wikipedia infobox logo. A rebrand gets a new file; git history keeps the old one.",
  "logos": {
+  "AAPL": {
+   "file": "AAPL.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
   "ABNB": {
    "file": "ABNB.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28",
    "check": "verify it is the standard Airbnb mark"
+  },
+  "ADBE": {
+   "file": "ADBE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "ADM": {
+   "file": "ADM.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30"
+  },
+  "AFL": {
+   "file": "AFL.svg",
+   "source": "en.wikipedia.org infobox logo (Aflac.svg)",
+   "fetched": "2026-09-30"
   },
   "AMAT": {
    "file": "AMAT.svg"
@@ -15,10 +35,31 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "AMT": {
+   "file": "AMT.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
   "AMZN": {
    "file": "AMZN.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
+  },
+  "ANET": {
+   "file": "ANET.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "AON": {
+   "file": "AON.svg",
+   "source": "en.wikipedia.org infobox logo (Aon Corporation logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ARE": {
+   "file": "ARE.png",
+   "source": "en.wikipedia.org",
+   "fetched": "2026-09-30",
+   "note": "Alexandria Real Estate Equities logo.png (Wikipedia infobox, en-wiki file, 300x98 px)"
   },
   "ARM": {
    "file": "ARM.svg"
@@ -28,227 +69,15 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
-  "AVGO": {
-   "file": "AVGO.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "BKNG": {
-   "file": "BKNG.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "CCL": {
-   "file": "CCL.png"
-  },
-  "CZR": {
-   "file": "CZR.svg"
-  },
-  "DKNG": {
-   "file": "DKNG.svg"
-  },
-  "EXPE": {
-   "file": "EXPE.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "FANDUEL": {
-   "file": "FANDUEL.svg"
-  },
-  "FLUT": {
-   "file": "FLUT.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28",
-   "check": "verify current Flutter mark"
-  },
-  "GOOGL": {
-   "file": "GOOGL.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "H": {
-   "file": "H.svg"
-  },
-  "HLT": {
-   "file": "HLT.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "IHG": {
-   "file": "IHG.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "INTC": {
-   "file": "INTC.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "KLAC": {
-   "file": "KLAC.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "LRCX": {
-   "file": "LRCX.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "LVS": {
-   "file": "LVS.png"
-  },
-  "MAR": {
-   "file": "MAR.svg"
-  },
-  "META": {
-   "file": "META.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "MGM": {
-   "file": "MGM.svg"
-  },
-  "MSFT": {
-   "file": "MSFT.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "NCLH": {
-   "file": "NCLH.svg"
-  },
-  "NVDA": {
-   "file": "NVDA.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "ORCL": {
-   "file": "ORCL.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "PENN": {
-   "file": "PENN.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "QCOM": {
-   "file": "QCOM.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "RCL": {
-   "file": "RCL.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "SSNLF": {
-   "file": "SSNLF.svg"
-  },
-  "TSM": {
-   "file": "TSM.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "WH": {
-   "file": "WH.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28"
-  },
-  "WYNN": {
-   "file": "WYNN.svg",
-   "source": "commons.wikimedia.org",
-   "fetched": "2026-09-28",
-   "check": "Wynn Las Vegas property logo, not the Wynn Resorts corporate mark; replace when found"
-  },
-  "AMT": {
-   "file": "AMT.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
   "ASTS": {
    "file": "ASTS.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
   },
-  "CHTR": {
-   "file": "CHTR.svg",
-   "source": "en.wikipedia.org infobox logo",
+  "AVGO": {
+   "file": "AVGO.svg",
+   "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
-  },
-  "CMCSA": {
-   "file": "CMCSA.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "ECHO": {
-   "file": "ECHO.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "ERIC": {
-   "file": "ERIC.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "IDCC": {
-   "file": "IDCC.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "NOK": {
-   "file": "NOK.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "T": {
-   "file": "T.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "TMUS": {
-   "file": "TMUS.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "VOD": {
-   "file": "VOD.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "VZ": {
-   "file": "VZ.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "BTI": {
-   "file": "BTI.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "MO": {
-   "file": "MO.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "PM": {
-   "file": "PM.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
-  },
-  "AAPL": {
-   "file": "AAPL.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
-  },
-  "ADBE": {
-   "file": "ADBE.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
-  },
-  "ANET": {
-   "file": "ANET.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
   },
   "AWK": {
    "file": "AWK.svg",
@@ -260,6 +89,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "BKNG": {
+   "file": "BKNG.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
   "BLK": {
    "file": "BLK.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -269,6 +103,11 @@
    "file": "BRK.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "BTI": {
+   "file": "BTI.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
   },
   "CASY": {
    "file": "CASY.svg",
@@ -290,6 +129,9 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CCL": {
+   "file": "CCL.png"
+  },
   "CEG": {
    "file": "CEG.png",
    "source": "en.wikipedia.org infobox logo",
@@ -300,10 +142,26 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CHTR": {
+   "file": "CHTR.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "CMCSA": {
+   "file": "CMCSA.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
   "CME": {
    "file": "CME.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "COIN": {
+   "file": "COIN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Coinbase.svg (Wikipedia infobox)"
   },
   "COST": {
    "file": "COST.svg",
@@ -330,20 +188,46 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CZR": {
+   "file": "CZR.svg"
+  },
+  "DAL": {
+   "file": "DAL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30"
+  },
   "DE": {
    "file": "DE.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "DHI": {
+   "file": "DHI.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30"
   },
   "DIS": {
    "file": "DIS.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "DKNG": {
+   "file": "DKNG.svg"
+  },
   "DUOL": {
    "file": "DUOL.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "ECHO": {
+   "file": "ECHO.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "EG": {
+   "file": "EG.svg",
+   "source": "en.wikipedia.org infobox logo (Everest Logo.svg)",
+   "fetched": "2026-09-30"
   },
   "EOG": {
    "file": "EOG.svg",
@@ -360,20 +244,63 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "ERIC": {
+   "file": "ERIC.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "ERIE": {
+   "file": "ERIE.svg",
+   "source": "en.wikipedia.org infobox logo of Erie Insurance Group (Erie Insurance Group logo.svg); the Erie Insurance mark is the brand Erie Indemnity operates under",
+   "fetched": "2026-09-30"
+  },
+  "EXPE": {
+   "file": "EXPE.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "FANDUEL": {
+   "file": "FANDUEL.svg"
+  },
   "FCX": {
    "file": "FCX.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "FICO": {
+   "file": "FICO.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Fair Isaac Corporation logo.svg (Wikipedia infobox)"
   },
   "FITB": {
    "file": "FITB.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "FLUT": {
+   "file": "FLUT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28",
+   "check": "verify current Flutter mark"
+  },
+  "GE": {
+   "file": "GE.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "GOOGL": {
+   "file": "GOOGL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
   "GRAB": {
    "file": "GRAB.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "H": {
+   "file": "H.svg"
   },
   "HCA": {
    "file": "HCA.svg",
@@ -390,13 +317,44 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "HLT": {
+   "file": "HLT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "IDCC": {
+   "file": "IDCC.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "IHG": {
+   "file": "IHG.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "INTC": {
+   "file": "INTC.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
   "IONQ": {
    "file": "IONQ.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "IRM": {
+   "file": "IRM.svg",
+   "source": "en.wikipedia.org",
+   "fetched": "2026-09-30",
+   "note": "Iron Mountain (logo).svg (Wikipedia article image, en-wiki file)"
+  },
   "ISRG": {
    "file": "ISRG.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "JPM": {
+   "file": "JPM.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
@@ -404,6 +362,11 @@
    "file": "KKR.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "KLAC": {
+   "file": "KLAC.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
   },
   "KMI": {
    "file": "KMI.svg",
@@ -413,6 +376,11 @@
   "KO": {
    "file": "KO.svg",
    "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "KSPI": {
+   "file": "KSPI.svg",
+   "source": "commons.wikimedia.org (File:Kaspi.kz logo.svg; Wikipedia infobox logo field empty)",
    "fetched": "2026-09-29"
   },
   "LEU": {
@@ -426,15 +394,42 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "LLY": {
+   "file": "LLY.svg",
+   "source": "commons.wikimedia.org (File:Eli Lilly and Company.svg; Wikipedia infobox logo field empty)",
+   "fetched": "2026-09-29"
+  },
   "LMND": {
    "file": "LMND.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "LMT": {
+   "file": "LMT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "check": "wordmark-only file (Wikipedia infobox 'Lockheed Martin logo (2).svg')"
+  },
   "LNG": {
    "file": "LNG.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "LRCX": {
+   "file": "LRCX.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "LVS": {
+   "file": "LVS.png"
+  },
+  "LYV": {
+   "file": "LYV.svg",
+   "source": "en.wikipedia.org (infobox)",
+   "fetched": "2026-09-30"
+  },
+  "MAR": {
+   "file": "MAR.svg"
   },
   "MCD": {
    "file": "MCD.svg",
@@ -451,10 +446,41 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "MET": {
+   "file": "MET.svg",
+   "source": "en.wikipedia.org infobox logo (MetLife logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "META": {
+   "file": "META.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "MGM": {
+   "file": "MGM.svg"
+  },
+  "MO": {
+   "file": "MO.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
   "MOS": {
    "file": "MOS.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "MRSH": {
+   "file": "MRSH.svg",
+   "source": "en.wikipedia.org infobox logo (commons file Marsh h rgb c.svg; Marsh brand since Jan 14 2026)",
+   "fetched": "2026-09-30"
+  },
+  "MSFT": {
+   "file": "MSFT.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "NCLH": {
+   "file": "NCLH.svg"
   },
   "NEE": {
    "file": "NEE.svg",
@@ -471,6 +497,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "NOK": {
+   "file": "NOK.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
   "NOW": {
    "file": "NOW.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -481,6 +512,16 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "NVDA": {
+   "file": "NVDA.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "NVR": {
+   "file": "NVR.png",
+   "source": "en.wikipedia.org (non-free logo, infobox)",
+   "fetched": "2026-09-30"
+  },
   "O": {
    "file": "O.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -490,6 +531,22 @@
    "file": "OKLO.png",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "OMC": {
+   "file": "OMC.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Omnicom_Group_logo.svg (Wikipedia infobox)"
+  },
+  "ORCL": {
+   "file": "ORCL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "PENN": {
+   "file": "PENN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
   },
   "PG": {
    "file": "PG.svg",
@@ -511,6 +568,32 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "PM": {
+   "file": "PM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "PSA": {
+   "file": "PSA.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Public Storage Logo.svg (Wikipedia infobox)"
+  },
+  "PWR": {
+   "file": "PWR.png",
+   "source": "en.wikipedia.org (non-free logo, infobox)",
+   "fetched": "2026-09-30"
+  },
+  "QCOM": {
+   "file": "QCOM.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
+  "RCL": {
+   "file": "RCL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
+  },
   "RKLB": {
    "file": "RKLB.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -531,8 +614,23 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "SLB": {
+   "file": "SLB.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SMR": {
+   "file": "SMR.png",
+   "source": "nuscalepower.com (horizontal blue logo with tagline, 622x206)",
+   "fetched": "2026-09-29"
+  },
   "SPCX": {
    "file": "SPCX.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
+  },
+  "SPGI": {
+   "file": "SPGI.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
@@ -541,25 +639,59 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "SSNLF": {
+   "file": "SSNLF.svg"
+  },
+  "T": {
+   "file": "T.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
   "TDG": {
    "file": "TDG.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "TKO": {
+   "file": "TKO.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30"
+  },
+  "TMDX": {
+   "file": "TMDX.png",
+   "source": "transmedics.com (official white wordmark recoloured to brand maroon #9E1C33 from the site icon, because only a white header logo is published; 1042x174)",
+   "fetched": "2026-09-29",
+   "check": "recoloured, eyeball it"
   },
   "TMO": {
    "file": "TMO.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "TMUS": {
+   "file": "TMUS.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
   "TOST": {
    "file": "TOST.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "TPL": {
+   "file": "TPL.png",
+   "source": "texaspacific.com site header logo PNG (536x148); Wikipedia has no infobox logo for TPL",
+   "fetched": "2026-09-30"
+  },
   "TSLA": {
    "file": "TSLA.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "TSM": {
+   "file": "TSM.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
   },
   "UBER": {
    "file": "UBER.svg",
@@ -591,6 +723,34 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "VICI": {
+   "file": "VICI.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Vici Properties logo.svg (Commons search)"
+  },
+  "VLO": {
+   "file": "VLO.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "check": "SVG wraps an embedded raster image; replace with a true vector if one is found"
+  },
+  "VMC": {
+   "file": "VMC.svg",
+   "source": "vulcanmaterials.com site header SVG (Vulcan_Logo_Blue.svg); Wikipedia PNG is only 112 px wide",
+   "fetched": "2026-09-30"
+  },
+  "VOD": {
+   "file": "VOD.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "VRSN": {
+   "file": "VRSN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Verisign logo.svg (Wikipedia infobox)"
+  },
   "VRTX": {
    "file": "VRTX.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -600,6 +760,22 @@
    "file": "VST.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "VZ": {
+   "file": "VZ.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-28"
+  },
+  "WELL": {
+   "file": "WELL.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30",
+   "note": "Welltower Logo 2025.svg (Commons search; used in Wikipedia article)"
+  },
+  "WH": {
+   "file": "WH.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28"
   },
   "WM": {
    "file": "WM.svg",
@@ -613,51 +789,21 @@
    "fetched": "2026-09-29",
    "check": "spark mark only, no wordmark"
   },
-  "GE": {
-   "file": "GE.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
+  "WY": {
+   "file": "WY.svg",
+   "source": "en.wikipedia.org infobox logo (Weyerhaeuser.svg)",
+   "fetched": "2026-09-30"
   },
-  "JPM": {
-   "file": "JPM.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
-  },
-  "SLB": {
-   "file": "SLB.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
-  },
-  "SPGI": {
-   "file": "SPGI.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
+  "WYNN": {
+   "file": "WYNN.svg",
+   "source": "commons.wikimedia.org",
+   "fetched": "2026-09-28",
+   "check": "Wynn Las Vegas property logo, not the Wynn Resorts corporate mark; replace when found"
   },
   "XOM": {
    "file": "XOM.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
-  },
-  "LLY": {
-   "file": "LLY.svg",
-   "source": "commons.wikimedia.org (File:Eli Lilly and Company.svg; Wikipedia infobox logo field empty)",
-   "fetched": "2026-09-29"
-  },
-  "KSPI": {
-   "file": "KSPI.svg",
-   "source": "commons.wikimedia.org (File:Kaspi.kz logo.svg; Wikipedia infobox logo field empty)",
-   "fetched": "2026-09-29"
-  },
-  "SMR": {
-   "file": "SMR.png",
-   "source": "nuscalepower.com (horizontal blue logo with tagline, 622x206)",
-   "fetched": "2026-09-29"
-  },
-  "TMDX": {
-   "file": "TMDX.png",
-   "source": "transmedics.com (official white wordmark recoloured to brand maroon #9E1C33 from the site icon, because only a white header logo is published; 1042x174)",
-   "fetched": "2026-09-29",
-   "check": "recoloured, eyeball it"
   }
  }
 }
