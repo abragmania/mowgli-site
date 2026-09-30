@@ -128,7 +128,7 @@ function moneyTile(c) {
     const i = withShare.indexOf(b);
     const sw = i >= 0 ? `<span class="tsw" style="background:${SW[i % SW.length]};display:inline-block;width:.7em;height:.7em;border-radius:3px;margin-right:.45em"></span>` : '';
     const share = b.share?.fraction != null ? pct(b.share.fraction * 100, 0) : b.share?.text ? esc(b.share.text) : DASH;
-    return `<tr${T(lineSrc(b))}><td class="wrap">${sw}${esc(b.name)}${b.how ? `<div class="bl-how">${esc(b.how.length > 170 ? b.how.slice(0, 167) + '…' : b.how)}</div>` : ''}</td><td class="n"><b>${share}</b></td></tr>`;
+    return `<tr${T(lineSrc(b))}><td class="wrap">${sw}${esc(b.name)}${b.how ? `<div class="bl-how">${b.how.length > 170 ? `<span class="sh">${esc(b.how.slice(0, 167))}…</span><span class="lg">${esc(b.how)}</span>` : esc(b.how)}</div>` : ''}</td><td class="n"><b>${share}</b></td></tr>`;
   }).join('');
   return `<div>${key ? `<h5>${esc(key.replace(/^by /i, 'By '))}</h5>` : ''}${bar}<table class="hk ut"><tr><th>Business line</th><th class="n">% of revenue</th></tr>${rows}</table></div>`;
   };
