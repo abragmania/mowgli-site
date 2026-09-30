@@ -64,7 +64,7 @@ function drawStatus() {
     st.innerHTML = `<i></i><span>${SESSION_TXT[P.session] || 'Market'} · prices as of <b>${et} ET</b>, ${dstr}</span>`;
   }
   const n = D.stocks.length;
-  const src = `Prices ${P.sources?.prices || 'Yahoo Finance'}, ${dstr} ${et} ET, refreshed every minute · S&amp;P 500 members and GICS sectors ${P.sources?.members || 'Wikipedia'} · breadth computed by Mowgli from daily prices for ${n} members · sector colour = sector fund (XLK…), size = members' market value · group breakdowns Mowgli industry maps · fund weights State Street (SPY) and Invesco (QQQ) holdings files${P.periodsOk === false ? ' · <b>1W, 1M and YTD moves for companies are unavailable until the site is next published</b>' : ''}`;
+  const src = `Prices ${P.sources?.prices || 'Yahoo Finance'}, ${dstr} ${et} ET, refreshed every minute · S&amp;P 500 members and GICS sectors ${P.sources?.members || 'Wikipedia'} · breadth counted by Mowgli from live quotes for ${n} members, history from Mowgli's saved daily lines · sector colour = sector fund (XLK…), size = members' market value · group breakdowns Mowgli industry maps · fund weights State Street (SPY) and Invesco (QQQ) holdings files${P.periodsOk === false ? ' · <b>1W, 1M and YTD moves for companies are unavailable until the site is next published</b>' : ''}`;
   $('src').innerHTML = src; $('src').title = src.replace(/<[^>]+>/g, '');
 }
 
@@ -171,7 +171,7 @@ function drawEtf() {
 }
 
 /* ---------- breadth ---------- */
-const line = (H, k, col) => { const v = H.map((x) => x[k]).filter((x) => x != null); if (v.length < 2) return ''; return `<svg viewBox="0 0 200 30" preserveAspectRatio="none"><line x1="0" x2="200" y1="15" y2="15" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/><path d="${v.map((y, i) => (i ? 'L' : 'M') + (i / (v.length - 1) * 200).toFixed(1) + ' ' + (30 - y / 100 * 30).toFixed(1)).join('')}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`; };
+const line = (H, k, col, max = 100) => { const v = H.map((x) => x[k]).filter((x) => x != null); if (v.length < 2) return ''; return `<svg viewBox="0 0 200 30" preserveAspectRatio="none">${max === 100 ? '<line x1="0" x2="200" y1="15" y2="15" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>' : ''}<path d="${v.map((y, i) => (i ? 'L' : 'M') + (i / (v.length - 1) * 200).toFixed(1) + ' ' + (30 - y / max * 30).toFixed(1)).join('')}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`; };
 const split = (a, b) => `<div class="bar"><i class="u" style="width:${a / (a + b || 1) * 100}%"></i><i class="d" style="width:${b / (a + b || 1) * 100}%"></i></div>`;
 const vfmt = (v) => (v / 1e9).toFixed(2) + 'B';
 const pctOf = (list, k) => { const known = list.filter((s) => s[k] != null); return known.length ? known.filter((s) => s[k]).length / known.length * 100 : null; };
@@ -179,14 +179,16 @@ const pf = (v) => (v == null ? '—' : v.toFixed(0) + '%');
 function drawBreadth() {
   const st = D.stocks.filter((s) => s.d != null), N = st.length;
   const adv = st.filter((s) => s.d > 0).length, dec = st.filter((s) => s.d < 0).length;
-  const a50 = pctOf(st, 'a50'), a200 = pctOf(st, 'a200'), nh = st.filter((s) => s.nh).length, nl = st.filter((s) => s.nl).length;
+  const a50 = pctOf(st, 'a50'), a200 = pctOf(st, 'a200'), hlk = st.filter((s) => s.nh != null && s.nl != null), nh = hlk.filter((s) => s.nh).length, nl = hlk.filter((s) => s.nl).length;
   const uv = st.filter((s) => s.d > 0).reduce((a, s) => a + (s.vol || 0), 0), dv = st.filter((s) => s.d < 0).reduce((a, s) => a + (s.vol || 0), 0);
   const H = D.breadthHist || [];
+  const HL = H.map((x) => ({ h: x.hl ? x.nh / x.hl * 100 : null, l: x.hl ? x.nl / x.hl * 100 : null })), hlMax = Math.max(5, ...HL.map((x) => Math.max(x.h ?? 0, x.l ?? 0)));
+  const hlPct = (v) => (hlk.length ? (v / hlk.length * 100).toFixed(1) + '%' : '—');
   $('bn').textContent = N + ' stocks · ' + (P.session === 'open' ? 'live' : 'last session');
   $('bgrid').innerHTML =
     `<div class="br"><div class="k">Rising vs falling today</div><div class="v"><span class="up">${adv}</span> / <span class="dn">${dec}</span></div>${split(adv, dec)}</div>` +
     `<div class="br"><div class="k">Share of stocks above their average price</div><div class="v"><small>last ${H.length} days, dashed = half</small></div><div class="two"><div><b>${pf(a50)}</b><span>above<br>50-day</span>${line(H, 'a50', 'var(--accx)')}</div><div><b>${pf(a200)}</b><span>above<br>200-day</span>${line(H, 'a200', '#c9c2e8')}</div></div></div>` +
-    `<div class="br"><div class="k">New 52-week highs vs lows</div><div class="v"><span class="up">${nh}</span> / <span class="dn">${nl}</span></div>${split(nh, nl)}</div>` +
+    `<div class="br"><div class="k">New 52-week highs vs lows</div><div class="v"><span class="up">${nh}</span> / <span class="dn">${nl}</span><small>of ${hlk.length} stocks</small></div>${split(nh, nl)}<div class="two"><div><b class="up">${hlPct(nh)}</b><span>at a new<br>high</span>${line(HL, 'h', '#3f9a74', hlMax)}</div><div><b class="dn">${hlPct(nl)}</b><span>at a new<br>low</span>${line(HL, 'l', '#b8574e', hlMax)}</div></div></div>` +
     `<div class="br"><div class="k">Volume in rising vs falling stocks</div><div class="v"><span class="up">${vfmt(uv)}</span> / <span class="dn">${vfmt(dv)}</span><small>shares</small></div>${split(uv, dv)}</div>`;
   /* expanded: breadth by sector */
   $('bfull').innerHTML = `<table class="st"><tr><th>Sector</th><th>Rising / falling today</th><th>Above 50-day</th><th>Above 200-day</th><th>New highs / lows</th><th>Sector fund today</th></tr>` +
@@ -209,6 +211,7 @@ function drawMovers() {
 $('mode').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.mode = b.dataset.m; if (S.mode !== 'sec') S.p = 'd'; document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p)); save(); drawMap(); });
 document.addEventListener('click', (e) => { const c = e.target.closest('[data-co]'); if (c && c.dataset.co) location.href = MG.pageUrl(c.dataset.co); });
 $('heat').addEventListener('click', (e) => { const z = e.target.closest('[data-z]'); if (!z) return; const v = z.dataset.z; if (v === '' && !S.zoom) return; if (v === S.zoom) return; S.zoom = v; save(); drawMap(); });
+[['w', '1 week: measured from the close of the previous weekly bar (nearest weekly close, not the exact day)'], ['m', '1 month: measured from the weekly close about four weeks back (nearest weekly close, not the exact day)'], ['y', 'Year to date: from the last close of the previous year']].forEach(([k, t]) => { const b = document.querySelector(`#per button[data-p="${k}"]`); if (b) b.title = t; });
 $('per').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.p = b.dataset.p; document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x === b)); save(); drawMap(); });
 document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p));
 function applyOpen() { const f = $('field'); f.className = 'field' + (S.open ? ' open-' + S.open : ''); ['heat', 'breadth'].forEach((t) => $(t).classList.toggle('open', S.open === t)); requestAnimationFrame(drawMap); }
