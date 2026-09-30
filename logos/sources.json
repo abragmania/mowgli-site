@@ -934,6 +934,96 @@
    "file": "FIX.svg",
    "source": "en.wikipedia.org infobox logo (Comfort Systems USA logo.svg)",
    "fetched": "2026-09-30"
+  },
+  "ACN": {
+   "file": "ACN.svg",
+   "source": "en.wikipedia.org infobox logo (Accenture.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CHRW": {
+   "file": "CHRW.svg",
+   "source": "en.wikipedia.org infobox logo (C. H. Robinson logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "JBL": {
+   "file": "JBL.png",
+   "source": "en.wikipedia.org infobox logo (Jabil logo (2023).png, 390x71 px)",
+   "fetched": "2026-09-30"
+  },
+  "APTV": {
+   "file": "APTV.svg",
+   "source": "en.wikipedia.org infobox logo (Aptiv logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GM": {
+   "file": "GM.svg",
+   "source": "en.wikipedia.org infobox logo (General Motors (logo with wordmark, horizontal).svg)",
+   "fetched": "2026-09-30"
+  },
+  "TSN": {
+   "file": "TSN.svg",
+   "source": "en.wikipedia.org infobox logo (Tyson Foods corporate logo (2024).svg)",
+   "fetched": "2026-09-30"
+  },
+  "INVH": {
+   "file": "INVH.svg",
+   "source": "en.wikipedia.org infobox logo (Invitation Homes logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "HST": {
+   "file": "HST.svg",
+   "source": "commons.wikimedia.org (Logo Host Hotels & Resorts.svg); no logo in the Wikipedia infobox",
+   "fetched": "2026-09-30"
+  },
+  "SPG": {
+   "file": "SPG.svg",
+   "source": "en.wikipedia.org infobox logo (Simon Property Group Logo 2014.svg)",
+   "fetched": "2026-09-30"
+  },
+  "BNY": {
+   "file": "BNY.svg",
+   "source": "en.wikipedia.org infobox logo (BNY logo 2024.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GS": {
+   "file": "GS.svg",
+   "source": "en.wikipedia.org infobox logo (Goldman Sachs logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "COF": {
+   "file": "COF.svg",
+   "source": "en.wikipedia.org infobox logo (Capital One logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CBRE": {
+   "file": "CBRE.svg",
+   "source": "en.wikipedia.org infobox logo (CBRE_Group.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "VTRS": {
+   "file": "VTRS.svg",
+   "source": "en.wikipedia.org infobox logo (Viatris.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "IQV": {
+   "file": "IQV.svg",
+   "source": "en.wikipedia.org infobox logo (IQVIA.svg)",
+   "fetched": "2026-09-30"
+  },
+  "DVA": {
+   "file": "DVA.png",
+   "source": "en.wikipedia.org infobox logo (DaVita Inc logo.png, 270x144 PNG, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "TJX": {
+   "file": "TJX.svg",
+   "source": "en.wikipedia.org infobox logo (TJX Logo.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "DG": {
+   "file": "DG.svg",
+   "source": "en.wikipedia.org infobox logo (Dollar General logo.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
   }
  }
 }
