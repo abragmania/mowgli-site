@@ -183,11 +183,12 @@ function drawBreadth() {
   const uv = st.filter((s) => s.d > 0).reduce((a, s) => a + (s.vol || 0), 0), dv = st.filter((s) => s.d < 0).reduce((a, s) => a + (s.vol || 0), 0);
   const H = D.breadthHist || [];
   const HL = H.map((x) => ({ h: x.hl ? x.nh / x.hl * 100 : null, l: x.hl ? x.nl / x.hl * 100 : null })), hlMax = Math.max(5, ...HL.map((x) => Math.max(x.h ?? 0, x.l ?? 0)));
+  const firstQ = H.find((x) => x.source === 'yahoo-quote')?.d, bnote = firstQ ? `Lines before ${firstQ} were rebuilt from daily closes (averages computed by Mowgli); from ${firstQ} on each line is saved after the close using Yahoo's 50- and 200-day averages.` : 'Rebuilt from daily closes (averages computed by Mowgli); today so far uses the Yahoo-supplied averages.';
   const hlPct = (v) => (hlk.length ? (v / hlk.length * 100).toFixed(1) + '%' : '—');
   $('bn').textContent = N + ' stocks · ' + (P.session === 'open' ? 'live' : 'last session');
   $('bgrid').innerHTML =
     `<div class="br"><div class="k">Rising vs falling today</div><div class="v"><span class="up">${adv}</span> / <span class="dn">${dec}</span></div>${split(adv, dec)}</div>` +
-    `<div class="br"><div class="k">Share of stocks above their average price</div><div class="v"><small>last ${H.length} days, dashed = half</small></div><div class="two"><div><b>${pf(a50)}</b><span>above<br>50-day</span>${line(H, 'a50', 'var(--accx)')}</div><div><b>${pf(a200)}</b><span>above<br>200-day</span>${line(H, 'a200', '#c9c2e8')}</div></div></div>` +
+    `<div class="br"><div class="k">Share of stocks above their average price</div><div class="v"><small title="${esc(bnote)}">last ${H.length} days, dashed = half</small></div><div class="two"><div><b>${pf(a50)}</b><span>above<br>50-day</span>${line(H, 'a50', 'var(--accx)')}</div><div><b>${pf(a200)}</b><span>above<br>200-day</span>${line(H, 'a200', '#c9c2e8')}</div></div></div>` +
     `<div class="br"><div class="k">New 52-week highs vs lows</div><div class="v"><span class="up">${nh}</span> / <span class="dn">${nl}</span><small>of ${hlk.length} stocks</small></div>${split(nh, nl)}<div class="two"><div><b class="up">${hlPct(nh)}</b><span>at a new<br>high</span>${line(HL, 'h', '#3f9a74', hlMax)}</div><div><b class="dn">${hlPct(nl)}</b><span>at a new<br>low</span>${line(HL, 'l', '#b8574e', hlMax)}</div></div></div>` +
     `<div class="br"><div class="k">Volume in rising vs falling stocks</div><div class="v"><span class="up">${vfmt(uv)}</span> / <span class="dn">${vfmt(dv)}</span><small>shares</small></div>${split(uv, dv)}</div>`;
   /* expanded: breadth by sector */
@@ -211,7 +212,11 @@ function drawMovers() {
 $('mode').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.mode = b.dataset.m; if (S.mode !== 'sec') S.p = 'd'; document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p)); save(); drawMap(); });
 document.addEventListener('click', (e) => { const c = e.target.closest('[data-co]'); if (c && c.dataset.co) location.href = MG.pageUrl(c.dataset.co); });
 $('heat').addEventListener('click', (e) => { const z = e.target.closest('[data-z]'); if (!z) return; const v = z.dataset.z; if (v === '' && !S.zoom) return; if (v === S.zoom) return; S.zoom = v; save(); drawMap(); });
-[['w', '1 week: measured from the close of the previous weekly bar (nearest weekly close, not the exact day)'], ['m', '1 month: measured from the weekly close about four weeks back (nearest weekly close, not the exact day)'], ['y', 'Year to date: from the last close of the previous year']].forEach(([k, t]) => { const b = document.querySelector(`#per button[data-p="${k}"]`); if (b) b.title = t; });
+function periodTips() {
+  const R = P?.periodRefs || {}, fd = (d) => (d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null);
+  [['w', R.w ? `1 week: from the close on ${fd(R.w)}, the last close at least 7 days before the latest session` : '1 week'], ['m', R.m ? `1 month: from the close on ${fd(R.m)}, the last close on or before the same date one month earlier` : '1 month'], ['y', 'Year to date: from the last close of the previous year']]
+    .forEach(([k, t]) => { const b = document.querySelector(`#per button[data-p="${k}"]`); if (b) b.title = t; });
+}
 $('per').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.p = b.dataset.p; document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x === b)); save(); drawMap(); });
 document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p));
 function applyOpen() { const f = $('field'); f.className = 'field' + (S.open ? ' open-' + S.open : ''); ['heat', 'breadth'].forEach((t) => $(t).classList.toggle('open', S.open === t)); requestAnimationFrame(drawMap); }
@@ -249,7 +254,7 @@ function adopt(p) {
   bySec = {}; D.stocks.forEach((s) => (bySec[s.sec] = bySec[s.sec] || []).push(s));
 }
 function render() {
-  drawStatus(); drawWatch(); drawBreadth(); drawMovers(); sky(); drawMap();
+  periodTips(); drawStatus(); drawWatch(); drawBreadth(); drawMovers(); sky(); drawMap();
 }
 async function fetchLive() {
   const url = MG.monitorUrl();
