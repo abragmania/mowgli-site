@@ -5,7 +5,8 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ETF = { 'Information Technology': 'XLK', 'Financials': 'XLF', 'Health Care': 'XLV', 'Consumer Discretionary': 'XLY', 'Consumer Staples': 'XLP', 'Energy': 'XLE', 'Industrials': 'XLI', 'Materials': 'XLB', 'Utilities': 'XLU', 'Real Estate': 'XLRE', 'Communication Services': 'XLC' };
 const SHORT = { 'Information Technology': 'Technology', 'Consumer Discretionary': 'Consumer Discretionary', 'Communication Services': 'Communication' };
-const S = { p: 'd', zoom: '', open: '', mode: 'sec' };
+const S = { p: 'd', zoom: '', open: '', mode: 'cats' };  // mode: cats (default, Mowgli's own scheme, D74) | sec (GICS) | SPY | QQQ | an overlay id (megacaps, hyperscalers)
+const isFund = (m) => m === 'SPY' || m === 'QQQ';
 Object.assign(S, Object.fromEntries(location.hash.slice(1).split('&').filter(Boolean).map((s) => s.split('=').map(decodeURIComponent))));
 const CAP = { d: 3, w: 6, m: 10, y: 30 };
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -21,6 +22,8 @@ const wavg = (arr, k) => { let s = 0, w = 0; arr.forEach((x) => { if (x[k] != nu
 let P = null;            // the payload being shown
 let D = { stocks: [], etf: {}, watch: [], breadthHist: [] };
 let bySec = {};
+let GR = null;           // grouping maps (Mowgli Cats, GICS labels, overlays) from the payload, joined to the live prices here
+let GCACHE = {};         // groupsFor() answers for the payload being shown
 let COMPANIES = [];      // Mowgli's own company pages
 const LINK = new Map();  // Yahoo-style symbol -> canonical folder ticker
 const LOGO = new Map();  // Yahoo-style symbol -> logo url
@@ -119,16 +122,85 @@ function groups(list, sub) {
 function nest(gs, W, H, big, click) {
   let h = ''; squarify(gs.map((g) => ({ ...g, v: g.list.reduce((a, s) => a + sz(s), 0) })), 0, 0, W, H).forEach((g) => {
     const hh = g.h > 60 && g.w > 70 ? 22 : 0, v = wavg(g.list, S.p);
-    h += `<div class="grp" style="${box(g)}">${hh ? `<div class="gh" ${click ? `data-z="${esc(click(g))}"` : ''} title="${esc(g.name)} ${fp(v)}">${g.badge ? '<span class="badge">Mowgli</span>' : ''}${esc(g.name)}<b class="${cls(v)}">${fp(v, 1)}</b></div>` : ''}`;
+    h += `<div class="grp" style="${box(g)}">${hh ? `<div class="gh" ${click ? `data-z="${esc(click(g))}"` : ''} title="${esc(g.full || g.name)} ${fp(v)}">${g.badge ? '<span class="badge">Mowgli</span>' : ''}${g.w < 90 ? '' : `<span class="gn">${esc(g.name)}</span>`}<b class="${cls(v)}">${fp(v, 1)}</b></div>` : ''}`;
     squarify(g.list.map((s) => ({ s, v: sz(s) })), 0, hh, g.w - G, g.h - G - hh).forEach((c) => { h += click ? coCell(c.s, c, big).replace('class="cell', 'data-z="' + esc(click(g)) + '" class="cell') : coCell(c.s, c, big); }); h += '</div>';
   }); return h;
 }
 const legend = (note) => { const c = CAP[S.p]; $('legend').innerHTML = `<span>${fp(-c, 0)}</span><div class="sc">${[-1, -.66, -.33, 0, .33, .66, 1].map((t) => `<i style="background:${heat(t * c)}"></i>`).join('')}</div><span>${fp(c, 0)}</span><span class="note">${note}</span>`; };
+/* ---------- Mowgli Cats / overlays: groups joined to the live prices (D75) ---------- */
+// [{ id, name, list, subs:[{ id, name, list }] }]: a company is placed once, under its main Sub. A company with no price row
+// is left out; one whose placement is unclear sits under "Not yet placed". Moves are weighted by market value in wavg(), which
+// skips members with no move instead of counting them as zero.
+function groupsFor(mode) {
+  if (GCACHE[mode]) return GCACHE[mode];
+  let out = null;
+  if (GR) {
+    const at = (s) => GR.co?.[ysym(s.s)];
+    if (mode === 'cats') {
+      const cats = GR.cats.map((c) => ({ id: c.id, name: c.name, short: c.short, list: [], subs: c.subs.map((x) => ({ id: x.id, name: x.name, short: x.short, list: [] })) }));
+      const un = { id: 'unplaced', name: 'Not yet placed', list: [], subs: [{ id: 'unplaced/unplaced', name: 'Not yet placed', list: [] }] };
+      D.grp.forEach((s) => {
+        const a = at(s); if (!a) return;
+        const c = cats.find((x) => x.id === a[0]), sb = c?.subs.find((x) => x.id === a[1]);
+        const g = c || un, sg = sb || (c ? (c.subs.find((x) => x.id === c.id + '/other') || (c.subs.push({ id: c.id + '/other', name: 'Other (not yet placed)', list: [] }), c.subs[c.subs.length - 1])) : un.subs[0]);
+        g.list.push(s); sg.list.push(s);
+      });
+      out = [...cats, un].filter((g) => g.list.length);
+      out.forEach((g) => { g.subs = g.subs.filter((x) => x.list.length); });
+    } else if (mode === 'sec') {
+      const m = new Map();
+      D.grp.forEach((s) => {
+        const a = at(s); if (!a || !a[2]) return;   // only cited GICS labels are used
+        if (!m.has(a[2])) m.set(a[2], { id: a[2], name: a[2], list: [], subs: new Map() });
+        const g = m.get(a[2]); g.list.push(s);
+        const sn = a[3] || 'Not stated'; if (!g.subs.has(sn)) g.subs.set(sn, { id: a[2] + '/' + sn, name: sn, list: [] });
+        g.subs.get(sn).list.push(s);
+      });
+      out = [...m.values()].map((g) => ({ ...g, subs: [...g.subs.values()] }));
+    } else {
+      const o = GR.overlays?.find((x) => x.id === mode);
+      if (o) { const set = new Set(o.members.map(ysym)); out = [{ id: o.id, name: o.name, list: D.grp.filter((s) => set.has(ysym(s.s))), subs: [], def: o.definition, n: o.members.length }]; }
+    }
+  }
+  return (GCACHE[mode] = out);
+}
+function drawGrouped(el, W, H) {
+  const gs = groupsFor(S.mode), root = 'Mowgli Cats';
+  if (!gs) { el.innerHTML = '<div class="msg">The grouping lists did not come with the data, so this view is not available yet.</div>'; $('crumb').innerHTML = ''; legend(''); return; }
+  if (S.mode !== 'cats') { /* an overlay: one group of companies */
+    const g = gs[0], v = wavg(g.list, S.p);
+    el.innerHTML = squarify(g.list.map((s) => ({ s, v: sz(s) })), 0, 0, W, H).map((c) => coCell(c.s, c, true)).join('');
+    $('crumb').innerHTML = `<span class="cur">${esc(g.name)}</span><span class="note" style="margin-left:.5rem;font-weight:600">value-weighted move <b class="${cls(v)}">${fp(v, 2)}</b> · ${g.list.length} of ${g.n} members priced here</span>`;
+    legend(`${esc(g.def || '')} Box size = market value; colour = the move. click a box to open the company`);
+    return;
+  }
+  const [cid] = S.zoom ? S.zoom.split('/') : [], g = gs.find((x) => x.id === cid), sub = g && S.zoom.includes('/') ? g.subs.find((x) => x.id === S.zoom) : null;
+  let h = '', crumb = `<a data-z="">${root}</a>`;
+  if (!g) {
+    squarify(gs.map((x) => ({ ...x, v: x.list.reduce((a, s) => a + sz(s), 0), mv: wavg(x.list, S.p) })), 0, 0, W, H).forEach((r) => {
+      // a narrow or short tile shows only the %, name in the tooltip; the % is always kept on the tile
+      const top = r.list.slice().sort((a, b) => sz(b) - sz(a)).slice(0, 3), nar = r.w < 90 || r.h < 60;
+      let fs = Math.max(7, Math.min(R() * 1.5, Math.sqrt(r.w * r.h) / 13));
+      fs = nar ? Math.min(fs, (r.w - G) / 4.8, (r.h - G) / 2.4) : Math.min(fs, (r.w - G) / 7.4);
+      h += `<div class="cell sec${nar ? ' nar' : ''}" data-z="${esc(r.id)}" style="${box(r, `background:${heat(r.mv)};font-size:${fs}px`)}" title="${esc(r.name)}: value-weighted move ${fp(r.mv)} · ${r.list.length} companies · click to zoom">${nar ? '' : `<div class="nm" style="-webkit-line-clamp:${r.h > fs * 6.2 ? 2 : 1}">${esc(r.short || r.name)}</div>`}<div class="mv">${fp(r.mv)}</div>${r.h > fs * 6 && r.w > fs * 14 ? `<div class="sm">${top.map((s) => `${esc(s.s)} ${fp(s[S.p], 1)}`).join(' · ')}</div>` : ''}</div>`;
+    });
+    crumb = `<span class="cur">${root}</span><span class="note" style="margin-left:.5rem;font-weight:600">click a Cat to zoom in</span>`;
+  } else if (!sub) {
+    h = nest(g.subs.map((x) => ({ name: x.short || x.name, full: x.name, list: x.list, id: x.id })), W, H, false, (x) => x.id);
+    crumb += `<span class="sep">›</span><span class="cur">${esc(g.name)}</span><span class="note" style="margin-left:.5rem;font-weight:600">value-weighted ${fp(wavg(g.list, S.p), 1)}</span>`;
+  } else {
+    h = squarify(sub.list.map((s) => ({ s, v: sz(s) })), 0, 0, W, H).map((c) => coCell(c.s, c, true)).join('');
+    crumb += `<span class="sep">›</span><a data-z="${esc(g.id)}">${esc(g.name)}</a><span class="sep">›</span><span class="cur">${esc(sub.name)}</span><span class="note" style="margin-left:.5rem;font-weight:600">value-weighted ${fp(wavg(sub.list, S.p), 1)}</span>`;
+  }
+  el.innerHTML = h; $('crumb').innerHTML = crumb;
+  legend('Box size = market value of the companies placed here (each company once, under its main Sub); colour = value-weighted move, companies with no price left out · click to go deeper');
+}
 function drawMap() {
-  document.body.classList.toggle('etf', S.mode !== 'sec'); $('hl').classList.toggle('on', S.mode === 'SPY'); document.querySelectorAll('#mode button').forEach((x) => x.classList.toggle('on', x.dataset.m === S.mode));
+  document.body.classList.toggle('etf', isFund(S.mode)); $('hl').classList.toggle('on', S.mode === 'SPY'); document.querySelectorAll('#mode button').forEach((x) => x.classList.toggle('on', x.dataset.m === S.mode));
   if (!P) return;
-  if (S.mode !== 'sec') return drawEtf();
-  const el = $('map'), W = el.clientWidth, H = el.clientHeight; const [sec, sub] = S.zoom ? S.zoom.split('/') : [];
+  if (isFund(S.mode)) return drawEtf();
+  const el = $('map'), W = el.clientWidth, H = el.clientHeight;
+  if (S.mode !== 'sec') return drawGrouped(el, W, H); const [sec, sub] = S.zoom ? S.zoom.split('/') : [];
   const secName = sec && Object.keys(ETF).find((k) => ETF[k] === sec); let h = '', crumb = `<a data-z="">S&amp;P 500</a>`;
   if (!secName) { /* level 0: sectors */
     const items = Object.keys(ETF).map((n) => ({ n, e: ETF[n], v: (bySec[n] || []).reduce((a, s) => a + sz(s), 0), mv: D.etf[ETF[n]]?.[S.p] ?? null }));
@@ -200,18 +272,35 @@ function drawBreadth() {
 }
 
 /* ---------- movers ---------- */
+const MV = { m: S.mode, g: S.mode === 'cats' ? S.zoom : '' };   // which grouping the list follows, and which group in it ('' = all)
+const mvPool = () => {
+  if (MV.m === 'SPY') return { list: D.stocks, floor: true };
+  if (MV.m === 'QQQ') { const q = new Set((P.etf?.qqq?.h || []).map((h) => ysym(h.t))); return { list: D.grp.filter((s) => q.has(ysym(s.s))), floor: true }; }
+  const gs = groupsFor(MV.m) || [];
+  if (!MV.g) return { list: gs.flatMap((g) => g.list), floor: MV.m === 'cats' || MV.m === 'sec' };
+  const top = gs.find((g) => g.id === MV.g.split('/')[0]), sub = top?.subs.find((x) => x.id === MV.g);
+  return { list: (MV.g.includes('/') ? sub : top)?.list || [], floor: false };
+};
 function drawMovers() {
-  const seen = new Set();
-  const bigco = D.stocks.filter((s) => s.cap != null && s.cap >= 1e11 && s.d != null).sort((a, b) => b.d - a.d || sz(b) - sz(a)).filter((s) => { const k = s.co || s.s; if (seen.has(k)) return false; seen.add(k); return true; });
+  document.querySelectorAll('#mvmode button').forEach((x) => x.classList.toggle('on', x.dataset.m === MV.m));
+  const sel = $('mvg'), gs = MV.m === 'cats' || MV.m === 'sec' ? groupsFor(MV.m) : null;
+  sel.classList.toggle('on', !!gs);
+  if (gs) { sel.innerHTML = `<option value="">All ${MV.m === 'cats' ? 'Cats' : 'GICS sectors'}</option>` + gs.map((g) => `<option value="${esc(g.id)}">${esc(g.name)}</option>` + g.subs.map((x) => `<option value="${esc(x.id)}">\u00a0\u00a0${esc(x.name)}</option>`).join('')).join(''); sel.value = MV.g; if (sel.value !== MV.g) { MV.g = ''; sel.value = ''; } }
+  const seen = new Set(), pool = mvPool();
+  const bigco = pool.list.filter((s) => s.d != null && (!pool.floor || (s.cap != null && s.cap >= 1e11))).sort((a, b) => b.d - a.d || sz(b) - sz(a)).filter((s) => { const k = s.co || s.s; if (seen.has(k)) return false; seen.add(k); return true; });
   const mrow = (s) => { const lg = logo(s.s); return `<div class="mr"${co(s.s)} title="${esc(s.n)} · ${money(s.cap)}${isMine(s.s) ? ' · click to open the company' : ''}"><div class="lg${lg ? '' : ' tx'}">${lg ? `<img src="${esc(lg)}" alt="">` : esc(s.s)}</div><div class="nm"><b>${esc(s.s)}</b>${esc(s.n)}</div><div class="v ${cls(s.d)}">${fp(s.d)}</div></div>`; };
-  $('mvn').textContent = bigco.length + ' companies';
-  $('mv2').innerHTML = bigco.length ? `<div><h5>Up most</h5>${bigco.slice(0, 5).map(mrow).join('')}</div><div><h5>Down most</h5>${bigco.slice(-5).reverse().map(mrow).join('')}</div>` : '';
+  $('mvn').textContent = bigco.length + ' companies' + (pool.floor ? ' over $100B' : '');
+  const k = bigco.length > 1 ? Math.min(5, Math.floor(bigco.length / 2)) : bigco.length;
+  $('mv2').innerHTML = bigco.length ? `<div><h5>Up most</h5>${bigco.slice(0, k).map(mrow).join('')}</div><div><h5>Down most</h5>${bigco.length > 1 ? bigco.slice(-k).reverse().map(mrow).join('') : ''}</div>` : '<div class="msg">No priced companies in this group.</div>';
 }
+function followMap() { MV.m = S.mode; MV.g = S.mode === 'cats' ? S.zoom : ''; drawMovers(); }   // the list follows the heat map's grouping and zoom
+$('mvmode').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; MV.m = b.dataset.m; MV.g = ''; drawMovers(); });
+$('mvg').addEventListener('change', (e) => { MV.g = e.target.value; drawMovers(); });
 
 /* ---------- interaction ---------- */
-$('mode').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.mode = b.dataset.m; if (S.mode !== 'sec') S.p = 'd'; document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p)); save(); drawMap(); });
+$('mode').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; if (S.mode !== b.dataset.m) S.zoom = ''; S.mode = b.dataset.m; if (isFund(S.mode)) S.p = 'd'; document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p)); save(); drawMap(); followMap(); });
 document.addEventListener('click', (e) => { const c = e.target.closest('[data-co]'); if (c && c.dataset.co) location.href = MG.pageUrl(c.dataset.co); });
-$('heat').addEventListener('click', (e) => { const z = e.target.closest('[data-z]'); if (!z) return; const v = z.dataset.z; if (v === '' && !S.zoom) return; if (v === S.zoom) return; S.zoom = v; save(); drawMap(); });
+$('heat').addEventListener('click', (e) => { const z = e.target.closest('[data-z]'); if (!z) return; const v = z.dataset.z; if (v === '' && !S.zoom) return; if (v === S.zoom) return; S.zoom = v; save(); drawMap(); followMap(); });
 function periodTips() {
   const R = P?.periodRefs || {}, fd = (d) => (d ? new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null);
   [['w', R.w ? `1 week: from the close on ${fd(R.w)}, the last close at least 7 days before the latest session` : '1 week'], ['m', R.m ? `1 month: from the close on ${fd(R.m)}, the last close on or before the same date one month earlier` : '1 month'], ['y', 'Year to date: from the last close of the previous year']]
@@ -221,7 +310,7 @@ $('per').addEventListener('click', (e) => { const b = e.target.closest('button')
 document.querySelectorAll('#per button').forEach((x) => x.classList.toggle('on', x.dataset.p === S.p));
 function applyOpen() { const f = $('field'); f.className = 'field' + (S.open ? ' open-' + S.open : ''); ['heat', 'breadth'].forEach((t) => $(t).classList.toggle('open', S.open === t)); requestAnimationFrame(drawMap); }
 document.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); S.open = S.open === b.dataset.x ? '' : b.dataset.x; save(); applyOpen(); }));
-function save() { const h = Object.entries(S).filter(([k, v]) => v && !(k === 'p' && v === 'd') && !(k === 'mode' && v === 'sec')).map(([k, v]) => k + '=' + encodeURIComponent(v).replace(/%2F/g, '/')).join('&'); history.replaceState(null, '', '#' + h); }
+function save() { const h = Object.entries(S).filter(([k, v]) => v && !(k === 'p' && v === 'd') && !(k === 'mode' && v === 'cats')).map(([k, v]) => k + '=' + encodeURIComponent(v).replace(/%2F/g, '/')).join('&'); history.replaceState(null, '', '#' + h); }
 function sizeBand() { const h = document.querySelector('.head').getBoundingClientRect(); document.body.style.setProperty('--bandh', (h.bottom + Math.max(18, h.height * .4)) + 'px'); }
 addEventListener('resize', () => { sky(); drawMap(); sizeBand(); });
 
@@ -251,6 +340,7 @@ let sel = 0, hits = [];
 function adopt(p) {
   P = p;
   D = { stocks: p.stocks || [], etf: p.sectors || {}, watch: p.watch || [], breadthHist: p.breadthHist || [] };
+  GR = p.groupings || GR; GCACHE = {}; D.grp = [...D.stocks, ...(p.extra || [])];
   bySec = {}; D.stocks.forEach((s) => (bySec[s.sec] = bySec[s.sec] || []).push(s));
 }
 function render() {
@@ -269,10 +359,19 @@ async function fetchLive() {
   return { ...b, stale: true, baked: true };
 }
 let failing = false;
+let bakedGr = null;
+// The Cloudflare Worker leaves the grouping lists out of its answer to keep it small, so they are taken from the copy baked at publish.
+async function groupingsFrom(p) {
+  if (p.groupings || GR) return p.groupings || GR;
+  const u = MG.monitorBakedUrl(); if (!u) return null;
+  bakedGr ||= fetch(u).then((r) => (r.ok ? r.json() : null)).then((b) => b?.groupings || null).catch(() => null);
+  const g = await bakedGr; if (!g) bakedGr = null; return g;
+}
 async function refresh() {
   try {
     const p = await fetchLive();
     if (!p || !Array.isArray(p.stocks)) throw new Error('unexpected answer');
+    p.groupings = await groupingsFrom(p);
     failing = false; adopt(p); render();
   } catch (e) {
     if (P) { P = { ...P, stale: true }; drawStatus(); return; }

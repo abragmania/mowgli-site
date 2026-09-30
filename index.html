@@ -95,7 +95,7 @@ body{background:var(--sp);color:var(--ink);font-family:Manrope,system-ui,sans-se
 .cell .nm{font-weight:800;font-size:1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .cell .mv{font-weight:800;font-variant-numeric:tabular-nums;font-size:.95em;opacity:.95}
 .cell .sm{font-size:.74em;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto}
-.sec .nm{font-size:1.25em}.sec .mv{font-size:1.7em;margin-top:.15em;letter-spacing:-.5px}
+.sec .nm{font-size:1.25em;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.15}.sec.nar .mv{font-size:1em;margin:0}.grp>.gh .gn{min-width:0;overflow:hidden;text-overflow:ellipsis}.grp>.gh b{flex:none}.sec .mv{font-size:1.7em;margin-top:.15em;letter-spacing:-.5px}
 .grp{position:absolute;border-radius:8px;background:rgba(0,0,0,.18);overflow:hidden}
 .grp>.gh{position:absolute;left:0;right:0;top:0;height:1.55rem;padding:0 .5rem;display:flex;align-items:center;gap:.4rem;font-size:.74rem;font-weight:800;color:var(--ink2);cursor:pointer;white-space:nowrap;overflow:hidden}
 .grp>.gh:hover{color:#fff}
@@ -111,6 +111,8 @@ body{background:var(--sp);color:var(--ink);font-family:Manrope,system-ui,sans-se
 .legend span{font-size:.72rem;color:var(--mut);font-variant-numeric:tabular-nums}
 .legend .note{margin-left:auto}
 .mode{margin-left:0}
+@container (max-height:215px){.mv2 .mr:nth-of-type(5){display:none}}
+.mvsel{margin-top:.5rem;flex-wrap:wrap;gap:.4rem .6rem}.mvsel .seg{margin-left:0}.mvg{display:none;background:var(--sub);color:var(--ink2);border:0;border-radius:16px;font:700 .78rem Manrope;padding:.3rem .7rem;max-width:16rem;min-width:0}.mvg.on{display:block}.mvg option{background:#10181c;color:#dfe6e8}
 .mapwrap{flex:1;min-height:0;display:flex;gap:1rem;margin-top:.8rem}
 .mapwrap .map{margin-top:0}
 .hl{display:none;width:clamp(15rem,17vw,24rem);flex:none;flex-direction:column;min-height:0}
@@ -203,7 +205,7 @@ body.etf #per button:not([data-p=d]){display:none}
   <section class="tile watch" id="watch"><div class="wrow" id="wrow"></div></section>
 
   <section class="tile heat" id="heat"><div class="in">
-    <div class="th"><div class="seg mode" id="mode"><button data-m="sec" class="on">Sectors</button><button data-m="SPY">SPY</button><button data-m="QQQ">QQQ</button></div><div class="crumb" id="crumb"></div>
+    <div class="th"><div class="seg mode" id="mode"><button data-m="cats" class="on">Cats</button><button data-m="sec">GICS</button><button data-m="SPY">SPY</button><button data-m="QQQ">QQQ</button><button data-m="megacaps">Megacaps</button><button data-m="hyperscalers">Hyperscalers</button></div><div class="crumb" id="crumb"></div>
       <div class="seg" id="per"><button data-p="d" class="on">Today</button><button data-p="w">1W</button><button data-p="m">1M</button><button data-p="y">YTD</button></div>
       <button class="xp" data-x="heat" aria-label="Expand"><svg viewBox="0 0 16 16"><path class="o" d="M9 2h5v5M7 14H2V9M14 2 9.5 6.5M2 14l4.5-4.5"/><path class="c" d="M10 6h4M6 10H2M10 6V2M6 10v4"/></svg></button></div>
     <div class="mapwrap"><div class="map" id="map"></div><div class="hl" id="hl"></div></div>
@@ -218,7 +220,8 @@ body.etf #per button:not([data-p=d]){display:none}
   </div></section>
 
   <section class="tile movers" id="movers"><div class="in">
-    <div class="th"><div class="lbl">Biggest moves · companies over $100B</div><span class="note" style="margin-left:auto" id="mvn"></span></div>
+    <div class="th"><div class="lbl">Biggest moves</div><span class="note" style="margin-left:auto;white-space:nowrap" id="mvn"></span></div>
+    <div class="th mvsel"><div class="seg mode" id="mvmode"><button data-m="cats">Cats</button><button data-m="sec">GICS</button><button data-m="SPY" class="on">SPY</button><button data-m="QQQ">QQQ</button><button data-m="megacaps">Megacaps</button><button data-m="hyperscalers">Hyperscalers</button></div><select class="mvg" id="mvg" aria-label="Group"></select></div>
     <div class="mv2" id="mv2"></div>
   </div></section>
 </div>
