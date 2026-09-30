@@ -52,12 +52,20 @@ body{background:radial-gradient(ellipse at 40% -10%,#0e2a2e 0%,#0a1a20 45%,#0509
 .bar2{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
 .bar2 h1{font-size:.8rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);font-weight:800}
 .bar2 input{margin-left:auto;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;color:var(--ink);font:500 14px Manrope,system-ui,sans-serif;padding:8px 16px;width:min(22rem,100%);outline:0}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.grid a{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:14px;background:var(--card);border:1px solid var(--cardbd);color:var(--ink);text-decoration:none;transition:background .15s;font:500 14px Manrope,system-ui,sans-serif}
-.grid a:hover{background:rgba(255,255,255,.12)}
-.grid img{width:70px;height:35px;object-fit:contain;background:#f4f2ee;border-radius:8px;padding:4px 6px;flex:none}
-.grid b{display:block;font-weight:800;letter-spacing:.04em;font-size:13px}
-.grid span{display:block;color:var(--mut);font-size:13px;line-height:1.25}
+.cats{column-width:28rem;column-gap:var(--gap)}
+.cats>*{break-inside:avoid;margin-bottom:var(--gap)}
+.cat{padding:1.1rem 1.3rem 1.3rem}
+.cat h2{font:600 1.35rem Fraunces,Georgia,serif;color:#f3f0e8;padding-bottom:.5rem;border-bottom:1px solid var(--line);margin-bottom:.5rem}
+.cat h2 i{font-style:normal;color:var(--dust);margin-right:.5rem}
+.cat h3{font-size:.8rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);margin:1rem 0 .45rem}
+.cat h3 i{font-style:normal;color:var(--accx);margin-right:.4rem}
+.cos{display:flex;flex-wrap:wrap;gap:.35rem}
+.cos a{display:flex;align-items:center;gap:.5rem;padding:.25rem .6rem .25rem .3rem;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);text-decoration:none;font:500 .85rem Manrope,system-ui,sans-serif}
+.cos a:hover{background:rgba(255,255,255,.12)}
+.cos img{width:2.6rem;height:1.3rem;object-fit:contain;background:#f4f2ee;border-radius:5px;padding:.1rem .25rem;flex:none}
+.cos b{font-weight:800;letter-spacing:.04em;font-size:.8rem}
+.cos a span{color:var(--mut);max-width:11rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cos em{font-style:normal;font-weight:700;letter-spacing:.04em;font-size:.8rem;color:var(--mut);opacity:.7;padding:.25rem .4rem}
 </style>
 </head>
 <body>
@@ -68,23 +76,44 @@ body{background:radial-gradient(ellipse at 40% -10%,#0e2a2e 0%,#0a1a20 45%,#0509
   <div class="stat pad off" id="stat" hidden><i></i><span></span></div>
 </div>
 <div class="body">
-<div class="bar2"><h1 id="n">Companies</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies"></div>
-<div class="grid" id="g"></div>
+<div class="bar2"><h1>Cats and Subs</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies"></div>
+<div class="cats" id="g"></div>
 </div>
 <script src="/mowgli-site/config.js"></script>
 <script src="/mowgli-site/site.js"></script>
 <script>
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let all = [];
+let all = [], G = null;
+const sym = (t) => String(t || '').trim().toUpperCase().replace(/[./ ]/g, '-');
 function draw(q) {
   q = q.trim().toLowerCase();
-  const rows = all.filter((c) => !q || c.ticker.toLowerCase().includes(q) || c.name.toLowerCase().includes(q));
-  document.getElementById('g').innerHTML = rows.map((c) => `<a href="${MG.pageUrl(c.ticker)}">${c.logo ? `<img src="${esc(c.logo)}" alt="">` : ''}<div><b>${esc(c.ticker)}</b><span>${esc(c.name)}</span></div></a>`).join('');
+  const g = document.getElementById('g');
+  if (!G) { g.innerHTML = ''; return; }
+  const pages = new Map(all.map((c) => [sym(c.ticker), c]));
+  const hit = (t, c) => !q || t.toLowerCase().includes(q) || (c && c.name.toLowerCase().includes(q));
+  const link = (t) => { const c = pages.get(t); return c ? `<a href="${MG.pageUrl(c.ticker)}">${c.logo ? `<img src="${esc(c.logo)}" alt="">` : ''}<b>${esc(c.ticker)}</b><span>${esc(c.name)}</span></a>` : `<em>${esc(t)}</em>`; };
+  const inCat = {}; // catId -> subId ('' = none) -> tickers
+  for (const [t, v] of Object.entries(G.co)) {
+    if (v[4] || !v[0]) continue; // share classes fold into the parent
+    ((inCat[v[0]] ||= {})[v[1] || ''] ||= []).push(t);
+  }
+  const order = (a, b) => (pages.has(b) - pages.has(a)) || a.localeCompare(b);
+  const box = (ts) => { ts = ts.filter((t) => hit(t, pages.get(t))).sort(order); return ts.length ? `<div class="cos">${ts.map(link).join('')}</div>` : ''; };
+  let html = '';
+  G.cats.forEach((c, i) => {
+    const m = inCat[c.id] || {};
+    let body = box(m[''] || []);
+    c.subs.forEach((s, j) => { const x = box(m[s.id] || []); if (x) body += `<h3><i>${i + 1}.${j + 1}</i>${esc(s.name)}</h3>${x}`; });
+    if (body) html += `<section class="cat pad"><h2><i>${i + 1}</i>${esc(c.name)}</h2>${body}</section>`;
+  });
+  const loose = all.filter((c) => { const v = G.co[sym(c.ticker)]; return !(v && (v[4] ? G.co[v[4]]?.[0] : v[0])); }).map((c) => sym(c.ticker));
+  const lb = box(loose);
+  if (lb) html += `<section class="cat pad"><h2>Not yet placed</h2>${lb}</section>`;
+  g.innerHTML = html;
 }
 fetch(MG.companiesUrl()).then((r) => r.json()).then((list) => {
   all = list.sort((a, b) => a.name.localeCompare(b.name));
-  document.getElementById('n').textContent = `Companies · ${all.length}`;
-  draw('');
+  draw(document.getElementById('f').value);
   setupSwitcher();
 });
 document.getElementById('f').addEventListener('input', (e) => draw(e.target.value));
@@ -117,6 +146,7 @@ function setupSwitcher() {
   let p = null, stale = false;
   try { const u = MG.monitorUrl(); if (!u) throw 0; p = await fetch(u).then((r) => { if (!r.ok) throw 0; return r.json(); }); stale = !!p.stale; }
   catch { try { p = await fetch(MG.monitorBakedUrl()).then((r) => r.json()); stale = true; } catch { return; } }
+  if (p.groupings) { G = p.groupings; draw(document.getElementById('f').value); }
   const q = new Date(p.quoteTime || p.asOf);
   const et = q.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
   const d = q.toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', day: 'numeric', month: 'short' });
