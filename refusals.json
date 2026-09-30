@@ -1,6 +1,0 @@
-{"entries":[
-{"t":"2026-09-29T20:00:00.000Z","machine":"M","text":"Publish refused: x What to do: y"},
-{"t":"2026-09-29T20:00:00.000Z","machine":"M","text":"OVERRIDE (--force-stale) let a publish through despite: z"},
-{"t":"2026-09-29T20:00:00.000Z","machine":"M","text":"Publish refused: x What to do: y"},
-{"t":"2026-09-29T20:00:00.000Z","machine":"M","text":"OVERRIDE (--force-stale) let a publish through despite: z"}
-]}
