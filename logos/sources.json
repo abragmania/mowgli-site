@@ -6,25 +6,90 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "ABBV": {
+   "file": "ABBV.svg",
+   "source": "en.wikipedia.org infobox logo (AbbVie logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "ABNB": {
    "file": "ABNB.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28",
    "check": "verify it is the standard Airbnb mark"
   },
+  "ABT": {
+   "file": "ABT.svg",
+   "source": "en.wikipedia.org infobox logo (Abbott Laboratories 2025 logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ACGL": {
+   "file": "ACGL.svg",
+   "source": "en.wikipedia.org infobox logo (Arch Capital Group logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ACN": {
+   "file": "ACN.svg",
+   "source": "en.wikipedia.org infobox logo (Accenture.svg)",
+   "fetched": "2026-09-30"
+  },
   "ADBE": {
    "file": "ADBE.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "ADI": {
+   "file": "ADI.svg",
+   "source": "en.wikipedia.org infobox logo (Analog Devices Logo.svg)",
+   "fetched": "2026-09-30"
   },
   "ADM": {
    "file": "ADM.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-30"
   },
+  "ADP": {
+   "file": "ADP.svg",
+   "source": "en.wikipedia.org infobox logo (File:Automatic Data Processing (logo).svg)",
+   "fetched": "2026-09-30"
+  },
+  "ADSK": {
+   "file": "ADSK.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Autodesk Logo 2021.svg",
+   "fetched": "2026-09-30"
+  },
+  "AEP": {
+   "file": "AEP.svg",
+   "source": "en.wikipedia.org infobox logo (File:AEP-Logo-Red-Gray.svg)",
+   "fetched": "2026-09-30"
+  },
   "AFL": {
    "file": "AFL.svg",
    "source": "en.wikipedia.org infobox logo (Aflac.svg)",
+   "fetched": "2026-09-30"
+  },
+  "AIG": {
+   "file": "AIG.svg",
+   "source": "en.wikipedia.org infobox logo (AIG new logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "AJG": {
+   "file": "AJG.svg",
+   "source": "en.wikipedia.org infobox logo (Arthur J. Gallagher & Co. logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ALAB": {
+   "file": "ALAB.svg",
+   "source": "en.wikipedia.org infobox logo (Astera Labs Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ALL": {
+   "file": "ALL.svg",
+   "source": "en.wikipedia.org infobox logo (Allstate logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ALNY": {
+   "file": "ALNY.svg",
+   "source": "en.wikipedia.org infobox logo (Alnylam Pharmaceuticals logo.svg)",
    "fetched": "2026-09-30"
   },
   "AMAT": {
@@ -34,6 +99,16 @@
    "file": "AMD.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
+  },
+  "AMGN": {
+   "file": "AMGN.svg",
+   "source": "en.wikipedia.org infobox logo (Amgen.svg)",
+   "fetched": "2026-09-30"
+  },
+  "AMP": {
+   "file": "AMP.svg",
+   "source": "en.wikipedia.org infobox logo (Ameriprise Financial logo.svg)",
+   "fetched": "2026-09-30"
   },
   "AMT": {
    "file": "AMT.svg",
@@ -55,11 +130,36 @@
    "source": "en.wikipedia.org infobox logo (Aon Corporation logo.svg)",
    "fetched": "2026-09-30"
   },
+  "APH": {
+   "file": "APH.svg",
+   "source": "en.wikipedia.org infobox logo (Logo_Amphenol.svg)",
+   "fetched": "2026-09-30"
+  },
+  "APO": {
+   "file": "APO.svg",
+   "source": "en.wikipedia.org infobox logo (Apollo_Global_Management_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "APP": {
+   "file": "APP.png",
+   "source": "commons.wikimedia.org (5000x1124 px) - Wikipedia infobox logo file: AppLovin logo.png",
+   "fetched": "2026-09-30"
+  },
+  "APTV": {
+   "file": "APTV.svg",
+   "source": "en.wikipedia.org infobox logo (Aptiv logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "ARE": {
    "file": "ARE.png",
    "source": "en.wikipedia.org",
    "fetched": "2026-09-30",
    "note": "Alexandria Real Estate Equities logo.png (Wikipedia infobox, en-wiki file, 300x98 px)"
+  },
+  "ARES": {
+   "file": "ARES.svg",
+   "source": "en.wikipedia.org infobox logo (Ares_Management_logo.svg)",
+   "fetched": "2026-09-30"
   },
   "ARM": {
    "file": "ARM.svg"
@@ -74,6 +174,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
   },
+  "ATO": {
+   "file": "ATO.svg",
+   "source": "en.wikipedia.org infobox logo (Atmos_Energy_Logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "AVGO": {
    "file": "AVGO.svg",
    "source": "commons.wikimedia.org",
@@ -84,20 +189,60 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "AXON": {
+   "file": "AXON.svg",
+   "source": "en.wikipedia.org infobox logo (File:AXON Company logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "AXP": {
+   "file": "AXP.svg",
+   "source": "en.wikipedia.org infobox logo (American_Express_logo_(2018).svg)",
+   "fetched": "2026-09-30"
+  },
   "AYI": {
    "file": "AYI.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "BA": {
+   "file": "BA.svg",
+   "source": "en.wikipedia.org infobox logo (Boeing_full_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "BAC": {
+   "file": "BAC.svg",
+   "source": "en.wikipedia.org infobox logo (Bank_of_America_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "BALL": {
+   "file": "BALL.svg",
+   "source": "en.wikipedia.org infobox logo (Ball Corporation logo 2024.svg)",
+   "fetched": "2026-09-30"
   },
   "BKNG": {
    "file": "BKNG.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "BKR": {
+   "file": "BKR.svg",
+   "source": "en.wikipedia.org infobox logo (File:Baker Hughes logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "BLK": {
    "file": "BLK.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "BMY": {
+   "file": "BMY.svg",
+   "source": "en.wikipedia.org infobox logo (Bristol-Myers_Squibb_logo_(2020).svg)",
+   "fetched": "2026-09-30"
+  },
+  "BNY": {
+   "file": "BNY.svg",
+   "source": "en.wikipedia.org infobox logo (BNY logo 2024.svg)",
+   "fetched": "2026-09-30"
   },
   "BRK": {
    "file": "BRK.svg",
@@ -108,6 +253,16 @@
    "file": "BTI.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
+  },
+  "BX": {
+   "file": "BX.svg",
+   "source": "en.wikipedia.org infobox logo (The_Blackstone_Group_logo_(2).svg)",
+   "fetched": "2026-09-30"
+  },
+  "C": {
+   "file": "C.svg",
+   "source": "en.wikipedia.org infobox logo (Citi_logo_March_2023.svg)",
+   "fetched": "2026-09-30"
   },
   "CASY": {
    "file": "CASY.svg",
@@ -124,6 +279,26 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CB": {
+   "file": "CB.png",
+   "source": "chubb.com home page header logo (chubb-logo-black.png, 550 px wide); the Wikipedia infobox file Chubb-Limited-logo.svg carries an editor note that it is not the version on the company homepage",
+   "fetched": "2026-09-30"
+  },
+  "CBOE": {
+   "file": "CBOE.svg",
+   "source": "en.wikipedia.org infobox logo (Cboe_Global_Markets_Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CBRE": {
+   "file": "CBRE.svg",
+   "source": "en.wikipedia.org infobox logo (CBRE_Group.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "CCEP": {
+   "file": "CCEP.png",
+   "source": "en.wikipedia.org infobox logo (Coca-Cola Europacific Partners (LOGO).png; Commons file, 300+ px)",
+   "fetched": "2026-09-30"
+  },
   "CCJ": {
    "file": "CCJ.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -131,6 +306,11 @@
   },
   "CCL": {
    "file": "CCL.png"
+  },
+  "CDNS": {
+   "file": "CDNS.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Cadence-Logo.svg",
+   "fetched": "2026-09-30"
   },
   "CEG": {
    "file": "CEG.png",
@@ -142,10 +322,35 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CFG": {
+   "file": "CFG.svg",
+   "source": "en.wikipedia.org infobox logo (Citizens Financial Group logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CHRW": {
+   "file": "CHRW.svg",
+   "source": "en.wikipedia.org infobox logo (C. H. Robinson logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "CHTR": {
    "file": "CHTR.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
+  },
+  "CINF": {
+   "file": "CINF.svg",
+   "source": "en.wikipedia.org infobox logo (Cincinnati_Financial_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CL": {
+   "file": "CL.svg",
+   "source": "en.wikipedia.org infobox logo (Colgate-Palmolive (2025).svg)",
+   "fetched": "2026-09-30"
+  },
+  "CLX": {
+   "file": "CLX.svg",
+   "source": "en.wikipedia.org infobox logo (The Clorox Company logo, 2021.svg)",
+   "fetched": "2026-09-30"
   },
   "CMCSA": {
    "file": "CMCSA.svg",
@@ -157,16 +362,31 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "COF": {
+   "file": "COF.svg",
+   "source": "en.wikipedia.org infobox logo (Capital One logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "COIN": {
    "file": "COIN.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-30",
    "note": "Coinbase.svg (Wikipedia infobox)"
   },
+  "COP": {
+   "file": "COP.svg",
+   "source": "en.wikipedia.org infobox logo (ConocoPhillips_Company_logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "COST": {
    "file": "COST.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "CPRT": {
+   "file": "CPRT.svg",
+   "source": "en.wikipedia.org infobox logo (File:Copart logo.svg)",
+   "fetched": "2026-09-30"
   },
   "CRM": {
    "file": "CRM.svg",
@@ -178,6 +398,21 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CRWV": {
+   "file": "CRWV.svg",
+   "source": "en.wikipedia.org infobox logo (CoreWeave logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CSCO": {
+   "file": "CSCO.svg",
+   "source": "en.wikipedia.org infobox logo (Cisco logo blue 2016.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CSX": {
+   "file": "CSX.svg",
+   "source": "en.wikipedia.org infobox logo (File:CSX_transp_logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "CTAS": {
    "file": "CTAS.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -188,6 +423,16 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "CVS": {
+   "file": "CVS.svg",
+   "source": "en.wikipedia.org infobox logo (CVS_Health_Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CVX": {
+   "file": "CVX.svg",
+   "source": "en.wikipedia.org infobox logo (Chevron_Logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "CZR": {
    "file": "CZR.svg"
   },
@@ -196,14 +441,44 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-30"
   },
+  "DASH": {
+   "file": "DASH.svg",
+   "source": "en.wikipedia.org infobox logo (DoorDash Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "DDOG": {
+   "file": "DDOG.svg",
+   "source": "en.wikipedia.org infobox logo (enwiki file) - Wikipedia infobox logo file: Datadog logo.svg",
+   "fetched": "2026-09-30"
+  },
   "DE": {
    "file": "DE.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "DELL": {
+   "file": "DELL.svg",
+   "source": "en.wikipedia.org infobox logo (Dell_Technologies_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "DG": {
+   "file": "DG.svg",
+   "source": "en.wikipedia.org infobox logo (Dollar General logo.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "DGX": {
+   "file": "DGX.png",
+   "source": "en.wikipedia.org infobox logo (Quest Diagnostics logo 2015.png), 562x177 px",
+   "fetched": "2026-09-30"
+  },
   "DHI": {
    "file": "DHI.svg",
    "source": "commons.wikimedia.org",
+   "fetched": "2026-09-30"
+  },
+  "DHR": {
+   "file": "DHR.svg",
+   "source": "en.wikipedia.org infobox logo (Danaher_logo_since_2023.svg)",
    "fetched": "2026-09-30"
   },
   "DIS": {
@@ -214,19 +489,49 @@
   "DKNG": {
    "file": "DKNG.svg"
   },
+  "DOW": {
+   "file": "DOW.svg",
+   "source": "en.wikipedia.org infobox logo (Dow Chemical Company logo.svg; Dow Inc. redirects to that article)",
+   "fetched": "2026-09-30"
+  },
+  "DUK": {
+   "file": "DUK.svg",
+   "source": "en.wikipedia.org infobox logo (Duke Energy logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "DUOL": {
    "file": "DUOL.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "DVA": {
+   "file": "DVA.png",
+   "source": "en.wikipedia.org infobox logo (DaVita Inc logo.png, 270x144 PNG, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "DXCM": {
+   "file": "DXCM.svg",
+   "source": "en.wikipedia.org infobox logo (Dexcom logo.svg; includes the tagline CONTINUOUS GLUCOSE MONITORING)",
+   "fetched": "2026-09-30"
   },
   "ECHO": {
    "file": "ECHO.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
   },
+  "ECL": {
+   "file": "ECL.svg",
+   "source": "en.wikipedia.org infobox logo (Ecolab.svg)",
+   "fetched": "2026-09-30"
+  },
   "EG": {
    "file": "EG.svg",
    "source": "en.wikipedia.org infobox logo (Everest Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "EME": {
+   "file": "EME.svg",
+   "source": "en.wikipedia.org infobox logo (Emcor logo.svg)",
    "fetched": "2026-09-30"
   },
   "EOG": {
@@ -254,6 +559,16 @@
    "source": "en.wikipedia.org infobox logo of Erie Insurance Group (Erie Insurance Group logo.svg); the Erie Insurance mark is the brand Erie Indemnity operates under",
    "fetched": "2026-09-30"
   },
+  "ETN": {
+   "file": "ETN.svg",
+   "source": "en.wikipedia.org infobox logo (Eaton_Corporation_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "EXC": {
+   "file": "EXC.svg",
+   "source": "en.wikipedia.org infobox logo (File:Exelon Logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "EXPE": {
    "file": "EXPE.svg",
    "source": "commons.wikimedia.org",
@@ -262,10 +577,25 @@
   "FANDUEL": {
    "file": "FANDUEL.svg"
   },
+  "FANG": {
+   "file": "FANG.svg",
+   "source": "en.wikipedia.org infobox logo (File:Diamondback Energy, Logo 2022.svg)",
+   "fetched": "2026-09-30"
+  },
+  "FAST": {
+   "file": "FAST.svg",
+   "source": "en.wikipedia.org infobox logo (File:Fastenal logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "FCX": {
    "file": "FCX.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "FER": {
+   "file": "FER.svg",
+   "source": "en.wikipedia.org infobox logo (File:Ferrovial Logo.svg)",
+   "fetched": "2026-09-30"
   },
   "FICO": {
    "file": "FICO.svg",
@@ -278,16 +608,56 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "FIX": {
+   "file": "FIX.svg",
+   "source": "en.wikipedia.org infobox logo (Comfort Systems USA logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "FLUT": {
    "file": "FLUT.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28",
    "check": "verify current Flutter mark"
   },
+  "FTNT": {
+   "file": "FTNT.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Fortinet logo.svg",
+   "fetched": "2026-09-30"
+  },
   "GE": {
    "file": "GE.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "GEHC": {
+   "file": "GEHC.svg",
+   "source": "en.wikipedia.org infobox logo (GE HealthCare logo 2023.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GEV": {
+   "file": "GEV.svg",
+   "source": "en.wikipedia.org infobox logo (GE_Vernova_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GILD": {
+   "file": "GILD.svg",
+   "source": "en.wikipedia.org infobox logo (Gilead Sciences Logo.svg, non-free logo file)",
+   "fetched": "2026-09-30"
+  },
+  "GIS": {
+   "file": "GIS.svg",
+   "source": "en.wikipedia.org infobox logo (General Mills logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GLW": {
+   "file": "GLW.svg",
+   "source": "en.wikipedia.org infobox logo (File:Corning Incorporated Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GM": {
+   "file": "GM.svg",
+   "source": "en.wikipedia.org infobox logo (General Motors (logo with wordmark, horizontal).svg)",
+   "fetched": "2026-09-30"
   },
   "GOOGL": {
    "file": "GOOGL.svg",
@@ -299,8 +669,18 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "GS": {
+   "file": "GS.svg",
+   "source": "en.wikipedia.org infobox logo (Goldman Sachs logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "H": {
    "file": "H.svg"
+  },
+  "HBAN": {
+   "file": "HBAN.svg",
+   "source": "en.wikipedia.org infobox logo (Huntington Bancshares Inc. logo.svg)",
+   "fetched": "2026-09-30"
   },
   "HCA": {
    "file": "HCA.svg",
@@ -312,6 +692,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "HIG": {
+   "file": "HIG.svg",
+   "source": "en.wikipedia.org infobox logo (The Hartford Financial Services Group logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "HIMS": {
    "file": "HIMS.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -322,10 +707,50 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "HON": {
+   "file": "HON.svg",
+   "source": "en.wikipedia.org infobox logo (File:Honeywell logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "HOOD": {
+   "file": "HOOD.png",
+   "source": "en.wikipedia.org infobox logo (File:Robinhood Markets logo.png, 3259 px wide)",
+   "fetched": "2026-09-30"
+  },
+  "HST": {
+   "file": "HST.svg",
+   "source": "commons.wikimedia.org (Logo Host Hotels & Resorts.svg); no logo in the Wikipedia infobox",
+   "fetched": "2026-09-30"
+  },
+  "HSY": {
+   "file": "HSY.svg",
+   "source": "en.wikipedia.org infobox logo (HersheyCo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "IBKR": {
+   "file": "IBKR.svg",
+   "source": "en.wikipedia.org infobox logo (Interactive Brokers Logo (2014).svg)",
+   "fetched": "2026-09-30"
+  },
+  "IBM": {
+   "file": "IBM.svg",
+   "source": "en.wikipedia.org infobox logo (IBM_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ICE": {
+   "file": "ICE.svg",
+   "source": "en.wikipedia.org infobox logo (Intercontinental_Exchange_logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "IDCC": {
    "file": "IDCC.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
+  },
+  "IDXX": {
+   "file": "IDXX.svg",
+   "source": "en.wikipedia.org infobox logo (IDEXX Labs.svg)",
+   "fetched": "2026-09-30"
   },
   "IHG": {
    "file": "IHG.svg",
@@ -337,10 +762,30 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "INTU": {
+   "file": "INTU.png",
+   "source": "commons.wikimedia.org (1920x408 px) - Wikipedia infobox logo file: Intuit-logo-super-blue (1).png",
+   "fetched": "2026-09-30"
+  },
+  "INVH": {
+   "file": "INVH.svg",
+   "source": "en.wikipedia.org infobox logo (Invitation Homes logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "IONQ": {
    "file": "IONQ.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "IP": {
+   "file": "IP.svg",
+   "source": "en.wikipedia.org infobox logo (InternationalPaper logo 2023.svg)",
+   "fetched": "2026-09-30"
+  },
+  "IQV": {
+   "file": "IQV.svg",
+   "source": "en.wikipedia.org infobox logo (IQVIA.svg)",
+   "fetched": "2026-09-30"
   },
   "IRM": {
    "file": "IRM.svg",
@@ -353,10 +798,30 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "J": {
+   "file": "J.svg",
+   "source": "en.wikipedia.org infobox logo (Jacobs Engineering Group 2019 logo.svg; current Jacobs wordmark)",
+   "fetched": "2026-09-30"
+  },
+  "JBL": {
+   "file": "JBL.png",
+   "source": "en.wikipedia.org infobox logo (Jabil logo (2023).png, 390x71 px)",
+   "fetched": "2026-09-30"
+  },
+  "JNJ": {
+   "file": "JNJ.svg",
+   "source": "en.wikipedia.org infobox logo (JNJ_Logo_New.svg)",
+   "fetched": "2026-09-30"
+  },
   "JPM": {
    "file": "JPM.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "KDP": {
+   "file": "KDP.svg",
+   "source": "en.wikipedia.org infobox logo (Keurig Dr Pepper.svg)",
+   "fetched": "2026-09-30"
   },
   "KKR": {
    "file": "KKR.svg",
@@ -378,6 +843,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "KR": {
+   "file": "KR.svg",
+   "source": "en.wikipedia.org infobox logo (Kroger (2021) logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "KSPI": {
    "file": "KSPI.svg",
    "source": "commons.wikimedia.org (File:Kaspi.kz logo.svg; Wikipedia infobox logo field empty)",
@@ -389,10 +859,20 @@
    "fetched": "2026-09-29",
    "check": "only 169px wide (site publishes nothing larger)"
   },
+  "LH": {
+   "file": "LH.svg",
+   "source": "en.wikipedia.org infobox logo (Labcorp Logo updated 12-2020.svg)",
+   "fetched": "2026-09-30"
+  },
   "LIN": {
    "file": "LIN.png",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "LITE": {
+   "file": "LITE.svg",
+   "source": "commons.wikimedia.org (Lumentum logo dark 2015.svg; same artwork and size as the logo in lumentum.com header; en.wikipedia infobox has no logo)",
+   "fetched": "2026-09-30"
   },
   "LLY": {
    "file": "LLY.svg",
@@ -415,6 +895,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "LOW": {
+   "file": "LOW.svg",
+   "source": "en.wikipedia.org infobox logo (File:Lowes Companies Logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "LRCX": {
    "file": "LRCX.svg",
    "source": "commons.wikimedia.org",
@@ -428,6 +913,11 @@
    "source": "en.wikipedia.org (infobox)",
    "fetched": "2026-09-30"
   },
+  "MA": {
+   "file": "MA.svg",
+   "source": "en.wikipedia.org infobox logo (Mastercard_2019_logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "MAR": {
    "file": "MAR.svg"
   },
@@ -436,15 +926,40 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "MCHP": {
+   "file": "MCHP.svg",
+   "source": "en.wikipedia.org infobox logo (Microchip logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "MCK": {
    "file": "MCK.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "MCO": {
+   "file": "MCO.png",
+   "source": "en.wikipedia.org infobox logo (Moody's_new_logo.png (1198x198 px))",
+   "fetched": "2026-09-30"
+  },
   "MDB": {
    "file": "MDB.png",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "MDLZ": {
+   "file": "MDLZ.svg",
+   "source": "commons.wikimedia.org (Mondelez International.svg); the Wikipedia infobox logo field is currently commented out, so the Commons wordmark was used",
+   "fetched": "2026-09-30"
+  },
+  "MDT": {
+   "file": "MDT.svg",
+   "source": "en.wikipedia.org infobox logo (File:Medtronic logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "MELI": {
+   "file": "MELI.svg",
+   "source": "en.wikipedia.org infobox logo (Mercado Libre logo (Spanish version).svg)",
+   "fetched": "2026-09-30"
   },
   "MET": {
    "file": "MET.svg",
@@ -459,6 +974,11 @@
   "MGM": {
    "file": "MGM.svg"
   },
+  "MNST": {
+   "file": "MNST.png",
+   "source": "en.wikipedia.org infobox logo (Monster Beverage logo.png, 289x76 px)",
+   "fetched": "2026-09-30"
+  },
   "MO": {
    "file": "MO.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -469,9 +989,39 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "MPC": {
+   "file": "MPC.svg",
+   "source": "en.wikipedia.org infobox logo (File:Marathon Petroleum logo 2022.svg)",
+   "fetched": "2026-09-30"
+  },
+  "MPWR": {
+   "file": "MPWR.svg",
+   "source": "en.wikipedia.org infobox logo (Monolithic Power Systems Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "MRK": {
+   "file": "MRK.svg",
+   "source": "en.wikipedia.org infobox logo (Merck Logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "MRSH": {
    "file": "MRSH.svg",
    "source": "en.wikipedia.org infobox logo (commons file Marsh h rgb c.svg; Marsh brand since Jan 14 2026)",
+   "fetched": "2026-09-30"
+  },
+  "MRVL": {
+   "file": "MRVL.svg",
+   "source": "en.wikipedia.org infobox logo (Marvell Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "MS": {
+   "file": "MS.svg",
+   "source": "en.wikipedia.org infobox logo (Morgan_Stanley_Logo_2024.svg)",
+   "fetched": "2026-09-30"
+  },
+  "MSCI": {
+   "file": "MSCI.svg",
+   "source": "en.wikipedia.org infobox logo (MSCI_logo_2019.svg)",
    "fetched": "2026-09-30"
   },
   "MSFT": {
@@ -479,13 +1029,43 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "MSTR": {
+   "file": "MSTR.svg",
+   "source": "en.wikipedia.org infobox logo (Strategy logo (2025).svg)",
+   "fetched": "2026-09-30"
+  },
+  "MTB": {
+   "file": "MTB.svg",
+   "source": "en.wikipedia.org infobox logo (M&T Bank wordmark.svg)",
+   "fetched": "2026-09-30"
+  },
+  "MU": {
+   "file": "MU.svg",
+   "source": "en.wikipedia.org infobox logo (Micron Technology logo 2024.svg)",
+   "fetched": "2026-09-30"
+  },
+  "NBIS": {
+   "file": "NBIS.svg",
+   "source": "en.wikipedia.org infobox logo (Nebius logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "NCLH": {
    "file": "NCLH.svg"
+  },
+  "NDAQ": {
+   "file": "NDAQ.svg",
+   "source": "en.wikipedia.org infobox logo (NASDAQ_Logo.svg)",
+   "fetched": "2026-09-30"
   },
   "NEE": {
    "file": "NEE.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "NEM": {
+   "file": "NEM.svg",
+   "source": "en.wikipedia.org infobox logo (Newmont Corporation - Logo.svg)",
+   "fetched": "2026-09-30"
   },
   "NFLX": {
    "file": "NFLX.svg",
@@ -507,6 +1087,11 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "NTRS": {
+   "file": "NTRS.svg",
+   "source": "en.wikipedia.org infobox logo (Northern_Trust_Corp._logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "NUE": {
    "file": "NUE.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -522,10 +1107,20 @@
    "source": "en.wikipedia.org (non-free logo, infobox)",
    "fetched": "2026-09-30"
   },
+  "NXPI": {
+   "file": "NXPI.svg",
+   "source": "en.wikipedia.org infobox logo (NXP Semiconductors logo 2023.svg)",
+   "fetched": "2026-09-30"
+  },
   "O": {
    "file": "O.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "ODFL": {
+   "file": "ODFL.png",
+   "source": "en.wikipedia.org infobox logo (File:Old Dominion Freight Line, Inc. Logo.png)",
+   "fetched": "2026-09-30"
   },
   "OKLO": {
    "file": "OKLO.png",
@@ -543,10 +1138,45 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "ORLY": {
+   "file": "ORLY.svg",
+   "source": "en.wikipedia.org infobox logo (File:O'Reilly Auto Parts Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PANW": {
+   "file": "PANW.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: PaloAltoNetworks 2020 Logo.svg",
+   "fetched": "2026-09-30"
+  },
+  "PAYX": {
+   "file": "PAYX.svg",
+   "source": "en.wikipedia.org infobox logo (File:Paychex logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PCAR": {
+   "file": "PCAR.svg",
+   "source": "en.wikipedia.org infobox logo (File:Paccar Inc logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PDD": {
+   "file": "PDD.svg",
+   "source": "en.wikipedia.org infobox logo (Pinduoduo logo.svg); Wikipedia logo is the Pinduoduo mark, PDD Holdings parent has no separate Wikipedia logo",
+   "fetched": "2026-09-30"
+  },
   "PENN": {
    "file": "PENN.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
+  },
+  "PEP": {
+   "file": "PEP.svg",
+   "source": "en.wikipedia.org infobox logo (PEP BIG.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PFE": {
+   "file": "PFE.svg",
+   "source": "en.wikipedia.org infobox logo (Pfizer_(2021).svg)",
+   "fetched": "2026-09-30"
   },
   "PG": {
    "file": "PG.svg",
@@ -557,6 +1187,11 @@
    "file": "PGR.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "PH": {
+   "file": "PH.svg",
+   "source": "en.wikipedia.org infobox logo (File:Parker Hannifin.svg)",
+   "fetched": "2026-09-30"
   },
   "PLD": {
    "file": "PLD.svg",
@@ -573,15 +1208,35 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
   },
+  "PNC": {
+   "file": "PNC.svg",
+   "source": "en.wikipedia.org infobox logo (PNClogo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PRU": {
+   "file": "PRU.svg",
+   "source": "en.wikipedia.org infobox logo (Prudential Financial.svg)",
+   "fetched": "2026-09-30"
+  },
   "PSA": {
    "file": "PSA.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-30",
    "note": "Public Storage Logo.svg (Wikipedia infobox)"
   },
+  "PSX": {
+   "file": "PSX.svg",
+   "source": "en.wikipedia.org infobox logo (File:Phillips 66 logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "PWR": {
    "file": "PWR.png",
    "source": "en.wikipedia.org (non-free logo, infobox)",
+   "fetched": "2026-09-30"
+  },
+  "PYPL": {
+   "file": "PYPL.svg",
+   "source": "en.wikipedia.org infobox logo (PayPal 2024.svg)",
    "fetched": "2026-09-30"
   },
   "QCOM": {
@@ -594,6 +1249,21 @@
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
   },
+  "REGN": {
+   "file": "REGN.svg",
+   "source": "en.wikipedia.org infobox logo (Regeneron logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "RF": {
+   "file": "RF.svg",
+   "source": "en.wikipedia.org infobox logo (Regions Financial Corp logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "RJF": {
+   "file": "RJF.svg",
+   "source": "en.wikipedia.org infobox logo (Raymond James wordmark.svg)",
+   "fetched": "2026-09-30"
+  },
   "RKLB": {
    "file": "RKLB.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -603,6 +1273,16 @@
    "file": "ROP.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "ROST": {
+   "file": "ROST.svg",
+   "source": "en.wikipedia.org infobox logo (File:Ross Stores logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "RTX": {
+   "file": "RTX.svg",
+   "source": "en.wikipedia.org infobox logo (RTX_Raytheon_Technologies_logo.svg)",
+   "fetched": "2026-09-30"
   },
   "SBUX": {
    "file": "SBUX.svg",
@@ -614,6 +1294,16 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "SHOP": {
+   "file": "SHOP.svg",
+   "source": "en.wikipedia.org infobox logo (Shopify logo 2018.svg)",
+   "fetched": "2026-09-30"
+  },
+  "SHW": {
+   "file": "SHW.svg",
+   "source": "en.wikipedia.org infobox logo (Sherwin Williams.svg)",
+   "fetched": "2026-09-30"
+  },
   "SLB": {
    "file": "SLB.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -624,10 +1314,30 @@
    "source": "nuscalepower.com (horizontal blue logo with tagline, 622x206)",
    "fetched": "2026-09-29"
   },
+  "SNDK": {
+   "file": "SNDK.svg",
+   "source": "en.wikipedia.org infobox logo (SanDisk 2024 logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "SNPS": {
+   "file": "SNPS.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Synopsys Logo.svg",
+   "fetched": "2026-09-30"
+  },
+  "SO": {
+   "file": "SO.svg",
+   "source": "en.wikipedia.org infobox logo (Southern Company logo new.svg)",
+   "fetched": "2026-09-30"
+  },
   "SPCX": {
    "file": "SPCX.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "SPG": {
+   "file": "SPG.svg",
+   "source": "en.wikipedia.org infobox logo (Simon Property Group Logo 2014.svg)",
+   "fetched": "2026-09-30"
   },
   "SPGI": {
    "file": "SPGI.svg",
@@ -642,6 +1352,31 @@
   "SSNLF": {
    "file": "SSNLF.svg"
   },
+  "STT": {
+   "file": "STT.svg",
+   "source": "en.wikipedia.org infobox logo (State-street-logo-final.svg)",
+   "fetched": "2026-09-30"
+  },
+  "STX": {
+   "file": "STX.svg",
+   "source": "en.wikipedia.org infobox logo (Seagate logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "STZ": {
+   "file": "STZ.png",
+   "source": "cbrands.com site header PNG (380x50, logo-cbrands-black); Wikipedia's infobox file Constellation Brands Logo.png (300x60, 2012) is the same mark",
+   "fetched": "2026-09-30"
+  },
+  "SYF": {
+   "file": "SYF.svg",
+   "source": "en.wikipedia.org infobox logo (Synchrony Financial logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "SYK": {
+   "file": "SYK.svg",
+   "source": "en.wikipedia.org infobox logo (Stryker logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "T": {
    "file": "T.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -651,6 +1386,21 @@
    "file": "TDG.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "TER": {
+   "file": "TER.svg",
+   "source": "en.wikipedia.org infobox logo (Teradyne logo 2014.svg)",
+   "fetched": "2026-09-30"
+  },
+  "TFC": {
+   "file": "TFC.svg",
+   "source": "en.wikipedia.org infobox logo (Truist Financial logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "TJX": {
+   "file": "TJX.svg",
+   "source": "en.wikipedia.org infobox logo (TJX Logo.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
   },
   "TKO": {
    "file": "TKO.svg",
@@ -683,6 +1433,16 @@
    "source": "texaspacific.com site header logo PNG (536x148); Wikipedia has no infobox logo for TPL",
    "fetched": "2026-09-30"
   },
+  "TRI": {
+   "file": "TRI.svg",
+   "source": "en.wikipedia.org infobox logo (File:TR Logo 2024.svg)",
+   "fetched": "2026-09-30"
+  },
+  "TRV": {
+   "file": "TRV.svg",
+   "source": "en.wikipedia.org infobox logo (The Travelers Companies.svg)",
+   "fetched": "2026-09-30"
+  },
   "TSLA": {
    "file": "TSLA.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -692,6 +1452,26 @@
    "file": "TSM.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-28"
+  },
+  "TSN": {
+   "file": "TSN.svg",
+   "source": "en.wikipedia.org infobox logo (Tyson Foods corporate logo (2024).svg)",
+   "fetched": "2026-09-30"
+  },
+  "TT": {
+   "file": "TT.svg",
+   "source": "en.wikipedia.org infobox logo (File:TraneTechnologieslogo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "TTWO": {
+   "file": "TTWO.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Take-Two Interactive Logo.svg",
+   "fetched": "2026-09-30"
+  },
+  "TXN": {
+   "file": "TXN.svg",
+   "source": "en.wikipedia.org infobox logo (Texas Instruments logo 2024.svg)",
+   "fetched": "2026-09-30"
   },
   "UBER": {
    "file": "UBER.svg",
@@ -717,6 +1497,11 @@
    "file": "URI.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
+  },
+  "USB": {
+   "file": "USB.svg",
+   "source": "en.wikipedia.org infobox logo (US Bancorp logo 2023 color.svg)",
+   "fetched": "2026-09-30"
   },
   "V": {
    "file": "V.svg",
@@ -751,6 +1536,11 @@
    "fetched": "2026-09-30",
    "note": "Verisign logo.svg (Wikipedia infobox)"
   },
+  "VRT": {
+   "file": "VRT.svg",
+   "source": "en.wikipedia.org infobox logo (File:Vertiv logo.svg)",
+   "fetched": "2026-09-30"
+  },
   "VRTX": {
    "file": "VRTX.svg",
    "source": "en.wikipedia.org infobox logo",
@@ -761,16 +1551,41 @@
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-29"
   },
+  "VTRS": {
+   "file": "VTRS.svg",
+   "source": "en.wikipedia.org infobox logo (Viatris.svg, hosted on commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
   "VZ": {
    "file": "VZ.svg",
    "source": "en.wikipedia.org infobox logo",
    "fetched": "2026-09-28"
+  },
+  "WBD": {
+   "file": "WBD.svg",
+   "source": "en.wikipedia.org infobox logo (File:Warner Bros. Discovery.svg)",
+   "fetched": "2026-09-30"
+  },
+  "WDAY": {
+   "file": "WDAY.svg",
+   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Workday logo.svg",
+   "fetched": "2026-09-30"
+  },
+  "WDC": {
+   "file": "WDC.svg",
+   "source": "en.wikipedia.org infobox logo (WD Logo.svg)",
+   "fetched": "2026-09-30"
   },
   "WELL": {
    "file": "WELL.svg",
    "source": "commons.wikimedia.org",
    "fetched": "2026-09-30",
    "note": "Welltower Logo 2025.svg (Commons search; used in Wikipedia article)"
+  },
+  "WFC": {
+   "file": "WFC.svg",
+   "source": "en.wikipedia.org infobox logo (Wells_Fargo_Logo_(2020).svg)",
+   "fetched": "2026-09-30"
   },
   "WH": {
    "file": "WH.svg",
@@ -789,6 +1604,11 @@
    "fetched": "2026-09-29",
    "check": "spark mark only, no wordmark"
   },
+  "WTW": {
+   "file": "WTW.png",
+   "source": "commons.wikimedia.org (File:Logo WTW.png, 1920x1080 current lowercase purple mark; the en.wikipedia infobox PNG is only 146x67)",
+   "fetched": "2026-09-30"
+  },
   "WY": {
    "file": "WY.svg",
    "source": "en.wikipedia.org infobox logo (Weyerhaeuser.svg)",
@@ -800,689 +1620,19 @@
    "fetched": "2026-09-28",
    "check": "Wynn Las Vegas property logo, not the Wynn Resorts corporate mark; replace when found"
   },
-  "XOM": {
-   "file": "XOM.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-29"
-  },
-  "MRK": {
-   "file": "MRK.svg",
-   "source": "en.wikipedia.org infobox logo (Merck Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ABBV": {
-   "file": "ABBV.svg",
-   "source": "en.wikipedia.org infobox logo (AbbVie logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ABT": {
-   "file": "ABT.svg",
-   "source": "en.wikipedia.org infobox logo (Abbott Laboratories 2025 logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "SYK": {
-   "file": "SYK.svg",
-   "source": "en.wikipedia.org infobox logo (Stryker logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "DGX": {
-   "file": "DGX.png",
-   "source": "en.wikipedia.org infobox logo (Quest Diagnostics logo 2015.png), 562x177 px",
-   "fetched": "2026-09-30"
-  },
-  "LH": {
-   "file": "LH.svg",
-   "source": "en.wikipedia.org infobox logo (Labcorp Logo updated 12-2020.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ZTS": {
-   "file": "ZTS.svg",
-   "source": "en.wikipedia.org infobox logo (Zoetis logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CVS": {
-   "file": "CVS.svg",
-   "source": "en.wikipedia.org infobox logo (CVS_Health_Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "KR": {
-   "file": "KR.svg",
-   "source": "en.wikipedia.org infobox logo (Kroger (2021) logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GIS": {
-   "file": "GIS.svg",
-   "source": "en.wikipedia.org infobox logo (General Mills logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "HSY": {
-   "file": "HSY.svg",
-   "source": "en.wikipedia.org infobox logo (HersheyCo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "STZ": {
-   "file": "STZ.png",
-   "source": "cbrands.com site header PNG (380x50, logo-cbrands-black); Wikipedia's infobox file Constellation Brands Logo.png (300x60, 2012) is the same mark",
-   "fetched": "2026-09-30"
-  },
-  "CL": {
-   "file": "CL.svg",
-   "source": "en.wikipedia.org infobox logo (Colgate-Palmolive (2025).svg)",
-   "fetched": "2026-09-30"
-  },
-  "CLX": {
-   "file": "CLX.svg",
-   "source": "en.wikipedia.org infobox logo (The Clorox Company logo, 2021.svg)",
-   "fetched": "2026-09-30"
-  },
-  "SHW": {
-   "file": "SHW.svg",
-   "source": "en.wikipedia.org infobox logo (Sherwin Williams.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ECL": {
-   "file": "ECL.svg",
-   "source": "en.wikipedia.org infobox logo (Ecolab.svg)",
-   "fetched": "2026-09-30"
-  },
-  "DOW": {
-   "file": "DOW.svg",
-   "source": "en.wikipedia.org infobox logo (Dow Chemical Company logo.svg; Dow Inc. redirects to that article)",
-   "fetched": "2026-09-30"
-  },
-  "BALL": {
-   "file": "BALL.svg",
-   "source": "en.wikipedia.org infobox logo (Ball Corporation logo 2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "IP": {
-   "file": "IP.svg",
-   "source": "en.wikipedia.org infobox logo (InternationalPaper logo 2023.svg)",
-   "fetched": "2026-09-30"
-  },
-  "NEM": {
-   "file": "NEM.svg",
-   "source": "en.wikipedia.org infobox logo (Newmont Corporation - Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "DUK": {
-   "file": "DUK.svg",
-   "source": "en.wikipedia.org infobox logo (Duke Energy logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "SO": {
-   "file": "SO.svg",
-   "source": "en.wikipedia.org infobox logo (Southern Company logo new.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ATO": {
-   "file": "ATO.svg",
-   "source": "en.wikipedia.org infobox logo (Atmos_Energy_Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "J": {
-   "file": "J.svg",
-   "source": "en.wikipedia.org infobox logo (Jacobs Engineering Group 2019 logo.svg; current Jacobs wordmark)",
-   "fetched": "2026-09-30"
-  },
-  "EME": {
-   "file": "EME.svg",
-   "source": "en.wikipedia.org infobox logo (Emcor logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "FIX": {
-   "file": "FIX.svg",
-   "source": "en.wikipedia.org infobox logo (Comfort Systems USA logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ACN": {
-   "file": "ACN.svg",
-   "source": "en.wikipedia.org infobox logo (Accenture.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CHRW": {
-   "file": "CHRW.svg",
-   "source": "en.wikipedia.org infobox logo (C. H. Robinson logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "JBL": {
-   "file": "JBL.png",
-   "source": "en.wikipedia.org infobox logo (Jabil logo (2023).png, 390x71 px)",
-   "fetched": "2026-09-30"
-  },
-  "APTV": {
-   "file": "APTV.svg",
-   "source": "en.wikipedia.org infobox logo (Aptiv logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GM": {
-   "file": "GM.svg",
-   "source": "en.wikipedia.org infobox logo (General Motors (logo with wordmark, horizontal).svg)",
-   "fetched": "2026-09-30"
-  },
-  "TSN": {
-   "file": "TSN.svg",
-   "source": "en.wikipedia.org infobox logo (Tyson Foods corporate logo (2024).svg)",
-   "fetched": "2026-09-30"
-  },
-  "INVH": {
-   "file": "INVH.svg",
-   "source": "en.wikipedia.org infobox logo (Invitation Homes logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "HST": {
-   "file": "HST.svg",
-   "source": "commons.wikimedia.org (Logo Host Hotels & Resorts.svg); no logo in the Wikipedia infobox",
-   "fetched": "2026-09-30"
-  },
-  "SPG": {
-   "file": "SPG.svg",
-   "source": "en.wikipedia.org infobox logo (Simon Property Group Logo 2014.svg)",
-   "fetched": "2026-09-30"
-  },
-  "BNY": {
-   "file": "BNY.svg",
-   "source": "en.wikipedia.org infobox logo (BNY logo 2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GS": {
-   "file": "GS.svg",
-   "source": "en.wikipedia.org infobox logo (Goldman Sachs logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "COF": {
-   "file": "COF.svg",
-   "source": "en.wikipedia.org infobox logo (Capital One logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CBRE": {
-   "file": "CBRE.svg",
-   "source": "en.wikipedia.org infobox logo (CBRE_Group.svg, hosted on commons.wikimedia.org)",
-   "fetched": "2026-09-30"
-  },
-  "VTRS": {
-   "file": "VTRS.svg",
-   "source": "en.wikipedia.org infobox logo (Viatris.svg, hosted on commons.wikimedia.org)",
-   "fetched": "2026-09-30"
-  },
-  "IQV": {
-   "file": "IQV.svg",
-   "source": "en.wikipedia.org infobox logo (IQVIA.svg)",
-   "fetched": "2026-09-30"
-  },
-  "DVA": {
-   "file": "DVA.png",
-   "source": "en.wikipedia.org infobox logo (DaVita Inc logo.png, 270x144 PNG, hosted on commons.wikimedia.org)",
-   "fetched": "2026-09-30"
-  },
-  "TJX": {
-   "file": "TJX.svg",
-   "source": "en.wikipedia.org infobox logo (TJX Logo.svg, hosted on commons.wikimedia.org)",
-   "fetched": "2026-09-30"
-  },
-  "DG": {
-   "file": "DG.svg",
-   "source": "en.wikipedia.org infobox logo (Dollar General logo.svg, hosted on commons.wikimedia.org)",
-   "fetched": "2026-09-30"
-  },
-  "PANW": {
-   "file": "PANW.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: PaloAltoNetworks 2020 Logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "FTNT": {
-   "file": "FTNT.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Fortinet logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "DDOG": {
-   "file": "DDOG.svg",
-   "source": "en.wikipedia.org infobox logo (enwiki file) - Wikipedia infobox logo file: Datadog logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "CDNS": {
-   "file": "CDNS.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Cadence-Logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "SNPS": {
-   "file": "SNPS.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Synopsys Logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "INTU": {
-   "file": "INTU.png",
-   "source": "commons.wikimedia.org (1920x408 px) - Wikipedia infobox logo file: Intuit-logo-super-blue (1).png",
-   "fetched": "2026-09-30"
-  },
-  "ADSK": {
-   "file": "ADSK.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Autodesk Logo 2021.svg",
-   "fetched": "2026-09-30"
-  },
-  "WDAY": {
-   "file": "WDAY.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Workday logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "APP": {
-   "file": "APP.png",
-   "source": "commons.wikimedia.org (5000x1124 px) - Wikipedia infobox logo file: AppLovin logo.png",
-   "fetched": "2026-09-30"
-  },
-  "TTWO": {
-   "file": "TTWO.svg",
-   "source": "commons.wikimedia.org - Wikipedia infobox logo file: Take-Two Interactive Logo.svg",
-   "fetched": "2026-09-30"
-  },
-  "TXN": {
-   "file": "TXN.svg",
-   "source": "en.wikipedia.org infobox logo (Texas Instruments logo 2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ADI": {
-   "file": "ADI.svg",
-   "source": "en.wikipedia.org infobox logo (Analog Devices Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MCHP": {
-   "file": "MCHP.svg",
-   "source": "en.wikipedia.org infobox logo (Microchip logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "NXPI": {
-   "file": "NXPI.svg",
-   "source": "en.wikipedia.org infobox logo (NXP Semiconductors logo 2023.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MPWR": {
-   "file": "MPWR.svg",
-   "source": "en.wikipedia.org infobox logo (Monolithic Power Systems Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MRVL": {
-   "file": "MRVL.svg",
-   "source": "en.wikipedia.org infobox logo (Marvell Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ALAB": {
-   "file": "ALAB.svg",
-   "source": "en.wikipedia.org infobox logo (Astera Labs Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "SNDK": {
-   "file": "SNDK.svg",
-   "source": "en.wikipedia.org infobox logo (SanDisk 2024 logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "STX": {
-   "file": "STX.svg",
-   "source": "en.wikipedia.org infobox logo (Seagate logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "WDC": {
-   "file": "WDC.svg",
-   "source": "en.wikipedia.org infobox logo (WD Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "LITE": {
-   "file": "LITE.svg",
-   "source": "commons.wikimedia.org (Lumentum logo dark 2015.svg; same artwork and size as the logo in lumentum.com header; en.wikipedia infobox has no logo)",
-   "fetched": "2026-09-30"
-  },
-  "MU": {
-   "file": "MU.svg",
-   "source": "en.wikipedia.org infobox logo (Micron Technology logo 2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "TER": {
-   "file": "TER.svg",
-   "source": "en.wikipedia.org infobox logo (Teradyne logo 2014.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CSCO": {
-   "file": "CSCO.svg",
-   "source": "en.wikipedia.org infobox logo (Cisco logo blue 2016.svg)",
-   "fetched": "2026-09-30"
-  },
-  "SHOP": {
-   "file": "SHOP.svg",
-   "source": "en.wikipedia.org infobox logo (Shopify logo 2018.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MELI": {
-   "file": "MELI.svg",
-   "source": "en.wikipedia.org infobox logo (Mercado Libre logo (Spanish version).svg)",
-   "fetched": "2026-09-30"
-  },
-  "DASH": {
-   "file": "DASH.svg",
-   "source": "en.wikipedia.org infobox logo (DoorDash Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "PYPL": {
-   "file": "PYPL.svg",
-   "source": "en.wikipedia.org infobox logo (PayPal 2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "NBIS": {
-   "file": "NBIS.svg",
-   "source": "en.wikipedia.org infobox logo (Nebius logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CRWV": {
-   "file": "CRWV.svg",
-   "source": "en.wikipedia.org infobox logo (CoreWeave logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MSTR": {
-   "file": "MSTR.svg",
-   "source": "en.wikipedia.org infobox logo (Strategy logo (2025).svg)",
-   "fetched": "2026-09-30"
-  },
-  "PDD": {
-   "file": "PDD.svg",
-   "source": "en.wikipedia.org infobox logo (Pinduoduo logo.svg); Wikipedia logo is the Pinduoduo mark, PDD Holdings parent has no separate Wikipedia logo",
-   "fetched": "2026-09-30"
-  },
-  "ORLY": {
-   "file": "ORLY.svg",
-   "source": "en.wikipedia.org infobox logo (File:O'Reilly Auto Parts Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ROST": {
-   "file": "ROST.svg",
-   "source": "en.wikipedia.org infobox logo (File:Ross Stores logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "AEP": {
-   "file": "AEP.svg",
-   "source": "en.wikipedia.org infobox logo (File:AEP-Logo-Red-Gray.svg)",
-   "fetched": "2026-09-30"
-  },
   "XEL": {
    "file": "XEL.svg",
    "source": "en.wikipedia.org infobox logo (File:Xcel-energy.svg)",
    "fetched": "2026-09-30"
   },
-  "EXC": {
-   "file": "EXC.svg",
-   "source": "en.wikipedia.org infobox logo (File:Exelon Logo.svg)",
-   "fetched": "2026-09-30"
+  "XOM": {
+   "file": "XOM.svg",
+   "source": "en.wikipedia.org infobox logo",
+   "fetched": "2026-09-29"
   },
-  "FER": {
-   "file": "FER.svg",
-   "source": "en.wikipedia.org infobox logo (File:Ferrovial Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "BKR": {
-   "file": "BKR.svg",
-   "source": "en.wikipedia.org infobox logo (File:Baker Hughes logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "FANG": {
-   "file": "FANG.svg",
-   "source": "en.wikipedia.org infobox logo (File:Diamondback Energy, Logo 2022.svg)",
-   "fetched": "2026-09-30"
-  },
-  "WBD": {
-   "file": "WBD.svg",
-   "source": "en.wikipedia.org infobox logo (File:Warner Bros. Discovery.svg)",
-   "fetched": "2026-09-30"
-  },
-  "AMGN": {
-   "file": "AMGN.svg",
-   "source": "en.wikipedia.org infobox logo (Amgen.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GILD": {
-   "file": "GILD.svg",
-   "source": "en.wikipedia.org infobox logo (Gilead Sciences Logo.svg, non-free logo file)",
-   "fetched": "2026-09-30"
-  },
-  "REGN": {
-   "file": "REGN.svg",
-   "source": "en.wikipedia.org infobox logo (Regeneron logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ALNY": {
-   "file": "ALNY.svg",
-   "source": "en.wikipedia.org infobox logo (Alnylam Pharmaceuticals logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "DXCM": {
-   "file": "DXCM.svg",
-   "source": "en.wikipedia.org infobox logo (Dexcom logo.svg; includes the tagline CONTINUOUS GLUCOSE MONITORING)",
-   "fetched": "2026-09-30"
-  },
-  "IDXX": {
-   "file": "IDXX.svg",
-   "source": "en.wikipedia.org infobox logo (IDEXX Labs.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GEHC": {
-   "file": "GEHC.svg",
-   "source": "en.wikipedia.org infobox logo (GE HealthCare logo 2023.svg)",
-   "fetched": "2026-09-30"
-  },
-  "PEP": {
-   "file": "PEP.svg",
-   "source": "en.wikipedia.org infobox logo (PEP BIG.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MNST": {
-   "file": "MNST.png",
-   "source": "en.wikipedia.org infobox logo (Monster Beverage logo.png, 289x76 px)",
-   "fetched": "2026-09-30"
-  },
-  "MDLZ": {
-   "file": "MDLZ.svg",
-   "source": "commons.wikimedia.org (Mondelez International.svg); the Wikipedia infobox logo field is currently commented out, so the Commons wordmark was used",
-   "fetched": "2026-09-30"
-  },
-  "KDP": {
-   "file": "KDP.svg",
-   "source": "en.wikipedia.org infobox logo (Keurig Dr Pepper.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CCEP": {
-   "file": "CCEP.png",
-   "source": "en.wikipedia.org infobox logo (Coca-Cola Europacific Partners (LOGO).png; Commons file, 300+ px)",
-   "fetched": "2026-09-30"
-  },
-  "CSX": {
-   "file": "CSX.svg",
-   "source": "en.wikipedia.org infobox logo (File:CSX_transp_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ODFL": {
-   "file": "ODFL.png",
-   "source": "en.wikipedia.org infobox logo (File:Old Dominion Freight Line, Inc. Logo.png)",
-   "fetched": "2026-09-30"
-  },
-  "PCAR": {
-   "file": "PCAR.svg",
-   "source": "en.wikipedia.org infobox logo (File:Paccar Inc logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "FAST": {
-   "file": "FAST.svg",
-   "source": "en.wikipedia.org infobox logo (File:Fastenal logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "HON": {
-   "file": "HON.svg",
-   "source": "en.wikipedia.org infobox logo (File:Honeywell logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "AXON": {
-   "file": "AXON.svg",
-   "source": "en.wikipedia.org infobox logo (File:AXON Company logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ADP": {
-   "file": "ADP.svg",
-   "source": "en.wikipedia.org infobox logo (File:Automatic Data Processing (logo).svg)",
-   "fetched": "2026-09-30"
-  },
-  "PAYX": {
-   "file": "PAYX.svg",
-   "source": "en.wikipedia.org infobox logo (File:Paychex logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "TRI": {
-   "file": "TRI.svg",
-   "source": "en.wikipedia.org infobox logo (File:TR Logo 2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CPRT": {
-   "file": "CPRT.svg",
-   "source": "en.wikipedia.org infobox logo (File:Copart logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GLW": {
-   "file": "GLW.svg",
-   "source": "en.wikipedia.org infobox logo (File:Corning Incorporated Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "PH": {
-   "file": "PH.svg",
-   "source": "en.wikipedia.org infobox logo (File:Parker Hannifin.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CB": {
-   "file": "CB.png",
-   "source": "chubb.com home page header logo (chubb-logo-black.png, 550 px wide); the Wikipedia infobox file Chubb-Limited-logo.svg carries an editor note that it is not the version on the company homepage",
-   "fetched": "2026-09-30"
-  },
-  "MDT": {
-   "file": "MDT.svg",
-   "source": "en.wikipedia.org infobox logo (File:Medtronic logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MPC": {
-   "file": "MPC.svg",
-   "source": "en.wikipedia.org infobox logo (File:Marathon Petroleum logo 2022.svg)",
-   "fetched": "2026-09-30"
-  },
-  "LOW": {
-   "file": "LOW.svg",
-   "source": "en.wikipedia.org infobox logo (File:Lowes Companies Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "PSX": {
-   "file": "PSX.svg",
-   "source": "en.wikipedia.org infobox logo (File:Phillips 66 logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "TT": {
-   "file": "TT.svg",
-   "source": "en.wikipedia.org infobox logo (File:TraneTechnologieslogo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "VRT": {
-   "file": "VRT.svg",
-   "source": "en.wikipedia.org infobox logo (File:Vertiv logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "HOOD": {
-   "file": "HOOD.png",
-   "source": "en.wikipedia.org infobox logo (File:Robinhood Markets logo.png, 3259 px wide)",
-   "fetched": "2026-09-30"
-  },
-  "APH": {
-   "file": "APH.svg",
-   "source": "en.wikipedia.org infobox logo (Logo_Amphenol.svg)",
-   "fetched": "2026-09-30"
-  },
-  "IBM": {
-   "file": "IBM.svg",
-   "source": "en.wikipedia.org infobox logo (IBM_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "ETN": {
-   "file": "ETN.svg",
-   "source": "en.wikipedia.org infobox logo (Eaton_Corporation_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "PFE": {
-   "file": "PFE.svg",
-   "source": "en.wikipedia.org infobox logo (Pfizer_(2021).svg)",
-   "fetched": "2026-09-30"
-  },
-  "DELL": {
-   "file": "DELL.svg",
-   "source": "en.wikipedia.org infobox logo (Dell_Technologies_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "AXP": {
-   "file": "AXP.svg",
-   "source": "en.wikipedia.org infobox logo (American_Express_logo_(2018).svg)",
-   "fetched": "2026-09-30"
-  },
-  "COP": {
-   "file": "COP.svg",
-   "source": "en.wikipedia.org infobox logo (ConocoPhillips_Company_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "BA": {
-   "file": "BA.svg",
-   "source": "en.wikipedia.org infobox logo (Boeing_full_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "DHR": {
-   "file": "DHR.svg",
-   "source": "en.wikipedia.org infobox logo (Danaher_logo_since_2023.svg)",
-   "fetched": "2026-09-30"
-  },
-  "BMY": {
-   "file": "BMY.svg",
-   "source": "en.wikipedia.org infobox logo (Bristol-Myers_Squibb_logo_(2020).svg)",
-   "fetched": "2026-09-30"
-  },
-  "JNJ": {
-   "file": "JNJ.svg",
-   "source": "en.wikipedia.org infobox logo (JNJ_Logo_New.svg)",
-   "fetched": "2026-09-30"
-  },
-  "MA": {
-   "file": "MA.svg",
-   "source": "en.wikipedia.org infobox logo (Mastercard_2019_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "CVX": {
-   "file": "CVX.svg",
-   "source": "en.wikipedia.org infobox logo (Chevron_Logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "BAC": {
-   "file": "BAC.svg",
-   "source": "en.wikipedia.org infobox logo (Bank_of_America_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "GEV": {
-   "file": "GEV.svg",
-   "source": "en.wikipedia.org infobox logo (GE_Vernova_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "RTX": {
-   "file": "RTX.svg",
-   "source": "en.wikipedia.org infobox logo (RTX_Raytheon_Technologies_logo.svg)",
-   "fetched": "2026-09-30"
-  },
-  "WFC": {
-   "file": "WFC.svg",
-   "source": "en.wikipedia.org infobox logo (Wells_Fargo_Logo_(2020).svg)",
-   "fetched": "2026-09-30"
-  },
-  "MS": {
-   "file": "MS.svg",
-   "source": "en.wikipedia.org infobox logo (Morgan_Stanley_Logo_2024.svg)",
-   "fetched": "2026-09-30"
-  },
-  "C": {
-   "file": "C.svg",
-   "source": "en.wikipedia.org infobox logo (Citi_logo_March_2023.svg)",
+  "ZTS": {
+   "file": "ZTS.svg",
+   "source": "en.wikipedia.org infobox logo (Zoetis logo.svg)",
    "fetched": "2026-09-30"
   }
  }
