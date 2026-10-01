@@ -2745,6 +2745,11 @@
    "file": "SBAC.svg",
    "source": "en.wikipedia.org infobox logo (SBA Communications Logo.svg)",
    "fetched": "2026-10-01"
+  },
+  "TPG": {
+   "file": "TPG.svg",
+   "source": "en.wikipedia.org infobox logo (TPG Capital logo.svg, commons.wikimedia.org)",
+   "fetched": "2026-10-01"
   }
  }
 }
