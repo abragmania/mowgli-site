@@ -52,20 +52,42 @@ body{background:radial-gradient(ellipse at 40% -10%,#0e2a2e 0%,#0a1a20 45%,#0509
 .bar2{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
 .bar2 h1{font-size:.8rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);font-weight:800}
 .bar2 input{margin-left:auto;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;color:var(--ink);font:500 14px Manrope,system-ui,sans-serif;padding:8px 16px;width:min(22rem,100%);outline:0}
-.cats{column-width:28rem;column-gap:var(--gap)}
-.cats>*{break-inside:avoid;margin-bottom:var(--gap)}
-.cat{padding:1.1rem 1.3rem 1.3rem}
-.cat h2{font:600 1.35rem Fraunces,Georgia,serif;color:#f3f0e8;padding-bottom:.5rem;border-bottom:1px solid var(--line);margin-bottom:.5rem}
-.cat h2 i{font-style:normal;color:var(--dust);margin-right:.5rem}
-.cat h3{font-size:.8rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);margin:1rem 0 .45rem}
-.cat h3 i{font-style:normal;color:var(--accx);margin-right:.4rem}
-.cos{display:flex;flex-wrap:wrap;gap:.35rem}
-.cos a{display:flex;align-items:center;gap:.5rem;padding:.25rem .6rem .25rem .3rem;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);text-decoration:none;font:500 .85rem Manrope,system-ui,sans-serif}
-.cos a:hover{background:rgba(255,255,255,.12)}
-.cos img{width:2.6rem;height:1.3rem;object-fit:contain;background:#f4f2ee;border-radius:5px;padding:.1rem .25rem;flex:none}
-.cos b{font-weight:800;letter-spacing:.04em;font-size:.8rem}
-.cos a span{color:var(--mut);max-width:11rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cos em{font-style:normal;font-weight:700;letter-spacing:.04em;font-size:.8rem;color:var(--mut);opacity:.7;padding:.25rem .4rem}
+.lay{display:grid;grid-template-columns:17rem minmax(0,56rem);gap:var(--gap);align-items:start;justify-content:start}
+.rail{position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow:auto;padding:.9rem .6rem;scrollbar-width:thin}
+.rail a{display:flex;gap:.5rem;align-items:baseline;text-decoration:none;color:var(--ink2);font:500 .85rem Manrope,system-ui,sans-serif;padding:.28rem .6rem;border-radius:9px;line-height:1.25}
+.rail a i{font-style:normal;color:var(--dust);font-weight:700;min-width:1.9rem;font-variant-numeric:tabular-nums}
+.rail a.c{font-weight:700;color:var(--ink);margin-top:.5rem}
+.rail a.s{padding-left:1.6rem;color:var(--mut)}.rail a.s i{color:var(--accx);opacity:.8}
+.rail a:hover{background:rgba(255,255,255,.07);color:#fff}
+.rail a.on{background:var(--accbg);color:#fff}
+.main{min-width:0}
+.cat{padding:.8rem 1.1rem .9rem;margin-bottom:.9rem;scroll-margin-top:1rem}
+.cat h2{display:flex;align-items:baseline;font:600 1.45rem Fraunces,Georgia,serif;color:#f3f0e8;padding-bottom:.4rem;border-bottom:1px solid var(--line);margin-bottom:.2rem}
+.ea{margin-left:auto;background:none;border:1px solid var(--sub2);border-radius:999px;color:var(--mut);font:700 .68rem Manrope,system-ui,sans-serif;letter-spacing:.8px;text-transform:uppercase;padding:.2rem .7rem;cursor:pointer}.ea:hover{color:#fff;background:rgba(255,255,255,.08)}
+.cat h2 i{font-style:normal;color:var(--dust);margin-right:.6rem}
+.sub{scroll-margin-top:1rem;margin-top:.15rem;border-bottom:1px solid var(--sub)}
+.sub h3{font-size:.8rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut)}
+.tg{display:flex;align-items:center;gap:.5rem;width:100%;background:none;border:0;border-radius:9px;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;text-align:left;padding:.4rem .4rem;cursor:pointer}
+.tg:hover{background:rgba(255,255,255,.07);color:#fff}
+.tg:focus-visible,.ea:focus-visible{outline:2px solid var(--accx);outline-offset:1px}
+.tg svg{width:.8rem;height:.8rem;flex:none;fill:none;stroke:currentColor;stroke-width:2;transition:transform .15s}
+.tg[aria-expanded=true] svg{transform:rotate(90deg)}
+.tg i{font-style:normal;color:var(--accx)}
+.tg em{margin-left:auto;font-style:normal;font-weight:600;letter-spacing:0;color:var(--mut);opacity:.7}
+.sub .tb{padding-bottom:.4rem}
+.tb[hidden]{display:none}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 4.2rem 5.6rem 4.6rem;align-items:center;gap:.7rem;padding:.18rem .5rem;border-radius:9px;color:var(--ink);text-decoration:none;font:500 .88rem Manrope,system-ui,sans-serif;border-bottom:1px solid var(--sub)}
+.row.hd{font-size:.68rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--line)}
+.co{display:flex;align-items:center;gap:.6rem;min-width:0}
+.co img{width:2.6rem;height:1.35rem;object-fit:contain;background:#f4f2ee;border-radius:5px;padding:.1rem .25rem;flex:none}
+.co .nl{width:2.6rem;height:1.35rem;flex:none}
+.co span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row b{font-weight:800;letter-spacing:.04em;font-size:.82rem}
+.row .n{text-align:right;font-variant-numeric:tabular-nums}
+a.row:hover{background:rgba(255,255,255,.09)}
+div.row:not(.hd){color:var(--mut)}div.row:not(.hd) .co span{opacity:.75}
+.none{color:var(--mut);padding:2rem;text-align:center}
+@media(max-width:820px){.lay{grid-template-columns:1fr}.rail{display:none}.row{grid-template-columns:minmax(0,1fr) 3.6rem 4.6rem 3.8rem;gap:.4rem;font-size:.8rem}.co img,.co .nl{display:none}}
 </style>
 </head>
 <body>
@@ -77,39 +99,82 @@ body{background:radial-gradient(ellipse at 40% -10%,#0e2a2e 0%,#0a1a20 45%,#0509
 </div>
 <div class="body">
 <div class="bar2"><h1>Cats and Subs</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies"></div>
-<div class="cats" id="g"></div>
+<div class="lay"><nav class="rail pad" id="rail" aria-label="Cats and Subs"></nav><div class="main" id="g"></div></div>
 </div>
 <script src="/mowgli-site/config.js"></script>
 <script src="/mowgli-site/site.js"></script>
 <script>
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let all = [], G = null;
+let all = [], G = null, Q = {};
 const sym = (t) => String(t || '').trim().toUpperCase().replace(/[./ ]/g, '-');
+const money = (n) => (n == null || !isFinite(n) || n <= 0) ? '—' : n >= 1e12 ? '$' + (n / 1e12).toFixed(2).replace(/\.?0+$/, '') + 'T' : n >= 1e9 ? '$' + (n / 1e9).toFixed(1) + 'B' : '$' + Math.round(n / 1e6) + 'M';
+const pct = (d) => d == null || !isFinite(d) ? '<span class="n">—</span>' : `<span class="n ${d > 0 ? 'up' : d < 0 ? 'dn' : ''}">${d > 0 ? '+' : ''}${d.toFixed(2)}%</span>`;
 function draw(q) {
   q = q.trim().toLowerCase();
-  const g = document.getElementById('g');
+  const filt = !!q;
+  const g = document.getElementById('g'), rail = document.getElementById('rail');
   if (!G) { g.innerHTML = ''; return; }
   const pages = new Map(all.map((c) => [sym(c.ticker), c]));
-  const hit = (t, c) => !q || t.toLowerCase().includes(q) || (c && c.name.toLowerCase().includes(q));
-  const link = (t) => { const c = pages.get(t); return c ? `<a href="${MG.pageUrl(c.ticker)}">${c.logo ? `<img src="${esc(c.logo)}" alt="">` : ''}<b>${esc(c.ticker)}</b><span>${esc(c.name)}</span></a>` : `<em>${esc(t)}</em>`; };
-  const inCat = {}; // catId -> subId ('' = none) -> tickers
+  const nameOf = (t) => (pages.get(t) || {}).name || (Q[t] || {}).n || '';
+  const hit = (t) => !q || t.toLowerCase().includes(q) || nameOf(t).toLowerCase().includes(q);
+  const cap = (t) => { const v = (Q[t] || {}).cap; return v > 0 ? v : -1; };
+  const row = (t) => {
+    const c = pages.get(t), x = Q[t] || {}, nm = nameOf(t) || t;
+    const inner = `<span class="co">${c && c.logo ? `<img src="${esc(c.logo)}" alt="">` : '<span class="nl"></span>'}<span>${esc(nm)}</span></span><b>${esc(c ? c.ticker : t)}</b><span class="n">${money(x.cap)}</span>${pct(x.d)}`;
+    return c ? `<a class="row" href="${MG.pageUrl(c.ticker)}">${inner}</a>` : `<div class="row">${inner}</div>`;
+  };
+  const hd = '<div class="row hd"><span>Company</span><span>Ticker</span><span class="n">Market cap</span><span class="n">Today</span></div>';
+  const table = (ts) => { ts = ts.filter(hit).sort((a, b) => cap(b) - cap(a) || a.localeCompare(b)); if (!ts.length) return ''; return ts; };
+  const tb = (ts, extra) => `<div class="tb"${extra || ''}>${hd}${ts.map(row).join('')}</div>`;
+  const inCat = {};
   for (const [t, v] of Object.entries(G.co)) {
-    if (v[4] || !v[0]) continue; // share classes fold into the parent
+    if (v[4] || !v[0]) continue;
     ((inCat[v[0]] ||= {})[v[1] || ''] ||= []).push(t);
   }
-  const order = (a, b) => (pages.has(b) - pages.has(a)) || a.localeCompare(b);
-  const box = (ts) => { ts = ts.filter((t) => hit(t, pages.get(t))).sort(order); return ts.length ? `<div class="cos">${ts.map(link).join('')}</div>` : ''; };
-  let html = '';
+  let html = '', nav = '';
   G.cats.forEach((c, i) => {
     const m = inCat[c.id] || {};
-    let body = box(m[''] || []);
-    c.subs.forEach((s, j) => { const x = box(m[s.id] || []); if (x) body += `<h3><i>${i + 1}.${j + 1}</i>${esc(s.name)}</h3>${x}`; });
-    if (body) html += `<section class="cat pad"><h2><i>${i + 1}</i>${esc(c.name)}</h2>${body}</section>`;
+    const direct = table(m[''] || []);
+    let body = direct.length ? tb(direct) : '', sn = '', nsub = 0;
+    c.subs.forEach((s, j) => { const x = table(m[s.id] || []); if (x.length) { const id = `s-${i + 1}-${j + 1}`, o = filt || OPEN.has(id); nsub++; body += `<div class="sub" id="${id}"><h3><button type="button" class="tg" aria-expanded="${o}" aria-controls="${id}-t"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}.${j + 1}</i>${esc(s.name)}<em>${x.length}</em></button></h3>${tb(x, ` id="${id}-t"${o ? '' : ' hidden'}`)}</div>`; sn += `<a class="s" href="#s-${i + 1}-${j + 1}"><i>${i + 1}.${j + 1}</i>${esc(s.name)}</a>`; } });
+    if (body) { html += `<section class="cat pad" id="c-${i + 1}"><h2><i>${i + 1}</i>${esc(c.name)}${nsub > 1 ? '<button type="button" class="ea"></button>' : ''}</h2>${body}</section>`; nav += `<a class="c" href="#c-${i + 1}"><i>${i + 1}</i>${esc(c.name)}</a>${sn}`; }
   });
   const loose = all.filter((c) => { const v = G.co[sym(c.ticker)]; return !(v && (v[4] ? G.co[v[4]]?.[0] : v[0])); }).map((c) => sym(c.ticker));
-  const lb = box(loose);
-  if (lb) html += `<section class="cat pad"><h2>Not yet placed</h2>${lb}</section>`;
-  g.innerHTML = html;
+  const lb = table(loose);
+  if (lb.length) { html += `<section class="cat pad" id="c-x"><h2>Not yet placed</h2>${tb(lb)}</section>`; nav += '<a class="c" href="#c-x"><i></i>Not yet placed</a>'; }
+  g.innerHTML = html || '<div class="none">No match.</div>';
+  rail.innerHTML = nav;
+  document.querySelectorAll('.cat').forEach(eaLabel);
+  watch();
+}
+const OPEN = new Set();
+try { JSON.parse(localStorage.getItem('mgListOpen') || '[]').forEach((x) => OPEN.add(x)); } catch {}
+const saveOpen = () => { try { localStorage.setItem('mgListOpen', JSON.stringify([...OPEN])); } catch {} };
+const filtering = () => !!document.getElementById('f').value.trim();
+function setSub(sub, o) {
+  const b = sub.querySelector('.tg'), t = sub.querySelector('.tb');
+  b.setAttribute('aria-expanded', o); t.hidden = !o;
+  if (!filtering()) { o ? OPEN.add(sub.id) : OPEN.delete(sub.id); }
+}
+function eaLabel(cat) {
+  const b = cat.querySelector('.ea'); if (!b) return;
+  const subs = [...cat.querySelectorAll('.sub')];
+  b.textContent = subs.every((s) => !s.querySelector('.tb').hidden) ? 'Collapse all' : 'Expand all';
+}
+document.getElementById('g').addEventListener('click', (e) => {
+  const tg = e.target.closest('.tg'), ea = e.target.closest('.ea');
+  if (tg) { const sub = tg.closest('.sub'); setSub(sub, tg.getAttribute('aria-expanded') !== 'true'); eaLabel(sub.closest('.cat')); saveOpen(); }
+  else if (ea) { const cat = ea.closest('.cat'), o = ea.textContent === 'Expand all'; cat.querySelectorAll('.sub').forEach((s) => setSub(s, o)); eaLabel(cat); saveOpen(); }
+});
+let io = null;
+function watch() {
+  if (io) io.disconnect();
+  const links = [...document.querySelectorAll('#rail a')];
+  const mark = (id) => links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+  links.forEach((a) => a.addEventListener('click', (ev) => { ev.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t && t.classList.contains('sub')) { setSub(t, true); eaLabel(t.closest('.cat')); saveOpen(); } if (t) t.scrollIntoView({ behavior: 'smooth' }); mark(a.getAttribute('href').slice(1)); }));
+  const els = [...document.querySelectorAll('.cat,.sub')];
+  io = new IntersectionObserver((en) => { const v = en.filter((x) => x.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]; if (v) { mark(v.target.id); const a = document.querySelector('#rail a.on'); if (a) a.scrollIntoView({ block: 'nearest' }); } }, { rootMargin: '0px 0px -75% 0px' });
+  els.forEach((x) => io.observe(x));
 }
 fetch(MG.companiesUrl()).then((r) => r.json()).then((list) => {
   all = list.sort((a, b) => a.name.localeCompare(b.name));
@@ -146,7 +211,7 @@ function setupSwitcher() {
   let p = null, stale = false;
   try { const u = MG.monitorUrl(); if (!u) throw 0; p = await fetch(u).then((r) => { if (!r.ok) throw 0; return r.json(); }); stale = !!p.stale; }
   catch { try { p = await fetch(MG.monitorBakedUrl()).then((r) => r.json()); stale = true; } catch { return; } }
-  if (p.groupings) { G = p.groupings; draw(document.getElementById('f').value); }
+  if (p.groupings) { G = p.groupings; for (const x of [...(p.extra || []), ...(p.stocks || [])]) Q[sym(x.s)] = x; for (const [t, v] of Object.entries(G.co)) if (v[4] && Q[t] && !Q[v[4]]) Q[v[4]] = Q[t]; draw(document.getElementById('f').value); }
   const q = new Date(p.quoteTime || p.asOf);
   const et = q.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
   const d = q.toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', day: 'numeric', month: 'short' });

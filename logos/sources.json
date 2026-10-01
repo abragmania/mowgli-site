@@ -588,8 +588,8 @@
   },
   "ECHO": {
    "file": "ECHO.svg",
-   "source": "en.wikipedia.org infobox logo",
-   "fetched": "2026-09-28"
+   "source": "en.wikipedia.org infobox logo (EchoStar logo.svg)",
+   "fetched": "2026-10-01"
   },
   "ECL": {
    "file": "ECL.svg",
@@ -2328,6 +2328,423 @@
    "file": "NTAP.png",
    "source": "en.wikipedia.org infobox logo (Logo of NetApp used since 2020.png, 2880 px wide)",
    "fetched": "2026-09-30"
+  },
+  "BF": {
+   "file": "BF.svg",
+   "source": "en.wikipedia.org infobox logo (Brown–Forman logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "KVUE": {
+   "file": "KVUE.svg",
+   "source": "en.wikipedia.org infobox logo (Kenvue Logo Black RGB.svg)",
+   "fetched": "2026-10-01"
+  },
+  "XYZ": {
+   "file": "XYZ.svg",
+   "source": "en.wikipedia.org infobox logo (Block-lockup black.svg)",
+   "fetched": "2026-10-01"
+  },
+  "CPAY": {
+   "file": "CPAY.svg",
+   "source": "en.wikipedia.org infobox logo (Corpay_Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "FISV": {
+   "file": "FISV.svg",
+   "source": "en.wikipedia.org infobox logo (Fiserv logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "GPN": {
+   "file": "GPN.svg",
+   "source": "en.wikipedia.org infobox logo (Global Payments Inc. logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "TROW": {
+   "file": "TROW.svg",
+   "source": "en.wikipedia.org infobox logo (T. Rowe Price wordmark.svg)",
+   "fetched": "2026-10-01"
+  },
+  "IVZ": {
+   "file": "IVZ.svg",
+   "source": "en.wikipedia.org infobox logo (Invesco Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "BEN": {
+   "file": "BEN.png",
+   "source": "en.wikipedia.org infobox logo (Franklin_Templeton_logo.png)",
+   "fetched": "2026-10-01"
+  },
+  "FDS": {
+   "file": "FDS.svg",
+   "source": "en.wikipedia.org infobox logo (FactSet wordmark.svg)",
+   "fetched": "2026-10-01"
+  },
+  "FIS": {
+   "file": "FIS.svg",
+   "source": "en.wikipedia.org infobox logo (FIS logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "JKHY": {
+   "file": "JKHY.svg",
+   "source": "en.wikipedia.org infobox logo (Jack-henry-logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "BR": {
+   "file": "BR.svg",
+   "source": "en.wikipedia.org infobox logo (Logo for Broadridge 2024.svg)",
+   "fetched": "2026-10-01"
+  },
+  "KEY": {
+   "file": "KEY.svg",
+   "source": "en.wikipedia.org infobox logo (KeyBank logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "EFX": {
+   "file": "EFX.svg",
+   "source": "en.wikipedia.org infobox logo (Equifax Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "EL": {
+   "file": "EL.svg",
+   "source": "en.wikipedia.org infobox logo (Estée Lauder Companies Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "SNA": {
+   "file": "SNA.svg",
+   "source": "en.wikipedia.org infobox logo (Snap-on logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "HPQ": {
+   "file": "HPQ.svg",
+   "source": "en.wikipedia.org infobox logo (HP logo 2025.svg)",
+   "fetched": "2026-10-01"
+  },
+  "HWM": {
+   "file": "HWM.svg",
+   "source": "en.wikipedia.org infobox logo (Howmet Aerospace logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "HONA": {
+   "file": "HONA.svg",
+   "source": "en.wikipedia.org infobox logo (HONA Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "TXT": {
+   "file": "TXT.svg",
+   "source": "en.wikipedia.org infobox logo (Textron.svg)",
+   "fetched": "2026-10-01"
+  },
+  "UAL": {
+   "file": "UAL.svg",
+   "source": "en.wikipedia.org infobox logo (United Airlines Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "LUV": {
+   "file": "LUV.svg",
+   "source": "en.wikipedia.org infobox logo (Southwest Airlines logo 2014.svg)",
+   "fetched": "2026-10-01"
+  },
+  "FOXA": {
+   "file": "FOXA.svg",
+   "source": "en.wikipedia.org infobox logo (FOX wordmark.svg)",
+   "fetched": "2026-10-01"
+  },
+  "RDDT": {
+   "file": "RDDT.svg",
+   "source": "en.wikipedia.org infobox logo (Reddit logo 2023.svg)",
+   "fetched": "2026-10-01"
+  },
+  "PSKY": {
+   "file": "PSKY.svg",
+   "source": "en.wikipedia.org infobox logo (Paramount Skydance Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "NWSA": {
+   "file": "NWSA.svg",
+   "source": "en.wikipedia.org infobox logo (News Corp logo 2013.svg)",
+   "fetched": "2026-10-01"
+  },
+  "TPR": {
+   "file": "TPR.svg",
+   "source": "en.wikipedia.org infobox logo (Tapestry logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "RL": {
+   "file": "RL.svg",
+   "source": "en.wikipedia.org infobox logo (Ralph Lauren logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "F": {
+   "file": "F.svg",
+   "source": "en.wikipedia.org infobox logo (Ford logo flat.svg)",
+   "fetched": "2026-10-01"
+  },
+  "AZO": {
+   "file": "AZO.svg",
+   "source": "en.wikipedia.org infobox logo (AutoZone_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "DECK": {
+   "file": "DECK.png",
+   "source": "en.wikipedia.org infobox logo (Deckers Brands logo.png (340x96 px; no SVG found))",
+   "fetched": "2026-10-01"
+  },
+  "WSM": {
+   "file": "WSM.svg",
+   "source": "en.wikipedia.org infobox logo (Williams-Sonoma logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "TSCO": {
+   "file": "TSCO.svg",
+   "source": "en.wikipedia.org infobox logo (TractorSupplyCompanylogo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "LULU": {
+   "file": "LULU.svg",
+   "source": "en.wikipedia.org infobox logo (Lululemon_Athletica_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "EBAY": {
+   "file": "EBAY.svg",
+   "source": "en.wikipedia.org infobox logo (EBay_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "BBY": {
+   "file": "BBY.svg",
+   "source": "en.wikipedia.org infobox logo (Best_Buy_logo_2018.svg)",
+   "fetched": "2026-10-01"
+  },
+  "GRMN": {
+   "file": "GRMN.svg",
+   "source": "en.wikipedia.org infobox logo (Garmin_2024_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "GPC": {
+   "file": "GPC.svg",
+   "source": "en.wikipedia.org infobox logo (Genuine_Parts_Company_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "HAS": {
+   "file": "HAS.svg",
+   "source": "en.wikipedia.org infobox logo (Hasbro_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "ULTA": {
+   "file": "ULTA.svg",
+   "source": "en.wikipedia.org infobox logo (Ulta_Beauty_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "BRO": {
+   "file": "BRO.png",
+   "source": "en.wikipedia.org infobox logo (BB004-Hor-RGB 1000px digital.png)",
+   "fetched": "2026-10-01"
+  },
+  "PFG": {
+   "file": "PFG.svg",
+   "source": "en.wikipedia.org infobox logo (Principal Financial Group logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "GL": {
+   "file": "GL.svg",
+   "source": "en.wikipedia.org infobox logo (Globe_Life_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "L": {
+   "file": "L.svg",
+   "source": "en.wikipedia.org infobox logo (Loews Corp.svg)",
+   "fetched": "2026-10-01"
+  },
+  "AIZ": {
+   "file": "AIZ.svg",
+   "source": "en.wikipedia.org infobox logo (Assurant logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "WRB": {
+   "file": "WRB.svg",
+   "source": "en.wikipedia.org infobox logo (W. R. Berkley Corporation logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "GD": {
+   "file": "GD.svg",
+   "source": "en.wikipedia.org infobox logo (General Dynamics logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "NOC": {
+   "file": "NOC.svg",
+   "source": "en.wikipedia.org infobox logo (Northrop Grumman logo blue-on-clear 2020.svg)",
+   "fetched": "2026-10-01"
+  },
+  "LHX": {
+   "file": "LHX.svg",
+   "source": "en.wikipedia.org infobox logo (L3Harris Technologies logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "HII": {
+   "file": "HII.svg",
+   "source": "en.wikipedia.org infobox logo (HII logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "LDOS": {
+   "file": "LDOS.svg",
+   "source": "en.wikipedia.org infobox logo (Leidos logo 2023.svg)",
+   "fetched": "2026-10-01"
+  },
+  "TYL": {
+   "file": "TYL.svg",
+   "source": "en.wikipedia.org infobox logo (Tyler Technologies logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "MSI": {
+   "file": "MSI.svg",
+   "source": "en.wikipedia.org infobox logo (Motorola Solutions stacked logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "CMG": {
+   "file": "CMG.svg",
+   "source": "en.wikipedia.org infobox logo (Chipotle Mexican Grill logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "YUM": {
+   "file": "YUM.svg",
+   "source": "en.wikipedia.org infobox logo (Yum! Brands logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "DRI": {
+   "file": "DRI.svg",
+   "source": "en.wikipedia.org infobox logo (Darden logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "DPZ": {
+   "file": "DPZ.svg",
+   "source": "en.wikipedia.org infobox logo (Domino's 2025.svg)",
+   "fetched": "2026-10-01"
+  },
+  "TGT": {
+   "file": "TGT.svg",
+   "source": "en.wikipedia.org infobox logo (Target (2018).svg)",
+   "fetched": "2026-10-01"
+  },
+  "DLTR": {
+   "file": "DLTR.svg",
+   "source": "en.wikipedia.org infobox logo (Dollar Tree logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "SYY": {
+   "file": "SYY.svg",
+   "source": "en.wikipedia.org infobox logo (Sysco-Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "KMB": {
+   "file": "KMB.png",
+   "source": "en.wikipedia.org infobox logo (Kimberly-Clark Logo.png)",
+   "fetched": "2026-10-01"
+  },
+  "CHD": {
+   "file": "CHD.svg",
+   "source": "en.wikipedia.org infobox logo (Church & Dwight logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "KHC": {
+   "file": "KHC.svg",
+   "source": "en.wikipedia.org infobox logo (KraftHeinz.svg)",
+   "fetched": "2026-10-01"
+  },
+  "SJM": {
+   "file": "SJM.svg",
+   "source": "en.wikipedia.org infobox logo (The J.M. Smucker Company logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "MKC": {
+   "file": "MKC.svg",
+   "source": "en.wikipedia.org infobox logo (McCormick.svg)",
+   "fetched": "2026-10-01"
+  },
+  "HRL": {
+   "file": "HRL.svg",
+   "source": "en.wikipedia.org infobox logo (Hormel_Foods_logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "FDX": {
+   "file": "FDX.svg",
+   "source": "en.wikipedia.org infobox logo (FedEx Corporation - 2016 Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "EXPD": {
+   "file": "EXPD.svg",
+   "source": "en.wikipedia.org infobox logo (Expeditors International logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "JBHT": {
+   "file": "JBHT.svg",
+   "source": "en.wikipedia.org infobox logo (J. B. Hunt logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "FDXF": {
+   "file": "FDXF.svg",
+   "source": "en.wikipedia.org infobox logo (FedEx Freight - 2016 Logo.svg)",
+   "fetched": "2026-10-01",
+   "check": "Wikipedia/Commons carry only the 2016 FedEx Freight mark; confirm it matches the post-spin-off branding"
+  },
+  "CMI": {
+   "file": "CMI.svg",
+   "source": "en.wikipedia.org infobox logo (Cummins logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "WAB": {
+   "file": "WAB.svg",
+   "source": "en.wikipedia.org infobox logo (Wabtec Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "NSC": {
+   "file": "NSC.svg",
+   "source": "en.wikipedia.org infobox logo (Norfolk Southern (logo, horizontal).svg)",
+   "fetched": "2026-10-01"
+  },
+  "CIEN": {
+   "file": "CIEN.svg",
+   "source": "en.wikipedia.org infobox logo (Ciena logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "COHR": {
+   "file": "COHR.svg",
+   "source": "en.wikipedia.org infobox logo (Coherent logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "Q": {
+   "file": "Q.jpg",
+   "source": "en.wikipedia.org infobox logo (Qnity Electronics logo.jpg)",
+   "fetched": "2026-10-01",
+   "check": "JPG 1024x512 (no SVG found); logo from the Wikipedia infobox"
+  },
+  "ON": {
+   "file": "ON.svg",
+   "source": "en.wikipedia.org infobox logo (onsemi logo 2021.svg)",
+   "fetched": "2026-10-01"
+  },
+  "SWKS": {
+   "file": "SWKS.svg",
+   "source": "en.wikipedia.org infobox logo (Skyworks logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "SMCI": {
+   "file": "SMCI.svg",
+   "source": "en.wikipedia.org infobox logo (Super Micro Computer Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "DLR": {
+   "file": "DLR.svg",
+   "source": "en.wikipedia.org infobox logo (Digital Realty TM Brandmark RGB Black.svg)",
+   "fetched": "2026-10-01"
+  },
+  "CCI": {
+   "file": "CCI.svg",
+   "source": "en.wikipedia.org infobox logo (Crown Castle Logo.svg)",
+   "fetched": "2026-10-01"
+  },
+  "SBAC": {
+   "file": "SBAC.svg",
+   "source": "en.wikipedia.org infobox logo (SBA Communications Logo.svg)",
+   "fetched": "2026-10-01"
   }
  }
 }
