@@ -1634,6 +1634,184 @@
    "file": "ZTS.svg",
    "source": "en.wikipedia.org infobox logo (Zoetis logo.svg)",
    "fetched": "2026-09-30"
+  },
+  "VLTO": {
+   "file": "VLTO.svg",
+   "source": "en.wikipedia.org infobox logo (Veralto_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "XYL": {
+   "file": "XYL.svg",
+   "source": "en.wikipedia.org infobox logo (Xylem_Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "FE": {
+   "file": "FE.svg",
+   "source": "en.wikipedia.org infobox logo (FirstEnergy Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "EIX": {
+   "file": "EIX.svg",
+   "source": "en.wikipedia.org infobox logo (Edison International Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "NRG": {
+   "file": "NRG.svg",
+   "source": "en.wikipedia.org infobox logo (NRG Energy logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "CMS": {
+   "file": "CMS.png",
+   "source": "en.wikipedia.org infobox logo (CMS Energy logo.png)",
+   "fetched": "2026-09-30",
+   "note": "PNG 640x151"
+  },
+  "NI": {
+   "file": "NI.svg",
+   "source": "en.wikipedia.org infobox logo (Nisource logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "EVRG": {
+   "file": "EVRG.svg",
+   "source": "en.wikipedia.org infobox logo (Evergy logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "LNT": {
+   "file": "LNT.svg",
+   "source": "en.wikipedia.org infobox logo (Alliant Energy logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PNW": {
+   "file": "PNW.png",
+   "source": "en.wikipedia.org infobox logo (Pinnacle West Capital logo.png)",
+   "fetched": "2026-09-30",
+   "note": "PNG 1000x188"
+  },
+  "AES": {
+   "file": "AES.svg",
+   "source": "en.wikipedia.org infobox logo (AES Corporation logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "BE": {
+   "file": "BE.svg",
+   "source": "en.wikipedia.org infobox logo (bloomenergylogo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "WMB": {
+   "file": "WMB.svg",
+   "source": "en.wikipedia.org infobox logo (Williams Companies logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "TRGP": {
+   "file": "TRGP.svg",
+   "source": "en.wikipedia.org infobox logo (Targa Resources logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "OKE": {
+   "file": "OKE.svg",
+   "source": "en.wikipedia.org infobox logo (ONEOK Logo .svg)",
+   "fetched": "2026-09-30"
+  },
+  "DVN": {
+   "file": "DVN.svg",
+   "source": "en.wikipedia.org infobox logo (Devon-Energy-Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "OXY": {
+   "file": "OXY.svg",
+   "source": "en.wikipedia.org infobox logo (OXY LOGO.svg)",
+   "fetched": "2026-09-30"
+  },
+  "HAL": {
+   "file": "HAL.svg",
+   "source": "en.wikipedia.org infobox logo (Halliburton logo.svg, via commons.wikimedia.org)",
+   "fetched": "2026-09-30"
+  },
+  "EXE": {
+   "file": "EXE.svg",
+   "source": "commons.wikimedia.org (Expand Logo.svg; en.wikipedia infobox logo field is empty)",
+   "fetched": "2026-09-30"
+  },
+  "APA": {
+   "file": "APA.svg",
+   "source": "en.wikipedia.org infobox logo (ApacheLogo.svg)",
+   "fetched": "2026-09-30",
+   "check": "APA Corporation is the holding company; the Wikipedia infobox shows the Apache wordmark, APA Corporation own mark was not found on Commons; confirm"
+  },
+  "FSLR": {
+   "file": "FSLR.svg",
+   "source": "en.wikipedia.org infobox logo (First_Solar_logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "GNRC": {
+   "file": "GNRC.png",
+   "source": "en.wikipedia.org infobox logo (Generac_Power_Systems_logo.png, 448x100 px)",
+   "fetched": "2026-09-30"
+  },
+  "HUBB": {
+   "file": "HUBB.png",
+   "source": "en.wikipedia.org infobox logo (Hubbell-corporate primary digital logo color.png, 2000x816 px)",
+   "fetched": "2026-09-30"
+  },
+  "D": {
+   "file": "D.svg",
+   "source": "en.wikipedia.org infobox logo (Dominion Energy logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "SRE": {
+   "file": "SRE.jpg",
+   "source": "en.wikipedia.org infobox logo (Sempra h tm rgb c.jpg), JPG 1551 px wide because no SVG of the current mark was found",
+   "fetched": "2026-09-30"
+  },
+  "ETR": {
+   "file": "ETR.svg",
+   "source": "en.wikipedia.org infobox logo (Entergy 2022.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ED": {
+   "file": "ED.svg",
+   "source": "en.wikipedia.org infobox logo (ConEd logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PEG": {
+   "file": "PEG.svg",
+   "source": "en.wikipedia.org infobox logo (PSEG logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "WEC": {
+   "file": "WEC.svg",
+   "source": "en.wikipedia.org infobox logo (WEC Energy Group Logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "AEE": {
+   "file": "AEE.svg",
+   "source": "en.wikipedia.org infobox logo (Ameren logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PCG": {
+   "file": "PCG.svg",
+   "source": "en.wikipedia.org infobox logo (Pacific Gas and Electric Company logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "DTE": {
+   "file": "DTE.svg",
+   "source": "en.wikipedia.org infobox logo (DTE Logo Blue.svg)",
+   "fetched": "2026-09-30"
+  },
+  "PPL": {
+   "file": "PPL.svg",
+   "source": "en.wikipedia.org infobox logo (Pennsylvania Power and Light logo.svg, shows the current ppl mark)",
+   "fetched": "2026-09-30"
+  },
+  "CNP": {
+   "file": "CNP.svg",
+   "source": "en.wikipedia.org infobox logo (CenterPoint Energy logo.svg)",
+   "fetched": "2026-09-30"
+  },
+  "ES": {
+   "file": "ES.svg",
+   "source": "en.wikipedia.org infobox logo (Eversource Energy Logo.svg)",
+   "fetched": "2026-09-30"
   }
  }
 }
