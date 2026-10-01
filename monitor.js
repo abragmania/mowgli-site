@@ -243,7 +243,8 @@ function drawEtf() {
 }
 
 /* ---------- breadth ---------- */
-const line = (H, k, col, max = 100) => { const v = H.map((x) => x[k]).filter((x) => x != null); if (v.length < 2) return ''; return `<svg viewBox="0 0 200 30" preserveAspectRatio="none">${max === 100 ? '<line x1="0" x2="200" y1="15" y2="15" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>' : ''}<path d="${v.map((y, i) => (i ? 'L' : 'M') + (i / (v.length - 1) * 200).toFixed(1) + ' ' + (30 - y / max * 30).toFixed(1)).join('')}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`; };
+// days before the series was recorded are left off; a missing day inside it (a gap marker, D84) breaks the line
+const line = (H, k, col, max = 100) => { const all = H.map((x) => x[k] ?? null), f = all.findIndex((x) => x != null), v = f < 0 ? [] : all.slice(f); if (v.filter((x) => x != null).length < 2) return ''; let pen = 'M'; const d = v.map((y, i) => { if (y == null) { pen = 'M'; return ''; } const s = pen + (i / (v.length - 1) * 200).toFixed(1) + ' ' + (30 - y / max * 30).toFixed(1); pen = 'L'; return s; }).join(''); return `<svg viewBox="0 0 200 30" preserveAspectRatio="none">${max === 100 ? '<line x1="0" x2="200" y1="15" y2="15" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>' : ''}<path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`; };
 const split = (a, b) => `<div class="bar"><i class="u" style="width:${a / (a + b || 1) * 100}%"></i><i class="d" style="width:${b / (a + b || 1) * 100}%"></i></div>`;
 const vfmt = (v) => (v / 1e9).toFixed(2) + 'B';
 const pctOf = (list, k) => { const known = list.filter((s) => s[k] != null); return known.length ? known.filter((s) => s[k]).length / known.length * 100 : null; };
@@ -339,7 +340,7 @@ let sel = 0, hits = [];
 /* ---------- data ---------- */
 function adopt(p) {
   P = p;
-  D = { stocks: p.stocks || [], etf: p.sectors || {}, watch: p.watch || [], breadthHist: p.breadthHist || [] };
+  D = { stocks: p.stocks || [], etf: p.sectors || {}, watch: p.watch || [], breadthHist: p.breadthHist || [] };   // a gap marker ({ d, gap: true }) has no values: a break in the chart
   GR = p.groupings || GR; GCACHE = {}; D.grp = [...D.stocks, ...(p.extra || [])];
   bySec = {}; D.stocks.forEach((s) => (bySec[s.sec] = bySec[s.sec] || []).push(s));
 }
