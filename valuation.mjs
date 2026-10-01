@@ -264,6 +264,33 @@ export function parseAuthorisation(text) {
   return { ...best, expiry };
 }
 
+// ---------- valuation box (D86) ----------
+
+// One measure of data/reference/financials.json valuationBox.measures from its inputs. inputs[name] is a number
+// or {missing: reason}. Returns {v} (multiple), {pct} (yield), {nm: true, reason} or {missing: true, reason}.
+export function boxMeasure(m, inputs) {
+  if (m.forcedNm) return { nm: true, reason: m.forcedNm };
+  const num = inputs[m.numerator], den = inputs[m.denominator];
+  for (const [x, k] of [[num, m.numerator], [den, m.denominator]]) {
+    if (typeof x !== 'number' || !Number.isFinite(x)) return { missing: true, reason: (x && x.missing) || `${k} is not available` };
+  }
+  const rules = m.nm || [];
+  if (rules.includes('denominatorNotPositive') && !(den > 0)) return { nm: true, reason: m.nmReason?.denominatorNotPositive || 'the denominator is zero or negative' };
+  if (rules.includes('numeratorNotPositive') && !(num > 0)) return { nm: true, reason: m.nmReason?.numeratorNotPositive || 'the numerator is zero or negative' };
+  if (den === 0) return { nm: true, reason: 'divides by zero' };
+  return m.kind === 'yield' ? { pct: (num / den) * 100 } : { v: num / den };
+}
+
+// Today's figures of a valuation box (server/lib/valuation_box.js buildValuationBox) at a live price per share
+// and market value: {status, basis, measures: [{id, v|pct|nm|missing, reason?}]}.
+export function valuationBoxNow(box, pps, mv) {
+  if (!box) return null;
+  if (box.status !== 'ok') return { status: box.status, reason: box.reason || null };
+  const ev = box.ev?.missing ? { missing: box.ev.missing } : typeof mv === 'number' ? mv + box.ev.net : { missing: 'no market value' };
+  const inputs = { ...box.flows, price: typeof pps === 'number' ? pps : { missing: 'no price' }, marketValue: typeof mv === 'number' ? mv : { missing: 'no market value' }, ev };
+  return { status: 'ok', basis: box.basis, evValue: typeof ev === 'number' ? ev : null, measures: box.measures.map((m) => ({ id: m.id, ...boxMeasure(m, inputs) })) };
+}
+
 // "Next 12" buyback yield (D53): a dated authorisation ÷ market value. Expiring within 12 months of
 // `today`: a percentage. Window longer than 12 months: the amount with its window, no percentage.
 export function buybackYieldNext(auth, mv, today) {
@@ -275,7 +302,7 @@ export function buybackYieldNext(auth, mv, today) {
 }
 
 // ---- valuation(), copied from server/lib/company.js by server/publish/build.js ----
-const M = { pricePerShare, marketValue, sourceText, dividendYield, buybackYieldPrev, buybackYieldNext };
+const M = { pricePerShare, marketValue, sourceText, valuationBoxNow, dividendYield, buybackYieldPrev, buybackYieldNext };
 export function valuation(inputs, price, today = new Date().toISOString().slice(0, 10)) {
   if (!inputs || typeof price !== 'number') return null;
   const sameCurrency = inputs.statementsCurrency === inputs.priceCurrency;
@@ -290,6 +317,8 @@ export function valuation(inputs, price, today = new Date().toISOString().slice(
       sharesDate: inputs.shares.date,
     };
   }
+  // D86: today's multiples and yields (the box itself says when the statements' currency blocks them)
+  if (inputs.box) out.valuationBox = M.valuationBoxNow(inputs.box, pps, mv);
   if (!sameCurrency) {
     const why = `Statements are in ${inputs.statementsCurrency}, the price in ${inputs.priceCurrency}; no currency conversion yet, so this is not computed.`;
     out.dividendYield = { na: true, src: why };
