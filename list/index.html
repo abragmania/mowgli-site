@@ -211,6 +211,7 @@ function setupSwitcher() {
   let p = null, stale = false;
   try { const u = MG.monitorUrl(); if (!u) throw 0; p = await fetch(u).then((r) => { if (!r.ok) throw 0; return r.json(); }); stale = !!p.stale; }
   catch { try { p = await fetch(MG.monitorBakedUrl()).then((r) => r.json()); stale = true; } catch { return; } }
+  if (!p.groupings) { try { const u = MG.monitorBakedUrl(); if (u) { const b = await fetch(u).then((r) => (r.ok ? r.json() : null)); p.groupings = b?.groupings || null; } } catch {} }
   if (p.groupings) { G = p.groupings; for (const x of [...(p.extra || []), ...(p.stocks || [])]) Q[sym(x.s)] = x; for (const [t, v] of Object.entries(G.co)) if (v[4] && Q[t] && !Q[v[4]]) Q[v[4]] = Q[t]; draw(document.getElementById('f').value); }
   const q = new Date(p.quoteTime || p.asOf);
   const et = q.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
