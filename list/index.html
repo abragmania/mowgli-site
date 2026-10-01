@@ -148,8 +148,8 @@ function draw(q) {
     const m = inCat[c.id] || {};
     const direct = table(m[''] || []);
     let body = direct.length ? tb(direct) : '', sn = '', nsub = 0;
-    c.subs.forEach((s, j) => { const x = table(m[s.id] || []); if (x.length) { const id = `s-${i + 1}-${j + 1}`, o = filt || OPEN.has(id); nsub++; body += `<div class="sub" id="${id}"><h3><button type="button" class="tg" aria-expanded="${o}" aria-controls="${id}-t"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}.${j + 1}</i>${esc(s.name)}<em>${x.length}</em></button></h3>${tb(x, ` id="${id}-t"${o ? '' : ' hidden'}`)}</div>`; sn += `<a class="s" href="#s-${i + 1}-${j + 1}"><i>${i + 1}.${j + 1}</i>${esc(s.name)}</a>`; } });
-    if (body) { html += `<section class="cat pad" id="c-${i + 1}"><h2><i>${i + 1}</i>${esc(c.name)}${nsub > 1 ? '<button type="button" class="ea"></button>' : ''}</h2>${body}</section>`; const ro = RAILOPEN.has(`c-${i + 1}`) || filt; nav += `<div class="rc" id="rc-${i + 1}"><button type="button" class="rt" data-c="c-${i + 1}" aria-expanded="${ro}" aria-controls="rs-${i + 1}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}</i>${esc(c.name)}</button><div class="rs" id="rs-${i + 1}"${ro ? '' : ' hidden'}>${sn}</div></div>`; chips += `<a class="chip" href="#c-${i + 1}"><i>${i + 1}</i>${esc(c.name)}</a>`; }
+    c.subs.forEach((s, j) => { const x = table(m[s.id] || []); if (x.length) { const id = `s-${i + 1}-${j + 1}`, o = filt || OPEN.has(id) || id === JUMP; nsub++; body += `<div class="sub" id="${id}"><h3><button type="button" class="tg" aria-expanded="${o}" aria-controls="${id}-t"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}.${j + 1}</i>${esc(s.name)}<em>${x.length}</em></button></h3>${tb(x, ` id="${id}-t"${o ? '' : ' hidden'}`)}</div>`; sn += `<a class="s" href="#s-${i + 1}-${j + 1}"><i>${i + 1}.${j + 1}</i>${esc(s.name)}</a>`; } });
+    if (body) { html += `<section class="cat pad" id="c-${i + 1}"><h2><i>${i + 1}</i>${esc(c.name)}${nsub > 1 ? '<button type="button" class="ea"></button>' : ''}</h2>${body}</section>`; const ro = RAILOPEN.has(`c-${i + 1}`) || filt || JUMPCAT === `c-${i + 1}`; nav += `<div class="rc" id="rc-${i + 1}"><button type="button" class="rt" data-c="c-${i + 1}" aria-expanded="${ro}" aria-controls="rs-${i + 1}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}</i>${esc(c.name)}</button><div class="rs" id="rs-${i + 1}"${ro ? '' : ' hidden'}>${sn}</div></div>`; chips += `<a class="chip" href="#c-${i + 1}"><i>${i + 1}</i>${esc(c.name)}</a>`; }
   });
   const loose = all.filter((c) => { const v = G.co[sym(c.ticker)]; return !(v && (v[4] ? G.co[v[4]]?.[0] : v[0])); }).map((c) => sym(c.ticker));
   const lb = table(loose);
@@ -159,7 +159,11 @@ function draw(q) {
   rail.innerHTML = nav;
   document.querySelectorAll('.cat').forEach(eaLabel);
   watch();
+  if (!jumped && location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) { jumped = true; t.scrollIntoView(); } } // the first draw with the Cats in it
 }
+let jumped = false;
+// a link from a company page (#c-2, #s-2-3): that Sub and its Cat open this visit, whatever the saved state says (not saved)
+const JUMP = /^s-\d+-\d+$/.test(location.hash.slice(1)) ? location.hash.slice(1) : '', JUMPCAT = location.hash.slice(1).replace(/^s-(\d+)-\d+$/, 'c-$1');
 const RAILOPEN = new Set();
 try { JSON.parse(localStorage.getItem('mgListRailOpen') || '[]').forEach((x) => RAILOPEN.add(x)); } catch {}
 const saveRail = () => { try { localStorage.setItem('mgListRailOpen', JSON.stringify([...RAILOPEN])); } catch {} };
