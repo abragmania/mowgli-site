@@ -60,6 +60,17 @@ body{background:radial-gradient(ellipse at 40% -10%,#0e2a2e 0%,#0a1a20 45%,#0509
 .rail a.s{padding-left:1.6rem;color:var(--mut)}.rail a.s i{color:var(--accx);opacity:.8}
 .rail a:hover{background:rgba(255,255,255,.07);color:#fff}
 .rail a.on{background:var(--accbg);color:#fff}
+.rt{display:flex;align-items:baseline;gap:.5rem;width:100%;background:none;border:0;border-radius:9px;text-align:left;color:var(--ink);font:700 .85rem Manrope,system-ui,sans-serif;padding:.28rem .6rem;line-height:1.25;margin-top:.5rem;cursor:pointer}
+.rt svg{width:.7rem;height:.7rem;flex:none;fill:none;stroke:currentColor;stroke-width:2;transition:transform .15s;align-self:center}
+.rt[aria-expanded=true] svg{transform:rotate(90deg)}
+.rt i{font-style:normal;color:var(--dust);font-weight:700;min-width:1.2rem;font-variant-numeric:tabular-nums}
+.rt:hover{background:rgba(255,255,255,.07);color:#fff}.rt.on{background:var(--accbg);color:#fff}
+.rt:focus-visible,.chip:focus-visible{outline:2px solid var(--accx);outline-offset:1px}
+.rs[hidden]{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:-.4rem 0 1.1rem;max-width:calc(17rem + var(--gap) + 56rem)}
+.chip{background:rgba(255,255,255,.07);border:1px solid var(--sub2);border-radius:999px;color:var(--ink2);font:600 .8rem Manrope,system-ui,sans-serif;padding:.32rem .85rem;cursor:pointer;text-decoration:none}
+.chip i{font-style:normal;color:var(--dust);font-weight:800;margin-right:.4rem}
+.chip:hover{color:#fff;background:rgba(255,255,255,.13)}
 .main{min-width:0}
 .cat{padding:.8rem 1.1rem .9rem;margin-bottom:.9rem;scroll-margin-top:1rem}
 .cat h2{display:flex;align-items:baseline;font:600 1.45rem Fraunces,Georgia,serif;color:#f3f0e8;padding-bottom:.4rem;border-bottom:1px solid var(--line);margin-bottom:.2rem}
@@ -99,6 +110,7 @@ div.row:not(.hd){color:var(--mut)}div.row:not(.hd) .co span{opacity:.75}
 </div>
 <div class="body">
 <div class="bar2"><h1>Cats and Subs</h1><input id="f" type="search" placeholder="Filter…" aria-label="Filter companies"></div>
+<nav class="chips" id="cc" aria-label="Jump to a Cat"></nav>
 <div class="lay"><nav class="rail pad" id="rail" aria-label="Cats and Subs"></nav><div class="main" id="g"></div></div>
 </div>
 <script src="/mowgli-site/config.js"></script>
@@ -131,22 +143,35 @@ function draw(q) {
     if (v[4] || !v[0]) continue;
     ((inCat[v[0]] ||= {})[v[1] || ''] ||= []).push(t);
   }
-  let html = '', nav = '';
+  let html = '', nav = '', chips = '';
   G.cats.forEach((c, i) => {
     const m = inCat[c.id] || {};
     const direct = table(m[''] || []);
     let body = direct.length ? tb(direct) : '', sn = '', nsub = 0;
     c.subs.forEach((s, j) => { const x = table(m[s.id] || []); if (x.length) { const id = `s-${i + 1}-${j + 1}`, o = filt || OPEN.has(id); nsub++; body += `<div class="sub" id="${id}"><h3><button type="button" class="tg" aria-expanded="${o}" aria-controls="${id}-t"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}.${j + 1}</i>${esc(s.name)}<em>${x.length}</em></button></h3>${tb(x, ` id="${id}-t"${o ? '' : ' hidden'}`)}</div>`; sn += `<a class="s" href="#s-${i + 1}-${j + 1}"><i>${i + 1}.${j + 1}</i>${esc(s.name)}</a>`; } });
-    if (body) { html += `<section class="cat pad" id="c-${i + 1}"><h2><i>${i + 1}</i>${esc(c.name)}${nsub > 1 ? '<button type="button" class="ea"></button>' : ''}</h2>${body}</section>`; nav += `<a class="c" href="#c-${i + 1}"><i>${i + 1}</i>${esc(c.name)}</a>${sn}`; }
+    if (body) { html += `<section class="cat pad" id="c-${i + 1}"><h2><i>${i + 1}</i>${esc(c.name)}${nsub > 1 ? '<button type="button" class="ea"></button>' : ''}</h2>${body}</section>`; const ro = RAILOPEN.has(`c-${i + 1}`) || filt; nav += `<div class="rc" id="rc-${i + 1}"><button type="button" class="rt" data-c="c-${i + 1}" aria-expanded="${ro}" aria-controls="rs-${i + 1}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}</i>${esc(c.name)}</button><div class="rs" id="rs-${i + 1}"${ro ? '' : ' hidden'}>${sn}</div></div>`; chips += `<a class="chip" href="#c-${i + 1}"><i>${i + 1}</i>${esc(c.name)}</a>`; }
   });
   const loose = all.filter((c) => { const v = G.co[sym(c.ticker)]; return !(v && (v[4] ? G.co[v[4]]?.[0] : v[0])); }).map((c) => sym(c.ticker));
   const lb = table(loose);
-  if (lb.length) { html += `<section class="cat pad" id="c-x"><h2>Not yet placed</h2>${tb(lb)}</section>`; nav += '<a class="c" href="#c-x"><i></i>Not yet placed</a>'; }
+  if (lb.length) { html += `<section class="cat pad" id="c-x"><h2>Not yet placed</h2>${tb(lb)}</section>`; nav += '<a class="c" href="#c-x"><i></i>Not yet placed</a>'; chips += '<a class="chip" href="#c-x">Not yet placed</a>'; }
+  document.getElementById('cc').innerHTML = chips;
   g.innerHTML = html || '<div class="none">No match.</div>';
   rail.innerHTML = nav;
   document.querySelectorAll('.cat').forEach(eaLabel);
   watch();
 }
+const RAILOPEN = new Set();
+try { JSON.parse(localStorage.getItem('mgListRailOpen') || '[]').forEach((x) => RAILOPEN.add(x)); } catch {}
+const saveRail = () => { try { localStorage.setItem('mgListRailOpen', JSON.stringify([...RAILOPEN])); } catch {} };
+function setRail(btn, o) { btn.setAttribute('aria-expanded', o); btn.nextElementSibling.hidden = !o; }
+document.getElementById('rail').addEventListener('click', (e) => {
+  const b = e.target.closest('.rt'); if (!b) return;
+  const o = b.getAttribute('aria-expanded') !== 'true';
+  setRail(b, o);
+  if (!filtering()) { o ? RAILOPEN.add(b.dataset.c) : RAILOPEN.delete(b.dataset.c); saveRail(); }
+});
+const scrollTo2 = (id) => { const t = document.getElementById(id); if (t) t.scrollIntoView({ behavior: 'smooth' }); };
+document.getElementById('cc').addEventListener('click', (e) => { const a = e.target.closest('.chip'); if (!a) return; e.preventDefault(); scrollTo2(a.getAttribute('href').slice(1)); });
 const OPEN = new Set();
 try { JSON.parse(localStorage.getItem('mgListOpen') || '[]').forEach((x) => OPEN.add(x)); } catch {}
 const saveOpen = () => { try { localStorage.setItem('mgListOpen', JSON.stringify([...OPEN])); } catch {} };
@@ -170,7 +195,11 @@ let io = null;
 function watch() {
   if (io) io.disconnect();
   const links = [...document.querySelectorAll('#rail a')];
-  const mark = (id) => links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+  const mark = (id) => {
+    links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+    const cid = id.startsWith('s-') ? 'c-' + id.split('-')[1] : id;
+    document.querySelectorAll('#rail .rt').forEach((b) => { b.classList.toggle('on', b.dataset.c === id); if (b.dataset.c === cid && b.getAttribute('aria-expanded') !== 'true') setRail(b, true); });
+  };
   links.forEach((a) => a.addEventListener('click', (ev) => { ev.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t && t.classList.contains('sub')) { setSub(t, true); eaLabel(t.closest('.cat')); saveOpen(); } if (t) t.scrollIntoView({ behavior: 'smooth' }); mark(a.getAttribute('href').slice(1)); }));
   const els = [...document.querySelectorAll('.cat,.sub')];
   io = new IntersectionObserver((en) => { const v = en.filter((x) => x.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]; if (v) { mark(v.target.id); const a = document.querySelector('#rail a.on'); if (a) a.scrollIntoView({ block: 'nearest' }); } }, { rootMargin: '0px 0px -75% 0px' });
