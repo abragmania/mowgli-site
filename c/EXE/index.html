@@ -495,6 +495,39 @@ body.instant .fcol{transition:none}
 .tile{container-type:inline-size}
 .tile .in{height:auto}
 .door.xpl{cursor:pointer}
+/* Financials tile: a grid of measure cells (label, figure, bars with a zero line, axis, one comparison line); expanded: quarters, TTM line, years */
+.fgr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.05em 1.3em;align-content:start}
+.fc{display:flex;flex-direction:column;min-width:0}
+.fc>span{font-size:.74em;color:var(--mut);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc>b{font-size:1.45em;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1.15;white-space:nowrap;cursor:help}
+.fc>em{font-style:normal;font-size:.7em;color:var(--mut);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1em}
+.fc>em span{font-weight:800}.fc>em span[title]{cursor:help}
+.fsp{position:relative;display:flex;gap:2px;height:2.5em;margin:.35em 0 .12em}
+.fsp s{flex:1;position:relative;text-decoration:none;min-width:0}
+.fsp s:hover{background:var(--sub)}
+.fsp s.ms::after{content:'';position:absolute;left:15%;right:15%;bottom:0;height:2px;border-radius:1px;background:var(--line)}
+.fc>b sup.calc{font-size:.36em;font-weight:700;letter-spacing:.4px;color:var(--mut);vertical-align:super;margin-left:.3em;text-transform:uppercase}
+.fsp i{position:absolute;left:0;right:0;min-height:2px;border-radius:2px;background:color-mix(in oklab,var(--accx) 30%,transparent)}
+.fsp i.cu{background:var(--accx)}
+.fsp i.ng{background:color-mix(in oklab,var(--dn) 55%,transparent)}.fsp i.ng.cu{background:var(--dn)}
+.fsp u{position:absolute;left:0;right:0;height:1px;background:var(--mut);opacity:.55}
+.fax{display:flex;justify-content:space-between;font-size:.56em;color:var(--mut);white-space:nowrap}
+.fin .std{min-width:0}
+.fnt{margin-top:.75em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.open .fnt{white-space:normal}
+.ftb{display:flex;flex-direction:column}
+.ftr{display:grid;grid-template-columns:8.6em repeat(3,minmax(0,1fr));gap:1.1em;align-items:center;padding:.3em 0;border-bottom:1px solid var(--line)}
+.ftr>span{font-size:.8em;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ftr.fth>span{font-size:.66em;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
+.ftr.fth>span small{display:block;font-size:.95em;font-weight:600;letter-spacing:0;text-transform:none;margin-top:.15em}
+.ftr .fsp{height:2.2em;margin:0}
+.ftl{position:relative;height:2.2em}
+.ftl svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ftl polyline,.ftl line{fill:none;stroke:var(--accx);stroke-width:1.8;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.ftl line.z{stroke:var(--mut);stroke-width:1;opacity:.55}
+.fhv{position:absolute;inset:0;display:flex}.fhv s{flex:1;text-decoration:none}.fhv s:hover{background:var(--sub)}
+@container (max-width:1100px){.tile.open .fgr{grid-template-columns:repeat(2,minmax(0,1fr))}.ftr{grid-template-columns:7.2em repeat(3,minmax(0,1fr));gap:.8em}}
+.ftr.fth>span{overflow:visible}
 .door.soon{opacity:1;color:var(--ink2);background:var(--sub2)}
 body .hero .hl{display:none!important}
 body .hero .hr{display:block!important;height:auto;width:auto;max-height:3rem;max-width:13rem;object-fit:contain;background:#eef0f4;border-radius:12px;padding:.4rem .8rem;box-sizing:content-box;filter:none!important;box-shadow:0 6px 24px rgba(0,0,0,.35)}

@@ -182,33 +182,95 @@ function spark(series, fmt, cur) {
   return `<div class="spk">${vals.map((v, i) => v == null ? `<i style="height:0;background:none"${T('missing')}></i>` : `<i style="height:${Math.max(6, (v - mn) / (mx - mn || 1) * 100)}%${v < 0 ? ';background:color-mix(in oklab,var(--dn) 55%,transparent)' : ''}"${T((series[i].src ? '' : '') + fmt(v, cur) + (series[i].src ? '\n' + series[i].src : ''))}></i>`).join('')}</div>`;
 }
 
+/* Financials tile cells (server/lib/fin_cells.js): bars with a zero line, so a negative value hangs below it */
+const fmtUnit = (u, v, cur) => (u === 'pct' ? pct(v) : u === 'perShare' ? perShare(v, cur) : money(v, cur));
+function bars(points, fmt, kind) {
+  const vals = (points || []).map((p) => (typeof p.v === 'number' ? p.v : null)), got = vals.filter((v) => v != null);
+  if (!got.length) return '';
+  const mx = Math.max(...got, 0), mn = Math.min(...got, 0), rg = mx - mn || 1, z = (mx / rg) * 100;
+  const last = vals.length - 1;
+  const slot = (p, i) => {
+    const v = vals[i], tip = `${p.p}${p.k || kind ? ' · ' + (p.k || kind) : ''}\n${v != null ? fmt(v) : p.nm ? 'n.m.' + (p.reason ? ': ' + p.reason : '') : p.note || 'not in the filings data'}${v != null && p.note ? '\n' + p.note : ''}`;
+    if (v == null) return `<s class="ms"${T(tip)}></s>`;
+    const top = v >= 0 ? z - (v / rg) * 100 : z, h = Math.abs(v) / rg * 100;
+    return `<s${T(tip)}><i class="${v < 0 ? 'ng' : ''}${i === last ? ' cu' : ''}" style="top:${top.toFixed(1)}%;height:${h.toFixed(1)}%"></i></s>`;
+  };
+  return `<div class="fsp">${mn < 0 ? `<u style="top:${z.toFixed(1)}%"></u>` : ''}${points.map(slot).join('')}</div>`;
+}
+// the rolling-TTM line of the expanded view: segments break where a TTM is missing; hover any slot for its value
+function tline(points, fmt) {
+  const vals = (points || []).map((p) => (typeof p.v === 'number' ? p.v : null)), got = vals.filter((v) => v != null);
+  if (!got.length) return '';
+  // scaled to its own range (a line needs no zero base), but never stretched over less than a fifth of its size, so a flat series stays flat
+  let mx = Math.max(...got), mn = Math.min(...got);
+  const need = .2 * Math.max(Math.abs(mx), Math.abs(mn)), mid = (mx + mn) / 2;
+  if (mx - mn < need) { mx = mid + need / 2; mn = mid - need / 2; }
+  const rg = mx - mn || 1, n = vals.length;
+  const X = (i) => ((i + .5) / n) * 100, Y = (v) => 2 + (1 - (v - mn) / rg) * 36;
+  const segs = []; let run = [];
+  vals.forEach((v, i) => { if (v == null) { if (run.length) segs.push(run); run = []; } else run.push([X(i), Y(v)]); });
+  if (run.length) segs.push(run);
+  const lines = segs.map((sg) => (sg.length > 1 ? `<polyline points="${sg.map(([a, b]) => a.toFixed(2) + ',' + b.toFixed(2)).join(' ')}"/>` : `<line x1="${(sg[0][0] - .8).toFixed(2)}" x2="${(sg[0][0] + .8).toFixed(2)}" y1="${sg[0][1].toFixed(2)}" y2="${sg[0][1].toFixed(2)}"/>`)).join('');
+  const zero = mn < 0 && mx > 0 ? `<line class="z" x1="0" x2="100" y1="${Y(0).toFixed(2)}" y2="${Y(0).toFixed(2)}"/>` : '';
+  const hov = points.map((p, i) => `<s${T(`${p.p} · trailing twelve months\n${vals[i] != null ? fmt(vals[i]) : p.nm ? 'n.m.' + (p.reason ? ': ' + p.reason : '') : 'missing'}${p.note ? '\n' + p.note : ''}`)}></s>`).join('');
+  return `<div class="ftl"><svg viewBox="0 0 100 40" preserveAspectRatio="none">${zero}${lines}</svg><div class="fhv">${hov}</div></div>`;
+}
+const shortP = (p) => String(p || '').replace(/FY(\d{2})(\d{2})\b/, 'FY$2');
+function vsHtml(x, cur) {
+  const v = x.vs;
+  if (!v) return '';
+  const t = T(x.vsLabel);
+  if (v.pts != null) return `<span class="${cls(v.pts)}"${t}>${v.pts > 0 ? '+' : v.pts < 0 ? '−' : ''}${Math.abs(v.pts).toFixed(1)} pts</span> vs ${esc(v.vs)}`;
+  if (v.change != null) return `${v.release ? `<span${t}>release</span> · ` : ''}<span${t}>${v.change > 0 ? '+' : ''}${money(v.change, cur)}</span> vs ${esc(v.vs)}`;
+  if (v.pct != null) return `<span class="${cls(v.pct)}"${t}>${spct(v.pct)}</span> vs ${esc(v.vs)}`;
+  return `<span${t}>${esc(v.words)}</span> vs ${esc(v.vs)}`;
+}
+
 function finTile(c) {
   const f = c.fin;
   if (!f) return '';
-  const h = f.headline, cur = f.currency, ch = f.chart || {};
-  const years = ch.years || [];
-  const axis = years.length ? `<div class="spx"><span>${years[0]}</span><span>${years[years.length - 1]}</span></div>` : '';
-  const card = (label, valHtml, title, sp, em) => `<div class="mc"><span>${label}</span><b${T(title)}>${valHtml}</b>${sp ? sp + axis : ''}${em ? `<em>${em}</em>` : ''}</div>`;
+  const h = f.headline, cur = f.currency;
   const g = h.revenueGrowth || {};
-  const cards = [];
-  cards.push(card(`Revenue · ${h.revenue ? h.revenue.basis : ''}`, h.revenue ? money(h.revenue.v, cur) : DASH, h.revenue ? `${h.revenue.label}\n${h.revenue.src}` : 'No revenue in the filings data', spark(ch.revenue, money, cur), h.revenue ? esc(h.revenue.label) : ''));
-  if (!c.isBank) cards.push(card(`Cash earnings${h.cashEarnings ? ' · ' + h.cashEarnings.basis : ''}`, h.cashEarnings ? money(h.cashEarnings.v, cur) : DASH,
-    h.cashEarnings ? `Operating cash flow − capital spending − stock-based pay (A4), ${h.cashEarnings.label}\n${h.cashEarnings.src}` : 'Not shown: one of operating cash flow, capital spending or stock-based pay is missing from the filings data for the same period',
-    spark(ch.cashEarnings, money, cur), h.cashEarnings ? esc(h.cashEarnings.label) : 'an input is missing'));
-  const mcard = (label, m) => card(`${label} · ${m ? m.basis : ''}`, m ? (m.nm ? 'n.m.' : pct(m.pct)) : DASH, m ? `${m.nm ? 'n.m.: ' + m.reason + '\n' : ''}${m.computed ? 'Gross profit computed as revenue − cost of revenue (A3)\n' : ''}${m.label}\n${m.src}` : 'An input is missing from the filings data', null, m ? esc(m.label) : '');
   const om = h.operatingMargin;
-  if (!c.isBank) cards.push(card(`Operating margin · ${om ? om.basis : ''}`, om ? (om.nm ? 'n.m.' : pct(om.pct)) : DASH, om ? `${om.label}\n${om.src}` : (c.isBank ? 'Banks report no operating income line' : 'An input is missing from the filings data'), spark(ch.operatingMargin, (v) => pct(v)), om ? esc(om.label) : ''));
-  if (c.isBank) cards.push(mcard('Net margin', h.netMargin));
-  cards.push(card('Revenue growth · quarter', g.quarter ? growthHtml(g.quarter, cur) : DASH, g.quarter ? `${g.quarter.label}\n${g.quarter.src}` : 'No same-quarter comparison in the filings data', null, g.quarter ? esc(g.quarter.label) : ''));
-  cards.push(card('Revenue growth · year', g.year ? growthHtml(g.year, cur) : DASH, g.year ? `${g.year.label}\n${g.year.src}` : 'No prior fiscal year in the filings data', null, g.year ? esc(g.year.label) : ''));
-  if (!c.isBank || cards.length < 6) cards.push(card('Revenue, 5-year yearly growth', g.cagr5 ? (g.cagr5.nm ? 'n.m.' : spct(g.cagr5.pct)) : DASH, g.cagr5 ? `${g.cagr5.nm ? 'n.m.: ' + g.cagr5.reason + '\n' : ''}${g.cagr5.label}\n${g.cagr5.src}` : 'Needs both end years in the filings data', null, g.cagr5 ? esc(g.cagr5.label) : ''));
+  const tl = f.tile, cells = tl?.cells || [];
+  const fmtOf = (x) => (v) => fmtUnit(x.unit, v, cur);
+  // main tile: the last ten fiscal years, then the TTM bar (highlighted) when the basis is a TTM that is not itself the latest fiscal year
+  const withTtm = tl && tl.basis.basis === 'TTM' && !tl.basis.isFy;
+  const tileSeries = (x) => {
+    const pts = x.annual.map((p) => ({ ...p, k: 'fiscal year' }));
+    if (withTtm && x.ttm) { const t = x.ttm[x.ttm.length - 1]; pts.push({ ...t, p: 'TTM to ' + t.p, k: 'trailing twelve months', ax: 'TTM' }); }
+    return { pts };
+  };
+  const cell = (x) => {
+    const n = x.now, fm = fmtOf(x);
+    const own = n && n.label !== tl.basis.label ? ` · ${esc(shortP(n.label))}` : '';
+    const val = n ? (n.nm ? 'n.m.' : fm(n.v) + (n.computed ? '<sup class="calc">calc</sup>' : '')) : DASH;
+    const title = [x.def ? `${x.label}: ${x.def}` : x.label, n && `${n.label}${n.note ? ' · ' + n.note : ''}`, n?.nm && 'n.m.: ' + n.reason, n?.src, !n && x.missing?.title].filter(Boolean).join('\n');
+    const s = tileSeries(x), sp = bars(s.pts, fm);
+    const lastP = s.pts[s.pts.length - 1];
+    const ax = `<div class="fax"><span>${sp ? esc(shortP(s.pts[0].p)) : '&nbsp;'}</span><span>${sp ? esc(lastP.ax || shortP(lastP.p)) : ''}</span></div>`;
+    let sub;
+    // free cash flow: its year-ago change, and Mowgli's cash earnings on a second short line
+    if (x.id === 'fcf' && x.cashEarnings) sub = `${n ? vsHtml(x, cur) || '&nbsp;' : '&nbsp;'}</em><em><span${T(`Cash earnings = free cash flow − stock-based pay (A4), ${x.cashEarnings.label}\n${x.cashEarnings.src}`)}>cash earnings ${money(x.cashEarnings.v, cur)}</span>`;
+    else if (n) sub = vsHtml(x, cur);
+    else if (x.fyFigure) sub = `<span${T(`${x.missing?.title || ''}\n${x.fyFigure.label}: ${x.fyFigure.src}`)}>${esc(shortP(x.fyFigure.label))}: ${fm(x.fyFigure.v)}</span>`;
+    else sub = x.missing?.text ? `<span${T(x.missing.title)}>${esc(x.missing.text)}</span>` : '';
+    return `<div class="fc"><span>${esc(x.label)}${own}</span><b${T(title)}>${val}</b>${sp || '<div class="fsp"></div>'}${ax}<em>${sub || '&nbsp;'}</em></div>`;
+  };
   const notes = [];
-  if (!c.isBank) notes.push('Cash earnings = operating cash flow − capital spending − stock-based pay.');
-  if (c.isBank) notes.push('Banks show no capital spending or cash earnings: their operating cash flow swings with lending and deposits.');
+  if (cells.length) notes.push(withTtm ? 'Bars: ten fiscal years, then the trailing twelve months (bright); change vs the twelve months a year earlier.' : 'Bars: ten fiscal years, the latest bright; change vs the year before.');
   if (c.isInsurer) notes.push('Insurers collect premiums long before claims are paid, so a growing insurer’s cash flow looks better than its profit.');
-  if (years.length) notes.push(`Bars run ${years[0]} to ${years[years.length - 1]}.`);
   if (cur !== 'USD') notes.push(`Figures in ${cur}, as filed.`);
-  const std = `<div class="v-self mg">${cards.slice(0, 6).join('')}</div><div class="v-self note" style="margin-top:.5em">${esc(notes.join(' '))}</div>`;
+  const std = `<div class="v-self fgr">${cells.map(cell).join('')}</div><div class="v-self note fnt"${T(notes.join('\n'))}>${esc(notes.join(' '))}</div>`;
+
+  // expanded view: per measure, single quarters, the rolling TTM line and fiscal years
+  const rng = (pts) => (pts?.length ? `${shortP(pts[0].p)}–${shortP(pts[pts.length - 1].p)}` : '');
+  const anyQ = cells.find((x) => x.quarters), anyT = cells.find((x) => x.ttm);
+  const trows = cells.map((x) => {
+    const fm = fmtOf(x);
+    return `<div class="ftr"><span${T(x.def || '')}>${esc(x.label)}</span><div>${x.quarters ? bars(x.quarters, fm, 'quarter') || DASH : ''}</div><div>${x.ttm ? tline(x.ttm, fm) || DASH : DASH}</div><div>${bars(x.annual, fm, 'fiscal year') || DASH}</div></div>`;
+  }).join('');
+  const trends = cells.length ? sec('Trends', `<div class="ftb"><div class="ftr fth"><span></span><span>Quarters<small>${anyQ ? esc(rng(anyQ.quarters)) : '&nbsp;'}</small></span><span${T('Trailing twelve months at each quarter end')}>Trailing year<small>${anyT ? esc(rng(anyT.ttm)) : '&nbsp;'}</small></span><span>Fiscal years<small>${esc(rng(cells[0].annual))}</small></span></div>${trows}</div>`) : '';
 
   const table = (t, title) => {
     if (!t || !t.rows.length) return '';
@@ -227,8 +289,8 @@ function finTile(c) {
     kv('Operating margin', om ? (om.nm ? 'n.m.' : pct(om.pct)) : '', om ? esc(om.label) : '', om ? om.src : ''),
     kv('Net margin', h.netMargin ? (h.netMargin.nm ? 'n.m.' : pct(h.netMargin.pct)) : '', h.netMargin ? esc(h.netMargin.label) : '', h.netMargin ? h.netMargin.src : ''),
   ].join('');
-  const full = `<div class="v-self" style="flex-direction:column">${sec('Margins', margins)}${table(f.annual, 'Annual · growth vs the year before')}${table(f.quarterly, 'Quarterly · growth vs the same quarter a year earlier')}</div>`;
-  const lbl = `<span class="v-self">Financials${h.revenue ? ' · ' + esc(h.revenue.label) : ''}</span>`;
+  const full = `<div class="v-self" style="flex-direction:column">${trends}${sec('Margins', margins)}${table(f.annual, 'Annual · growth vs the year before')}${table(f.quarterly, 'Quarterly · growth vs the same quarter a year earlier')}</div>`;
+  const lbl = `<span class="v-self">Financials${tl ? ' · ' + esc(tl.basis.label) : h.revenue ? ' · ' + esc(h.revenue.label) : ''}</span>`;
   const door = '<span class="door soon" title="coming">Full financials (coming)</span>';
   const peek = [h.revenue && `Revenue <b>${money(h.revenue.v, cur)}</b>`, g.quarter?.pct != null && `<b class="${cls(g.quarter.pct)}">${spct(g.quarter.pct)}</b> last quarter`, om && om.pct != null && `operating margin <b>${pct(om.pct)}</b>`].filter(Boolean).join(' · ');
   return tile('fin', lbl, peek, std, full, door);
