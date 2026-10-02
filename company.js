@@ -76,11 +76,79 @@ function applyTheme(theme) {
 function drawStars() { stars($('#st1'), 1400, mix('#dce1ff', DUST, .15), .7, 1.4, 11); stars($('#st2'), 120, mix('#fff5e1', DUST, .25), .9, 2.0, 29); }
 function sizeBand() { const h = $('.head').getBoundingClientRect(); document.body.style.setProperty('--bandh', (h.bottom + Math.max(18, h.height * .28)) + 'px'); }
 
+/* ---------- D90 switchboard: what each box draws (public/lib/switchboard.mjs resolves Adam's switches) ----------
+   S.st(id, d) is 'MAIN' (the box's main view), 'ON' (the expanded view only) or null (not drawn). d is the day-one
+   state written at each call site: it is used only when the switchboard could not be loaded, so the page then draws
+   the day-one defaults (with a small notice) instead of a blank. */
+let SB = null, SBLIB = null, SBERR = null, S = null;
+// slots the live price fills: drawn with a dash even when the payload has no data for them (absentFrom calls them absent)
+const ALWAYS = ['marketValue', 'dividendYield', 'buybackYield', 'sharesValue.marketValueLine'];
+const DAY_ONE_BOXES = ['company', 'cls', 'money', 'next', 'brands', 'fin', 'val', 'geo', 'earn'];
+let SBSEQ = 0, SBSTALE = null; // SBSTALE: why the last refresh failed while earlier switches are still in use
+async function loadSwitchboard() {
+  const seq = ++SBSEQ;
+  try {
+    const [lib, r] = await Promise.all([import(MG.base + 'lib/switchboard.mjs'), fetch(MG.switchboardUrl(), { cache: 'no-store' })]);
+    const j = await r.json();
+    if (!r.ok || !j?.catalogLite || !j?.settings) throw new Error(j?.error?.message || `switchboard answered ${r.status}`);
+    if (seq !== SBSEQ) return false; // a newer request is under way
+    SBLIB = lib; SB = j; SBERR = null; SBSTALE = null;
+  } catch (e) {
+    if (seq !== SBSEQ) return false;
+    if (SB) SBSTALE = e.message || String(e); // keep the last good switches
+    else SBERR = e.message || String(e);
+  }
+  return true;
+}
+function fallbackSel(why) {
+  return { fallback: true, why, st: (id, d) => d, form: (id, d) => d, box: () => true, asks: () => true, peek: (id, d) => d, sort: (ids) => ids,
+    order: DAY_ONE_BOXES, pin: (id) => (id === 'cls' ? 'company' : null), headline: [], label: (id) => id };
+}
+function selection(c) {
+  if (!SB || !SBLIB) return fallbackSel(SBERR || 'not loaded');
+  try {
+    const cat = SB.catalogLite;
+    const res = SBLIB.resolve(cat, SB.settings, { type: c.type, absent: SBLIB.absentFrom(cat, c).filter((id) => !ALWAYS.includes(id)) });
+    const intent = SBLIB.resolve(cat, SB.settings, { type: c.type }); // what the settings ask for before the company's data is consulted
+    const st = new Map(), forms = {}, bx = new Map(), rank = new Map();
+    for (const b of res.boxes) {
+      bx.set(b.id, b); Object.assign(forms, b.forms);
+      b.main.forEach((id) => st.set(id, 'MAIN')); b.on.forEach((id) => st.set(id, 'ON'));
+      [...b.main, ...b.on].forEach((id, i) => rank.set(id, i));
+    }
+    const known = new Map(cat.metrics.map((m) => [m.id, m]));
+    const asked = new Set(intent.boxes.map((b) => b.id));
+    return {
+      fallback: false,
+      st: (id, d) => (known.has(id) ? st.get(id) || null : d), // an id the catalog does not know keeps its day-one state
+      form: (id, d) => forms[id] ?? d,
+      box: (id) => bx.get(id) || null,
+      asks: (id) => asked.has(id),
+      peek: (id) => bx.get(id)?.peek || [],
+      sort: (ids) => [...ids].sort((a, b) => (rank.get(a) ?? 1e9) - (rank.get(b) ?? 1e9)),
+      order: intent.boxes.map((b) => b.id).filter((id) => id !== 'hero'), // a box the settings ask for may still draw a note (Valuation not computed)
+      pin: (id) => bx.get(id)?.pin ?? null,
+      headline: res.headline,
+      label: (id) => known.get(id)?.label || id,
+    };
+  } catch (e) { return fallbackSel(e.message || String(e)); }
+}
+// an item switched ON (expanded view only) is drawn in its usual place but hidden until the box is expanded
+const xo = (html) => (html ? `<div class="xo">${html}</div>` : '');
+// whether a box draws its usual peek: the peek names one of its items, or the box is slim, so its one collapsed line
+// falls to the ON items, which carry the same figures
+// (src: the items whose data that peek shows; the slim fallback uses it only when one of them is not OFF)
+const natPeek = (box, ids, slim, src = ids) => S.peek(box, ids).some((id) => ids.includes(id)) || (slim && src.some((id) => S.st(id, 'MAIN')));
+// the resolver's peek items this box does not draw natively (a fall-through to another item), as short figures
+const xPeek = (c, box, ids, own) => [own, ...S.peek(box, ids).filter((id) => !ids.includes(id)).map((id) => peekPart(c, id))].filter(Boolean).join(' · ');
+const put = (state, html) => (!html || !state ? '' : state === 'ON' ? xo(html) : html);
+
 /* ---------- tiles ---------- */
-const XP = '<button class="xp" aria-label="Expand"><svg viewBox="0 0 16 16"><path class="o" d="M9 2h5v5M7 14H2V9M14 2 9.5 6.5M2 14l4.5-4.5"/><path class="c" d="M10 6h4M6 10H2M10 6V2M6 10v4"/></svg></button>';
+const XP ='<button class="xp" aria-label="Expand"><svg viewBox="0 0 16 16"><path class="o" d="M9 2h5v5M7 14H2V9M14 2 9.5 6.5M2 14l4.5-4.5"/><path class="c" d="M10 6h4M6 10H2M10 6V2M6 10v4"/></svg></button>';
 const CHIP = { company: 'Company ›', money: 'Business ›', brands: 'Brands ›', val: 'Valuation ›', geo: 'Regions ›', fin: 'Financials ›', earn: 'Earnings ›', next: 'Plans ›' };
-const tile = (id, label, peek, std, full, door = '') =>
-  `<section class="tile ${id}" data-id="${id}"><div class="in"><div class="th"><div class="lbl">${label}</div><div class="doorl">${door}<span class="door xpl" title="Expand">${CHIP[id]}</span></div>${XP}</div><div class="peek">${peek}</div><div class="body"><div class="std${id === 'company' ? ' bsx' : ''}">${std}</div><div class="full">${full}</div></div></div></section>`;
+// slim: the box has nothing in its main view (only items switched ON): header, chip and peek, and it still expands
+const tile = (id, label, peek, std, full, door = '', slim = false) =>
+  `<section class="tile ${id}${slim ? ' slim' : ''}" data-id="${id}"><div class="in"><div class="th"><div class="lbl">${label}</div><div class="doorl">${door}<span class="door xpl" title="Expand">${CHIP[id]}</span></div>${XP}</div><div class="peek">${peek}</div><div class="body"><div class="std${id === 'company' ? ' bsx' : ''}">${std}</div><div class="full">${full}</div></div></div></section>`;
 const kv = (label, val, note = '', title = '') => (val ? `<div class="kv"${T(title)}><span>${label}</span><b>${val}</b><i>${note}</i></div>` : '');
 const sec = (h, inner) => (inner ? `<div class="sec">${h ? `<h5>${h}</h5>` : ''}${inner}</div>` : '');
 
@@ -89,52 +157,115 @@ function profileSrc(c, extra) {
 }
 
 function basicsTile(c) {
+  if (!S.box('company')) return '';
   const tick = [c.displayTicker, c.exchange].filter(Boolean).join(' · ');
   const classes = c.classTickers ? `<p class="bcl">Several share classes, one company: <b>${c.classTickers.map(esc).join(', ')}</b></p>` : '';
-  const std = `<div class="bid"><div><p class="btk">${esc(tick)}</p>${classes}${c.description ? `<p${T(profileSrc(c))}>${esc(firstSentence(c.description))}</p>` : ''}</div></div>
-    <div class="sg b4"><div id="v-mv"><span>Market value</span><b>${DASH}</b></div>${c.hq ? `<div${T(profileSrc(c, c.hq.note))}><span>Headquarters</span><b>${esc(c.hq.text)}</b></div>` : ''}<div id="v-dy"><span>Dividend yield</span><b>${DASH}</b></div><div id="v-by"><span>Buyback yield (prev 12 / next 12)</span><b>${DASH} / ${DASH}</b></div></div>`;
   const vi = c.valuationInputs, sh = vi.shares;
-  const ident = [
-    kv('Legal name', esc(c.legalName), c.cik ? 'CIK ' + esc(c.cik) : ''),
-    kv('Exchange · ticker', esc(tick), c.classTickers ? 'classes: ' + esc(c.classTickers.join(', ')) : ''),
-    kv('Fiscal year ends', esc(c.fiscalYearEnd)),
-    kv('Founded', c.founded ? esc(c.founded.value) : '', 'profile', profileSrc(c)),
-    kv('Employees', c.employees ? c.employees.value.toLocaleString('en-US') : '', c.employees?.asOf ? 'as of ' + esc(c.employees.asOf) : '', profileSrc(c, c.employees?.note)),
-    kv('Website', c.website ? `<a href="${esc(c.website)}" target="_blank" rel="noopener" style="color:var(--accx)">${esc(c.website.replace(/^https?:\/\/(www\.)?/, ''))}</a>` : ''),
-    kv('Headquarters', c.hq ? esc(c.hq.text) : '', '', profileSrc(c, c.hq?.note)),
-  ].join('');
-  const shares = [
-    sh ? kv(`Shares outstanding, ${esc(shortDate(sh.date))}`, (sh.value / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M', esc(sh.source.form || ''), `${sh.combined ? sh.combined + '\n' : ''}${sh.source.form} filed ${sh.source.filed} · accession ${sh.source.accn} · ${sh.source.tag || ''}`) : '',
-    vi.sharesPerADS ? kv('Shares per ADS', String(vi.sharesPerADS), 'filing', vi.adsNote || '') : '',
-    '<div id="v-mvline"></div>',
-    vi.declaredDividend ? kv(`Dividend declared: $${vi.declaredDividend.annual.toFixed(2)} a year per share${vi.declaredDividend.quarterly ? ` ($${vi.declaredDividend.quarterly.toFixed(2)} a quarter)` : ''}`, '<span id="v-dy2">—</span>', 'at today\'s price', vi.declaredDividend.source) : '',
-    vi.authorisationText ? `<div class="kv"${T('Company profile: ' + vi.authorisationText)}><span>Buyback authorisation: ${esc(vi.authorisationText.length > 160 ? vi.authorisationText.slice(0, 157) + '…' : vi.authorisationText)}</span><b></b><i>profile</i></div>` : '',
-  ].join('');
-  const full = sec('Identity', ident) + sec('Shares &amp; value', shares) + (c.description && c.description !== firstSentence(c.description) ? sec('What it does', `<div class="note" style="font-size:.84em;color:var(--ink2)">${esc(c.description)}</div>`) : '');
-  const peek = `<span id="v-peek">${c.hq ? esc(c.hq.text) : esc(c.displayTicker)}</span>`;
-  return tile('company', 'Basics', peek, std, full);
+  const gc = (label, val, title = '') => (val ? `<div${T(title)}><span>${label}</span><b>${val}</b></div>` : '');
+  const live = (id, label, val, note = '') => ({ grid: `<div id="${id}"><span>${label}</span><b>${val}</b></div>`, row: `<div class="kv" id="${id}"><span>${label}</span><b>${val}</b><i>${note}</i></div>` });
+  const site = c.website ? `<a href="${esc(c.website)}" target="_blank" rel="noopener" style="color:var(--accx)">${esc(c.website.replace(/^https?:\/\/(www\.)?/, ''))}</a>` : '';
+  const shv = sh ? (sh.value / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M' : '';
+  const shT = sh ? `${sh.combined ? sh.combined + '\n' : ''}${sh.source.form} filed ${sh.source.filed} · accession ${sh.source.accn} · ${sh.source.tag || ''}` : '';
+  const hqT = profileSrc(c, c.hq?.note);
+  const hqV = c.hq ? esc(c.hq.text) : '';
+  const longDesc = c.description && c.description !== firstSentence(c.description);
+  const dd = vi.declaredDividend;
+  // filing names never break across lines (10‑Q, not "10-" then "Q")
+  const nb = (s) => (s ? s.replace(/\b(10|20|8|6)-(K|Q|F)\b/g, '$1‑$2') : s);
+  const auth = nb(vi.authorisationText);
+  // long prose fields get a short main-view form; the prose itself goes to the expanded view
+  const fyeShort = c.fiscalYearEnd ? c.fiscalYearEnd.split(/\s*[(;]/)[0] : '';
+  // the short form only from the parsed authorisation (remaining amount at its latest as-of date, with an expiry;
+  // server/lib/metrics.js parseAuthorisation); without it, no short form and the text stays in the expanded view
+  const pa = vi.authorisation;
+  const authShort = pa && typeof pa.amount === 'number' ? money(pa.amount) : '';
+  const authTitle = pa ? `Remaining at ${pa.asOf}${pa.expiry ? ', expires ' + pa.expiry : ''}\nCompany profile: ${vi.authorisationText || ''}` : '';
+  // every Basics item: its group, its day-one state, its cell in the main grid and its row in the expanded view
+  // (long: too long for a grid cell, so its row is drawn in the main view too)
+  const I = {
+    marketValue: { g: 'sharesValue', d: 'MAIN', ...live('v-mv', 'Market value', DASH, 'at today\'s price') },
+    hq: { g: 'identity', d: 'MAIN', grid: c.hq ? `<div${T(hqT)}><span>Headquarters</span><b>${hqV}</b></div>` : '', row: kv('Headquarters', hqV, '', hqT) },
+    dividendYield: { g: 'sharesValue', d: 'MAIN', ...live('v-dy', 'Dividend yield', DASH) },
+    buybackYield: { g: 'sharesValue', d: 'MAIN', ...live('v-by', 'Buyback yield<em class="lx">, past / next 12m</em>', `${DASH} / ${DASH}`) },
+    legalName: { g: 'identity', d: 'ON', grid: gc('Legal name', esc(c.legalName), c.cik ? 'CIK ' + c.cik : ''), row: kv('Legal name', esc(c.legalName), c.cik ? 'CIK ' + esc(c.cik) : '') },
+    'identity.exchangeTicker': { g: 'identity', d: 'ON', grid: gc('Exchange · ticker', esc(tick)), row: kv('Exchange · ticker', esc(tick), c.classTickers ? 'classes: ' + esc(c.classTickers.join(', ')) : '') },
+    fiscalYearEnd: { g: 'identity', d: 'ON', grid: fyeShort !== c.fiscalYearEnd ? gc('Fiscal year ends', esc(fyeShort), c.fiscalYearEnd) : gc('Fiscal year ends', esc(c.fiscalYearEnd)), row: kv('Fiscal year ends', esc(c.fiscalYearEnd)), prose: fyeShort !== c.fiscalYearEnd },
+    founded: { g: 'identity', d: 'ON', grid: gc('Founded', c.founded ? esc(c.founded.value) : '', profileSrc(c)), row: kv('Founded', c.founded ? esc(c.founded.value) : '', 'profile', profileSrc(c)) },
+    employees: { g: 'identity', d: 'ON', grid: gc('Employees', c.employees ? c.employees.value.toLocaleString('en-US') : '', profileSrc(c, c.employees?.note)), row: kv('Employees', c.employees ? c.employees.value.toLocaleString('en-US') : '', c.employees?.asOf ? 'as of ' + esc(c.employees.asOf) : '', profileSrc(c, c.employees?.note)) },
+    website: { g: 'identity', d: 'ON', grid: gc('Website', site), row: kv('Website', site) },
+    'identity.hq': { g: 'identity', d: 'ON', grid: gc('Headquarters', hqV, hqT), row: kv('Headquarters', hqV, '', hqT) },
+    sharesOutstanding: { g: 'sharesValue', d: 'ON', grid: gc('Shares outstanding', shv, shT), row: sh ? kv(`Shares outstanding, ${esc(shortDate(sh.date))}`, shv, esc(sh.source.form || ''), shT) : '' },
+    sharesPerADS: { g: 'sharesValue', d: 'ON', grid: gc('Shares per ADS', vi.sharesPerADS ? String(vi.sharesPerADS) : '', vi.adsNote || ''), row: vi.sharesPerADS ? kv('Shares per ADS', String(vi.sharesPerADS), 'filing', vi.adsNote || '') : '' },
+    'sharesValue.marketValueLine': { g: 'sharesValue', d: 'ON', long: true, row: `<div id="v-mvline">${kv('Market value: today’s price × shares', DASH, 'computed')}</div>` },
+    dividendDeclared: { g: 'sharesValue', d: 'ON', long: true, row: dd ? kv(`Dividend declared: $${dd.annual.toFixed(2)} a year per share${dd.quarterly ? ` ($${dd.quarterly.toFixed(2)} a quarter)` : ''}`, '<span id="v-dy2">—</span>', 'at today\'s price', dd.source) : '' },
+    buybackAuthorisation: { g: 'sharesValue', d: 'ON', long: !authShort, prose: !!authShort, grid: authShort ? gc('Buyback authorisation', esc(authShort), authTitle) : '', row: auth ? `<div class="kv"${T('Company profile: ' + auth)}><span>Buyback authorisation: ${esc(auth.length > 160 ? auth.slice(0, 157) + '…' : auth)}</span><b></b><i>profile</i></div>` : '' },
+    'about.descriptionFull': { g: 'about', d: 'ON', long: true, row: longDesc ? `<div class="note" style="font-size:.84em;color:var(--ink2)">${esc(c.description)}</div>` : '' },
+  };
+  // the same figure switched on twice in one view (settings that overlap) is drawn once, in its richer form
+  const DUP = { 'identity.hq': 'hq', marketValue: 'sharesValue.marketValueLine' };
+  const state0 = (id) => S.st(id, I[id].d);
+  const state = (id) => { const s = state0(id); return s && DUP[id] && state0(DUP[id]) === s && I[DUP[id]].row ? null : s; };
+  const ids = Object.keys(I).filter(state);
+  const mainIds = S.sort(ids.filter((id) => state(id) === 'MAIN'));
+  const gridIds = mainIds.filter((id) => !I[id].long && I[id].grid);
+  const rowIds = mainIds.filter((id) => (I[id].long || !I[id].grid) && I[id].row);
+  // the ticker line and the first sentence of the description head the main view (each dropped when its fuller
+  // form, the exchange · ticker field or the whole description, is switched into the same view)
+  let tk = S.st('exchangeTicker', 'MAIN'), ds = c.description ? S.st('description', 'MAIN') : null;
+  if (tk && state('identity.exchangeTicker') === tk) tk = null;
+  if (ds && longDesc && state('about.descriptionFull') === ds) ds = null;
+  // a value too long for its cell spans two columns
+  const span = (h) => (gridIds.length > 4 && ((/<b>([\s\S]*?)<\/b><\/div>$/.exec(h)?.[1] || '').replace(/<[^>]+>/g, '').length > 18) ? h.replace(/^<div/, '<div style="grid-column:span 2"') : h);
+  const bidIn = put(tk, `<p class="btk">${esc(tick)}</p>${classes}`) + put(ds, `<p${T(profileSrc(c))}>${esc(firstSentence(c.description))}</p>`);
+  // the day-one grid (market value, headquarters, dividend yield, buyback yield) keeps its tuned column widths;
+  // any other set of fields gets n even columns up to four, and three columns (several rows) beyond that
+  const dayOne = gridIds.join() === (c.hq ? 'marketValue,hq,dividendYield,buybackYield' : 'marketValue,dividendYield,buybackYield');
+  const grid = gridIds.length ? `<div class="sg b4${dayOne ? '' : ' bn'}"${dayOne ? '' : ` style="--n:${gridIds.length > 4 ? 3 : gridIds.length}"`}>${gridIds.map((id) => span(I[id].grid)).join('')}</div>` : '';
+  const rows = rowIds.map((id) => I[id].row).join('');
+  const std = (bidIn ? `<div class="bid"><div>${bidIn}</div></div>` : '') + (grid ? `
+    ${grid}` : '') + (rows ? `<div class="bxr">${rows}</div>` : '');
+  const onIds = S.sort(ids.filter((id) => state(id) === 'ON'));
+  // a prose field shown short in the main view keeps its full text in the expanded view
+  const prose = gridIds.filter((id) => I[id].prose);
+  const grp = (g) => S.sort([...onIds, ...prose]).filter((id) => I[id].g === g).map((id) => I[id].row || '').join('');
+  const full = sec('Identity', grp('identity')) + sec('Shares &amp; value', grp('sharesValue')) + sec('What it does', grp('about'));
+  // peek: headquarters (or the ticker) until the price arrives, then the market value in front of it
+  const P = S.peek('company', ['hq', 'marketValue']);
+  const extra = P.filter((id) => id !== 'hq' && id !== 'marketValue').map((id) => peekPart(c, id)).filter(Boolean);
+  const head = P.includes('hq') && c.hq ? hqV : P.includes('hq') || P.includes('marketValue') ? esc(c.displayTicker) : '';
+  let peekTxt = [head, ...extra].filter(Boolean).join(' · ');
+  // a box with nothing in its main view still says something collapsed: the headquarters or the ticker
+  if (!peekTxt && !(tk === 'MAIN' || ds === 'MAIN' || gridIds.length || rowIds.length)) peekTxt = (['hq', 'identity.hq'].some((id) => S.st(id, 'MAIN')) && hqV) || esc(c.displayTicker);
+  BASICS_PEEK = { mv: P.includes('marketValue'), hq: P.includes('hq') && !!c.hq, extra: extra.join(' · ') };
+  const hasMain = tk === 'MAIN' || ds === 'MAIN' || !!gridIds.length || !!rows;
+  return tile('company', 'Basics', peekTxt ? `<span id="v-peek">${peekTxt}</span>` : '', std, full, '', !hasMain);
 }
+let BASICS_PEEK = { mv: true, hq: false, extra: '' };
 
-/* D87: Mowgli's own Cat and Sub (each linking to its place on the List page), the conventional GICS label, and up to five companies of the same Sub */
+/* D87: Mowgli's own Cat and Sub (each linking to its place on the List page), the conventional GICS label, and up to five companies of the same Sub.
+   The box does not expand, so an item switched ON is drawn like a MAIN one. */
 function classTile(c) {
   const k = c.classification;
-  if (!k && !c.gics) return '';
+  if ((!k && !c.gics) || !S.box('cls')) return '';
+  const on = (id) => !!S.st(id, 'MAIN');
   const list = MG.isStatic ? `${MG.base}list/` : '/list';
   const link = (x, what) => `<a href="${list}#${esc(x.anchor)}"${T(`Show ${what} on the List page`)}>${esc(x.name)}</a>`;
   const row = (l, v, t = '') => `<div class="kv2"${T(t)}><span>${l}</span><b>${v}</b></div>`;
   const rows = [
-    k && row('Cat', link(k.cat, 'this Cat')),
-    k?.sub && row('Sub', link(k.sub, 'this Sub')),
-    c.gics && row('GICS', `${esc(c.gics.sector)}${c.gics.industry ? ' › ' + esc(c.gics.industry) : ''}`, c.gics.note ? c.gics.note : 'Conventionally filed as (GICS)'),
+    k && on('cat') && row('Cat', link(k.cat, 'this Cat')),
+    k?.sub && on('sub') && row('Sub', link(k.sub, 'this Sub')),
+    c.gics && on('gics') && row('GICS', `${esc(c.gics.sector)}${c.gics.industry ? ' › ' + esc(c.gics.industry) : ''}`, c.gics.note ? c.gics.note : 'Conventionally filed as (GICS)'),
   ].filter(Boolean).join('');
-  const peers = k?.peers?.length ? `<div class="kv2 pr2"><span>Peers</span><div class="peers">${k.peers.map((p) => `<span class="pe"${T(p.ticker)}>${p.logo ? `<img src="${esc(MG.logoBase + p.logo.replace(/^\/logos\//, ''))}" alt="">` : '<i></i>'}<em>${esc(p.name)}</em></span>`).join('')}</div></div>` : '';
+  const peers = k?.peers?.length && on('subPeers') ? `<div class="kv2 pr2"><span>Peers</span><div class="peers">${k.peers.map((p) => `<span class="pe"${T(p.ticker)}>${p.logo ? `<img src="${esc(MG.logoBase + p.logo.replace(/^\/logos\//, ''))}" alt="">` : '<i></i>'}<em>${esc(p.name)}</em></span>`).join('')}</div></div>` : '';
+  if (!rows && !peers) return '';
   return `<section class="tile cls"><div class="in"><div class="th"><div class="lbl">Classification</div></div><div class="cbody">${rows}${peers}</div></div></section>`;
 }
 
 const SW = ['#6f7fd8', '#3f9fb4', '#5fae7d', '#e0a34a', '#c77d9a', '#b08a3e', '#8f7fd0', '#a6a3b8'];
 function moneyTile(c) {
   const bl = c.businessLines;
-  if (!bl.length) return '';
+  if (!bl.length || !S.box('money')) return '';
+  const sLines = S.st('businessLines', 'MAIN'), sFig = S.st('businessLineFigures', 'ON');
   const lineSrc = (b) => profileSrc(c, [b.revenue && `Revenue ${money(b.revenue.amount, b.revenue.currency)}${b.revenue.period ? ', ' + b.revenue.period : ''}`, b.revenueNote, b.shareBasis, b.source].filter(Boolean).join(' · '));
   const groups = [];
   for (const b of bl) { let g = groups.find((x) => x.key === (b.group || '')); if (!g) groups.push(g = { key: b.group || '', lines: [] }); g.lines.push(b); }
@@ -150,31 +281,35 @@ function moneyTile(c) {
   return `<div>${key ? `<h5>${esc(key.replace(/^by /i, 'By '))}</h5>` : ''}${bar}<table class="hk ut"><tr><th>Business line</th><th class="n">% of revenue</th></tr>${rows}</table></div>`;
   };
   const withShare = bl.filter((b) => typeof b.share?.fraction === 'number' && b.share.fraction > 0 && (b.group || '') === groups[0].key);
-  const std = groups.map((g) => block(g.lines, groups.length > 1 ? g.key || 'Other lines' : '')).join('<div style="height:1.1em"></div>');
+  const std = put(sLines, groups.map((g) => block(g.lines, groups.length > 1 ? g.key || 'Other lines' : '')).join('<div style="height:1.1em"></div>'));
   const frows = bl.map((b) => {
     const rev = b.revenue ? `<span${T(lineSrc(b))}>${money(b.revenue.amount, b.revenue.currency)}</span>${b.revenue.period ? `<small>${esc(b.revenue.period)}</small>` : ''}` : DASH;
     const op = b.operatingProfit ? `<span${T(profileSrc(c, [b.operatingProfit.label, b.operatingProfit.period, b.operatingProfit.note].filter(Boolean).join(' · ')))}>${money(b.operatingProfit.amount, b.operatingProfit.currency)}</span>${b.operatingProfit.label ? `<small>${esc(b.operatingProfit.label)}</small>` : ''}` : DASH;
     const mg = b.margin ? `<span${T(profileSrc(c, b.margin.label))}>${pct(b.margin.fraction * 100)}</span>` : DASH;
     return `<tr><td class="wrap">${esc(b.name)}${b.description ? `<div class="bl-how">${esc(b.description)}</div>` : ''}</td><td class="n">${rev}</td><td class="n">${op}</td><td class="n">${mg}</td><td class="wrap">${b.marketShare ? esc(b.marketShare) : DASH}</td></tr>`;
   }).join('');
-  const full = sec('Each line in figures (company profile)', `<table class="tt ut"><tr><th>Line</th><th class="n">Revenue</th><th class="n">Operating profit</th><th class="n">Margin</th><th>Market share</th></tr>${frows}</table>`);
+  const full = !sFig ? '' : sec('Each line in figures (company profile)', `<table class="tt ut"><tr><th>Line</th><th class="n">Revenue</th><th class="n">Operating profit</th><th class="n">Margin</th><th>Market share</th></tr>${frows}</table>`);
   const top = withShare.slice().sort((a, b) => b.share.fraction - a.share.fraction)[0];
-  const peek = top ? `<b>${esc(top.name)}</b> ${pct(top.share.fraction * 100, 0)} of revenue` : `${bl.length} business line${bl.length > 1 ? 's' : ''}`;
-  return tile('money', 'How it makes money', peek, std, full);
+  const peek0 = !natPeek('money', ['businessLines'], sLines !== 'MAIN', ['businessLines', 'businessLineFigures']) ? '' : top ? `<b>${esc(top.name)}</b> ${pct(top.share.fraction * 100, 0)} of revenue` : `${bl.length} business line${bl.length > 1 ? 's' : ''}`;
+  const peek = xPeek(c, 'money', ['businessLines'], peek0);
+  return tile('money', 'How it makes money', peek, std, full, '', sLines !== 'MAIN');
 }
 
 function brandsTile(c) {
   const br = c.brands;
-  if (!br.length) return '';
+  if (!br.length || !S.box('brands')) return '';
+  const sMain = S.st('brands', 'MAIN'), sAll = S.st('brandsAll', 'ON');
   const short = (s) => (s ? s.split(/;\s/)[0] : '');
   const src = (b) => profileSrc(c, [b.share, b.note, b.source].filter(Boolean).join(' · '));
-  const anyShare = br.some((b) => b.share);
-  const rows = br.slice(0, 12).map((b) => `<tr${T(src(b))}><td>${esc(b.name)}</td><td class="wrap">${esc(b.segment || '')}</td>${anyShare ? `<td class="wrap">${b.share ? esc(short(b.share)) : DASH}</td>` : ''}</tr>`).join('');
-  const std = `<div><table class="hk"><tr><th>Brand or subsidiary</th><th>Part of</th>${anyShare ? '<th>Share</th>' : ''}</tr>${rows}</table>${br.length > 12 ? `<div class="note" style="margin-top:.4em">${br.length - 12} more on expand</div>` : ''}</div>`;
-  const frows = br.map((b) => `<tr${T(src(b))}><td>${esc(b.name)}</td><td class="wrap">${esc(b.segment || '')}</td><td class="wrap">${b.share ? esc(b.share) : DASH}</td><td class="wrap">${esc(b.note || '')}</td></tr>`).join('');
-  const full = sec('Every brand and subsidiary (company profile)', `<table class="tt"><tr><th>Name</th><th>Part of</th><th>Share</th><th>Note</th></tr>${frows}</table>`);
+  // a column no brand has a value for is not drawn
+  const anyShare = br.some((b) => b.share), anyPart = br.some((b) => b.segment), anyNote = br.some((b) => b.note);
+  const part = (b) => (anyPart ? `<td class="wrap">${esc(b.segment || '')}</td>` : '');
+  const rows = br.slice(0, 12).map((b) => `<tr${T(src(b))}><td>${esc(b.name)}</td>${part(b)}${anyShare ? `<td class="wrap">${b.share ? esc(short(b.share)) : DASH}</td>` : ''}</tr>`).join('');
+  const std = put(sMain, `<div><table class="hk"><tr><th>Brand or subsidiary</th>${anyPart ? '<th>Part of</th>' : ''}${anyShare ? '<th>Share</th>' : ''}</tr>${rows}</table>${br.length > 12 ? `<div class="note" style="margin-top:.4em">${br.length - 12} more on expand</div>` : ''}</div>`);
+  const frows = br.map((b) => `<tr${T(src(b))}><td>${esc(b.name)}</td>${part(b)}${anyShare ? `<td class="wrap">${b.share ? esc(b.share) : DASH}</td>` : ''}${anyNote ? `<td class="wrap">${esc(b.note || '')}</td>` : ''}</tr>`).join('');
+  const full = !sAll ? '' : sec('Every brand and subsidiary (company profile)', `<table class="tt"><tr><th>Name</th>${anyPart ? '<th>Part of</th>' : ''}${anyShare ? '<th>Share</th>' : ''}${anyNote ? '<th>Note</th>' : ''}</tr>${frows}</table>`);
   const peek = br.slice(0, 3).map((b) => `<b>${esc(b.name)}</b>`).join(' · ') + (br.length > 3 ? ` +${br.length - 3}` : '');
-  return tile('brands', 'Brands &amp; subsidiaries', peek, std, full);
+  return tile('brands', 'Brands &amp; subsidiaries', xPeek(c, 'brands', ['brands'], natPeek('brands', ['brands'], sMain !== 'MAIN', ['brands', 'brandsAll']) ? peek : ''), std, full, '', sMain !== 'MAIN');
 }
 
 function spark(series, fmt, cur) {
@@ -230,11 +365,27 @@ function vsHtml(x, cur) {
 
 function finTile(c) {
   const f = c.fin;
-  if (!f) return '';
+  if (!f || !S.box('fin')) return '';
   const h = f.headline, cur = f.currency;
   const g = h.revenueGrowth || {};
   const om = h.operatingMargin;
-  const tl = f.tile, cells = tl?.cells || [];
+  const tl = f.tile;
+  // the payload carries every cell for the type; the switchboard picks and orders them (day-one fallback without it:
+  // net margin only where operating margin is absent)
+  let have = tl?.cells || [];
+  if (S.fallback) have = have.filter((x, _, all) => !(x.id === 'netMargin' && all.some((y) => y.id === 'opMargin')));
+  // the ten-year history series (chart.*), drawn as bar-only cells when switched on
+  const ch = f.chart;
+  const chartCells = ch?.years ? ['revenue', 'cashEarnings', 'operatingMargin'].filter((k) => Array.isArray(ch[k])).map((k) => ({
+    id: 'chart.' + k, label: S.label('chart.' + k).replace(/, ten fiscal years.*$/, ', 10 yrs'), unit: k === 'operatingMargin' ? 'pct' : 'money', chartOnly: true, now: null,
+    annual: ch.years.map((p, i) => ({ p, v: typeof ch[k][i]?.v === 'number' ? ch[k][i].v : null, note: ch[k][i]?.src })),
+  })) : [];
+  const byId = new Map([...have, ...chartCells].map((x) => [x.id, x]));
+  const stOf = (x) => S.st(x.id, x.chartOnly ? null : 'MAIN');
+  const drawn = S.sort([...byId.keys()].filter((id) => stOf(byId.get(id)))).map((id) => byId.get(id));
+  const cells = drawn.filter((x) => !x.chartOnly); // the measure cells: the trends rows and the notes follow them
+  const mainN = drawn.filter((x) => stOf(x) === 'MAIN').length;
+  const formOf = (x) => (x.chartOnly ? 'chart' : S.form(x.id, 'both'));
   const fmtOf = (x) => (v) => fmtUnit(x.unit, v, cur);
   // main tile: the last ten fiscal years, then the TTM bar (highlighted) when the basis is a TTM that is not itself the latest fiscal year
   const withTtm = tl && tl.basis.basis === 'TTM' && !tl.basis.isFy;
@@ -243,28 +394,59 @@ function finTile(c) {
     if (withTtm && x.ttm) { const t = x.ttm[x.ttm.length - 1]; pts.push({ ...t, p: 'TTM to ' + t.p, k: 'trailing twelve months', ax: 'TTM' }); }
     return { pts };
   };
+  const ceSt = S.st('cashEarningsLine', 'MAIN');
   const cell = (x) => {
-    const n = x.now, fm = fmtOf(x);
-    const own = n && n.label !== tl.basis.label ? ` · ${esc(shortP(n.label))}` : '';
+    const n = x.now, fm = fmtOf(x), form = formOf(x), bar = form !== 'number', num = form !== 'chart';
+    const own = n && n.label !== tl?.basis.label ? ` · ${esc(shortP(n.label))}` : '';
     const val = n ? (n.nm ? 'n.m.' : fm(n.v) + (n.computed ? '<sup class="calc">calc</sup>' : '')) : DASH;
     const title = [x.def ? `${x.label}: ${x.def}` : x.label, n && `${n.label}${n.note ? ' · ' + n.note : ''}`, n?.nm && 'n.m.: ' + n.reason, n?.src, !n && x.missing?.title].filter(Boolean).join('\n');
-    const s = tileSeries(x), sp = bars(s.pts, fm);
+    const s = tileSeries(x), sp = bar ? bars(s.pts, fm) : '';
     const lastP = s.pts[s.pts.length - 1];
     const ax = `<div class="fax"><span>${sp ? esc(shortP(s.pts[0].p)) : '&nbsp;'}</span><span>${sp ? esc(lastP.ax || shortP(lastP.p)) : ''}</span></div>`;
     let sub;
     // free cash flow: its year-ago change, and Mowgli's cash earnings on a second short line
-    if (x.id === 'fcf' && x.cashEarnings) sub = `${n ? vsHtml(x, cur) || '&nbsp;' : '&nbsp;'}</em><em><span${T(`Cash earnings = free cash flow − stock-based pay (A4), ${x.cashEarnings.label}\n${x.cashEarnings.src}`)}>cash earnings ${money(x.cashEarnings.v, cur)}</span>`;
+    if (x.id === 'fcf' && x.cashEarnings && ceSt) sub = `${n ? vsHtml(x, cur) || '&nbsp;' : '&nbsp;'}</em><em${ceSt === 'ON' ? ' class="xo"' : ''}><span${T(`Cash earnings = free cash flow − stock-based pay (A4), ${x.cashEarnings.label}\n${x.cashEarnings.src}`)}>cash earnings ${money(x.cashEarnings.v, cur)}</span>`;
     else if (n) sub = vsHtml(x, cur);
     else if (x.fyFigure) sub = `<span${T(`${x.missing?.title || ''}\n${x.fyFigure.label}: ${x.fyFigure.src}`)}>${esc(shortP(x.fyFigure.label))}: ${fm(x.fyFigure.v)}</span>`;
     else sub = x.missing?.text ? `<span${T(x.missing.title)}>${esc(x.missing.text)}</span>` : '';
-    return `<div class="fc"><span>${esc(x.label)}${own}</span><b${T(title)}>${val}</b>${sp || '<div class="fsp"></div>'}${ax}<em>${sub || '&nbsp;'}</em></div>`;
+    const html = `<div class="fc${bar ? '' : ' nb'}" data-cell="${esc(x.id)}"><span>${esc(x.label)}${own}</span>${num ? `<b${T(title)}>${val}</b>` : ''}${bar ? (sp || '<div class="fsp"></div>') + ax : ''}<em>${sub || '&nbsp;'}</em></div>`;
+    return put(stOf(x), html);
   };
-  const notes = [];
-  if (cells.length) notes.push(withTtm ? 'Bars: ten fiscal years, then the trailing twelve months (bright); change vs the twelve months a year earlier.' : 'Bars: ten fiscal years, the latest bright; change vs the year before.');
-  const rn = c.valuationInputs?.readerNotes?.financials || [];
-  if (c.isInsurer && !rn.some((x) => x.id === 'A9')) notes.push('Insurers collect premiums long before claims are paid, so a growing insurer’s cash flow looks better than its profit.');
-  if (cur !== 'USD') notes.push(`Figures in ${cur}, as filed.`);
-  const std = `<div class="v-self fgr">${cells.map(cell).join('')}</div><div class="v-self note fnt"${T(notes.join('\n'))}>${esc(notes.join(' '))}</div>${readerNotes(rn)}`;
+  // D89 accounting notes, only for the cells actually drawn (each note names the cells it explains)
+  const drawnIds = new Set(drawn.map((x) => x.id));
+  const rn = (c.valuationInputs?.readerNotes?.financials || []).filter((x) => !Array.isArray(x.lines) || x.lines.some((l) => drawnIds.has(l)));
+  // a note sits in the main view when one of its cells is there; a note whose cells are all expanded-only goes with them
+  const mainIds = new Set(drawn.filter((x) => stOf(x) === 'MAIN').map((x) => x.id));
+  const rnMain = rn.filter((x) => !Array.isArray(x.lines) || x.lines.some((l) => mainIds.has(l))), rnOn = rn.filter((x) => !rnMain.includes(x));
+  const noteM = [], noteO = [];
+  const note = (id, text) => { const s = S.st(id, 'MAIN'); if (s === 'MAIN') noteM.push(text); else if (s === 'ON') noteO.push(text); };
+  if (drawn.some((x) => formOf(x) !== 'number')) note('finBarsCaption', withTtm ? 'Bars: ten fiscal years, then the trailing twelve months (bright); change vs the twelve months a year earlier.' : 'Bars: ten fiscal years, the latest bright; change vs the year before.');
+  if (c.isInsurer && !rn.some((x) => x.id === 'A9')) note('insurerFloatNote', 'Insurers collect premiums long before claims are paid, so a growing insurer’s cash flow looks better than its profit.');
+  if (cur !== 'USD') note('currencyNote', `Figures in ${cur}, as filed.`);
+  const fnt = (l) => `<div class="v-self note fnt"${T(l.join('\n'))}>${esc(l.join(' '))}</div>`;
+  // the other single figures: the margins (expanded view on day one) and the computed headline figures (off on day one)
+  const q = g.quarter;
+  const figs = {
+    'margins.grossMargin': ['ON', 'Margins', kv('Gross margin', h.grossMargin ? (h.grossMargin.nm ? 'n.m.' : pct(h.grossMargin.pct)) : '', h.grossMargin ? esc(h.grossMargin.label) + (h.grossMargin.computed ? ' · computed' : '') : '', h.grossMargin ? h.grossMargin.src : '')],
+    'margins.operatingMargin': ['ON', 'Margins', kv('Operating margin', om ? (om.nm ? 'n.m.' : pct(om.pct)) : '', om ? esc(om.label) : '', om ? om.src : '')],
+    'margins.netMargin': ['ON', 'Margins', kv('Net margin', h.netMargin ? (h.netMargin.nm ? 'n.m.' : pct(h.netMargin.pct)) : '', h.netMargin ? esc(h.netMargin.label) : '', h.netMargin ? h.netMargin.src : '')],
+    'headline.revenue': [null, 'Other figures', h.revenue ? kv('Revenue', money(h.revenue.v, cur), esc(h.revenue.label), h.revenue.src) : ''],
+    'headline.cashEarnings': [null, 'Other figures', h.cashEarnings ? kv('Cash earnings', money(h.cashEarnings.v, cur), esc(h.cashEarnings.label || ''), h.cashEarnings.src) : ''],
+    revenueGrowth: [null, 'Other figures', q?.pct != null ? kv('Revenue growth', `<span class="${cls(q.pct)}">${spct(q.pct)}</span>`, esc(q.label || ''), q.src) : ''],
+  };
+  // switches changed: a single figure that repeats a drawn cell in the same view is left out (the cell is richer)
+  const SAME = { 'margins.operatingMargin': 'opMargin', 'margins.netMargin': 'netMargin', 'headline.revenue': 'revenue' };
+  const dupOf = (id) => SAME[id] && byId.has(SAME[id]) && stOf(byId.get(SAME[id])) === S.st(id, figs[id][0]);
+  const figIds = S.sort(Object.keys(figs).filter((id) => figs[id][2] && S.st(id, figs[id][0]) && !dupOf(id)));
+  // rows balanced: per row = ceil(n / rows) with at most 4 a row (5 when the box is wide)
+  const perRow = (max) => (mainN ? Math.ceil(mainN / Math.ceil(mainN / max)) : 4);
+  const p4 = perRow(4), p5 = perRow(5);
+  const gcls = (p4 !== 4 ? ' c' + p4 : '') + (p5 !== p4 ? ' w' + p5 : '');
+  const figMain = figIds.filter((id) => S.st(id, figs[id][0]) === 'MAIN').map((id) => figs[id][2]).join('');
+  const figOn = (head) => figIds.filter((id) => S.st(id, figs[id][0]) === 'ON' && figs[id][1] === head).map((id) => figs[id][2]).join('');
+  const rnSt = S.st('readerNotesFinancials', 'MAIN');
+  const std = (drawn.length ? `<div class="v-self fgr${gcls}">${drawn.map(cell).join('')}</div>` : '')
+    + (figMain ? `<div class="fkv">${figMain}</div>` : '') + fnt(noteM) + (noteO.length ? xo(fnt(noteO)) : '') + put(rnSt, readerNotes(rnMain)) + (rnSt && rnOn.length ? xo(readerNotes(rnOn)) : '');
 
   // expanded view: per measure, single quarters, the rolling TTM line and fiscal years
   const rng = (pts) => (pts?.length ? `${shortP(pts[0].p)}–${shortP(pts[pts.length - 1].p)}` : '');
@@ -273,9 +455,11 @@ function finTile(c) {
     const fm = fmtOf(x);
     return `<div class="ftr"><span${T(x.def || '')}>${esc(x.label)}</span><div>${x.quarters ? bars(x.quarters, fm, 'quarter') || DASH : ''}</div><div>${x.ttm ? tline(x.ttm, fm) || DASH : DASH}</div><div>${bars(x.annual, fm, 'fiscal year') || DASH}</div></div>`;
   }).join('');
-  const trends = cells.length ? sec('Trends', `<div class="ftb"><div class="ftr fth"><span></span><span>Quarters<small>${anyQ ? esc(rng(anyQ.quarters)) : '&nbsp;'}</small></span><span${T('Trailing twelve months at each quarter end')}>Trailing year<small>${anyT ? esc(rng(anyT.ttm)) : '&nbsp;'}</small></span><span>Fiscal years<small>${esc(rng(cells[0].annual))}</small></span></div>${trows}</div>`) : '';
+  const trends = cells.length && S.st('trends', 'ON') ? sec('Trends', `<div class="ftb"><div class="ftr fth"><span></span><span>Quarters<small>${anyQ ? esc(rng(anyQ.quarters)) : '&nbsp;'}</small></span><span${T('Trailing twelve months at each quarter end')}>Trailing year<small>${anyT ? esc(rng(anyT.ttm)) : '&nbsp;'}</small></span><span>Fiscal years<small>${esc(rng(cells[0].annual))}</small></span></div>${trows}</div>`) : '';
 
-  const table = (t, title) => {
+  const table = (t0, title) => {
+    // each statement line is its own switch (stmt.<line id>); a table with no line switched on is not drawn
+    const t = t0 && { ...t0, rows: t0.rows.filter((r) => S.st('stmt.' + r.id, 'ON')) };
     if (!t || !t.rows.length) return '';
     // Most recent period on the left, older periods to the right (Adam, D64); the API sends oldest first.
     const head = `<tr><th></th>${[...t.cols].reverse().map((x) => `<th>${esc(x)}</th>`).join('')}</tr>`;
@@ -287,29 +471,37 @@ function finTile(c) {
     }).join('')}</tr>`).join('');
     return sec(title, `<table class="ft">${head}${body}</table>`);
   };
-  const margins = [
-    kv('Gross margin', h.grossMargin ? (h.grossMargin.nm ? 'n.m.' : pct(h.grossMargin.pct)) : '', h.grossMargin ? esc(h.grossMargin.label) + (h.grossMargin.computed ? ' · computed' : '') : '', h.grossMargin ? h.grossMargin.src : ''),
-    kv('Operating margin', om ? (om.nm ? 'n.m.' : pct(om.pct)) : '', om ? esc(om.label) : '', om ? om.src : ''),
-    kv('Net margin', h.netMargin ? (h.netMargin.nm ? 'n.m.' : pct(h.netMargin.pct)) : '', h.netMargin ? esc(h.netMargin.label) : '', h.netMargin ? h.netMargin.src : ''),
-  ].join('');
-  const full = `<div class="v-self" style="flex-direction:column">${trends}${sec('Margins', margins)}${table(f.annual, 'Annual · growth vs the year before')}${table(f.quarterly, 'Quarterly · growth vs the same quarter a year earlier')}</div>`;
+  const full = `<div class="v-self" style="flex-direction:column">${trends}${sec('Margins', figOn('Margins'))}${table(f.annual, 'Annual · growth vs the year before')}${table(f.quarterly, 'Quarterly · growth vs the same quarter a year earlier')}${sec('Other figures', figOn('Other figures'))}</div>`;
   const lbl = `<span class="v-self">Financials${tl ? ' · ' + esc(tl.basis.label) : h.revenue ? ' · ' + esc(h.revenue.label) : ''}</span>`;
   const door = '<span class="door soon" title="coming">Full financials (coming)</span>';
-  const peek = [h.revenue && `Revenue <b>${money(h.revenue.v, cur)}</b>`, g.quarter?.pct != null && `<b class="${cls(g.quarter.pct)}">${spct(g.quarter.pct)}</b> last quarter`, om && om.pct != null && `operating margin <b>${pct(om.pct)}</b>`].filter(Boolean).join(' · ');
-  return tile('fin', lbl, peek, std, full, door);
+  const pp = {
+    'peek.revenue': h.revenue && `Revenue <b>${money(h.revenue.v, cur)}</b>`,
+    'peek.revenueGrowthQ': g.quarter?.pct != null && `<b class="${cls(g.quarter.pct)}">${spct(g.quarter.pct)}</b> last quarter`,
+    'margins.operatingMargin': om && om.pct != null && `operating margin <b>${pct(om.pct)}</b>`,
+  };
+  const peek = S.peek('fin', Object.keys(pp)).map((id) => (id in pp ? pp[id] : peekPart(c, id))).filter(Boolean).join(' · ');
+  const hasMain = mainN > 0 || !!figMain || (rnSt === 'MAIN' && rn.length > 0);
+  return tile('fin', lbl, peek, std, full, door, !hasMain);
 }
 
 /* ---------- valuation box (D86) and geography box (D71) ---------- */
 const mfmt = (m, v) => (m.kind === 'yield' ? pct(v, 1) : typeof v === 'number' ? (v < 0 ? '−' : '') + Math.abs(v).toFixed(Math.abs(v) >= 100 ? 0 : 1) + '×' : null);
 const okYear = (m) => (y) => (m.kind === 'yield' ? y.pct : y.v) != null;
+let VAL_PEEK = null; // the measure the collapsed Valuation box shows (null: the box's headline measure, day one)
 function valTile(c) {
   const box = c.valuationInputs?.box;
   if (!box) return '';
-  if (box.status !== 'ok') return tile('val', 'Valuation', esc(box.reason || ''), `<div class="note">${esc(box.reason || 'Not computed.')}</div>`, '');
-  const ms = [...box.measures].sort((a, b) => (b.headline ? 1 : 0) - (a.headline ? 1 : 0));
+  if (box.status !== 'ok') return S.asks('val') ? tile('val', 'Valuation', esc(box.reason || ''), `<div class="note">${esc(box.reason || 'Not computed.')}</div>`, '') : '';
+  if (!S.box('val')) return '';
+  // the measures in the switchboard's order (day-one fallback: the headline measure first)
+  const ordered = S.fallback ? [...box.measures].sort((a, b) => (b.headline ? 1 : 0) - (a.headline ? 1 : 0)) : S.sort(box.measures.map((m) => m.id)).map((id) => box.measures.find((m) => m.id === id));
+  const ms = ordered.filter((m) => S.st(m.id, 'MAIN'));
+  const formOf = (m) => S.form(m.id, 'both');
+  const range = ms.some((m) => formOf(m) === 'both'); // the 10-year range column is drawn only when a measure uses it
+  const nr = range ? '' : ' nr';
   const basisTxt = box.basis.basis === 'FY' ? `${box.basis.label} annual report` : box.basis.label;
   const catName = box.peers?.cat?.name || 'Cat';
-  const range = (a, b) => (a ? (a === b ? `priced ${a}` : `priced ${a} to ${b}`) : '');
+  const rangeTxt = (a, b) => (a ? (a === b ? `priced ${a}` : `priced ${a} to ${b}`) : '');
   const onFY = (k) => (k ? `; ${k} on latest fiscal year` : '');
   const named = (m, pe) => (pe?.values?.length ? pe.values.map((x) => `${x.ticker} ${mfmt(m, x.value)}${x.basis === 'FY' ? ' FY' : ''}`).join(' · ') : '');
   const detail = [];
@@ -319,9 +511,9 @@ function valTile(c) {
     const subMed = pe && pe.median != null, catMed = !subMed && pe?.cat?.median != null;
     const nm = pe && !subMed ? named(m, pe) : '';
     const peer = subMed ? mfmt(m, pe.median) : catMed ? `<small>Cat</small>${mfmt(m, pe.cat.median)}` : DASH;
-    const catTitle = pe?.cat ? `${catName}: ${pe.cat.n} of ${pe.cat.m} companies have it${pe.cat.median != null ? `, median ${mfmt(m, pe.cat.median)}, ${range(box.peers.cat?.pricedFrom, box.peers.cat?.pricedTo)}${onFY(pe.cat.onFY)}` : ', too few for a median'}` : '';
+    const catTitle = pe?.cat ? `${catName}: ${pe.cat.n} of ${pe.cat.m} companies have it${pe.cat.median != null ? `, median ${mfmt(m, pe.cat.median)}, ${rangeTxt(box.peers.cat?.pricedFrom, box.peers.cat?.pricedTo)}${onFY(pe.cat.onFY)}` : ', too few for a median'}` : '';
     const peerTitle = !pe ? 'No peer group' : subMed
-      ? `Median of ${pe.n} peers in ${box.peers.sub}, ${range(box.peers.pricedFrom, box.peers.pricedTo)}${onFY(pe.onFY)}`
+      ? `Median of ${pe.n} peers in ${box.peers.sub}, ${rangeTxt(box.peers.pricedFrom, box.peers.pricedTo)}${onFY(pe.onFY)}`
       : [`Only ${pe.n} of ${pe.m} peers in ${box.peers.sub} have this figure; a median needs at least ${box.peers.minimum}`, nm && `Named: ${nm}${pe.onFY ? ' (FY = latest fiscal year)' : ''}`, catTitle].filter(Boolean).join('\n');
     const have = h && h.n && h.low != null;
     const ys = have ? h.years.filter(okYear(m)) : [];
@@ -329,38 +521,79 @@ function valTile(c) {
     const hist = have ? `Own range, ${h.n} fiscal years ${span}, each at its fiscal-year-end price\nLow ${mfmt(m, h.low)} · median ${mfmt(m, h.median)} · high ${mfmt(m, h.high)}` : 'No 10-year history available';
     const tag = m.basis ? `<small class="vtag"${T(`${m.basis.label} annual report`)}>${esc(m.basis.label)}</small>` : '';
     detail.push(`<tr${T(m.long || '')}><td>${esc(m.name)}${tag}</td><td class="n">${have ? `${mfmt(m, h.low)} · ${mfmt(m, h.median)} · ${mfmt(m, h.high)}<small>${esc(span)}</small>` : DASH}</td><td class="n">${subMed ? `${mfmt(m, pe.median)}<small>median of ${pe.n}</small>` : nm ? `${esc(nm)}<small>${pe.n} of ${pe.m}, too few for a median</small>` : DASH}</td><td class="n">${pe?.cat?.median != null ? `${mfmt(m, pe.cat.median)}<small>${pe.cat.n} of ${pe.cat.m}</small>` : DASH}</td></tr>`);
-    return `<div class="vrow${m.headline ? ' hd' : ''}" id="vb-${esc(m.id)}"${T(m.long || '')}>
-      <span class="vn">${esc(m.name)}${tag}</span><b class="vv">${DASH}</b>
-      <span class="vr"${T(hist)}><span class="vbar" data-lo="${have ? h.low : ''}" data-md="${have ? h.median : ''}" data-hi="${have ? h.high : ''}"><i class="mid"></i><i class="now"></i></span></span>
-      <span class="vp"${T(peerTitle)}>${peer}</span></div>`;
+    const vr = !range ? '' : formOf(m) !== 'both' ? `
+      <span class="vr"></span>` : `
+      <span class="vr"${T(hist)}><span class="vbar" data-lo="${have ? h.low : ''}" data-md="${have ? h.median : ''}" data-hi="${have ? h.high : ''}"><i class="mid"></i><i class="now"></i></span></span>`;
+    return put(S.st(m.id, 'MAIN'), `<div class="vrow${m.headline ? ' hd' : ''}${nr}" id="vb-${esc(m.id)}"${T(m.long || '')}>
+      <span class="vn">${esc(m.name)}${tag}</span><b class="vv">${DASH}</b>${vr}
+      <span class="vp"${T(peerTitle)}>${peer}</span></div>`);
   }).join('');
-  const std = `<div class="vhead"><span></span><span>Today</span><span>10-year range</span><span>Peers</span></div>${rows}<div class="note vnote">${esc(basisTxt)} · live price</div>${readerNotes(c.valuationInputs.readerNotes?.valuation)}`;
+  const rnSt = S.st('readerNotesValuation', 'MAIN');
+  const vnotes = put(rnSt, readerNotes(c.valuationInputs.readerNotes?.valuation));
+  const std = ms.length ? `<div class="vhead${nr}"><span></span><span>Today</span>${range ? '<span>10-year range</span>' : ''}<span>Peers</span></div>${rows}<div class="note vnote">${esc(basisTxt)} · live price</div>${vnotes}` : vnotes;
   const dt = `<table class="tt vdt"><tr><th>Measure</th><th class="n">Own low · median · high</th><th class="n"${T(box.peers?.sub || '')}>Sub peers</th><th class="n"${T(catName)}>Cat median</th></tr>${detail.join('')}</table>`;
-  const prices = box.peers ? `Peers ${range(box.peers.pricedFrom, box.peers.pricedTo)}. ` : '';
+  const prices = box.peers ? `Peers ${rangeTxt(box.peers.pricedFrom, box.peers.pricedTo)}. ` : '';
   const src = Object.entries(box.sources || {}).map(([k, x]) => `<div class="note" style="white-space:pre-line"><b>${esc(k)}</b>: ${esc(String(x))}</div>`).join('');
-  const full = sec('Range and peers', dt + `<div class="note" style="margin-top:.4em">Today at the live price; own range at each fiscal-year-end price. ${esc(prices)}FY = latest fiscal year.</div>`) + sec('Where the figures come from', `<div class="note">Basis ${esc(basisTxt)}. ${box.historyPrices ? esc(box.historyPrices.source) + '.' : ''}</div>${src}`);
-  return tile('val', 'Valuation', '<span id="vb-peek">—</span>', std, full);
+  const full = (ms.length && S.st('valuationRangeAndPeers', 'ON') ? sec('Range and peers', dt + `<div class="note" style="margin-top:.4em">Today at the live price; own range at each fiscal-year-end price. ${esc(prices)}FY = latest fiscal year.</div>`) : '')
+    + (S.st('valuationSources', 'ON') ? sec('Where the figures come from', `<div class="note">Basis ${esc(basisTxt)}. ${box.historyPrices ? esc(box.historyPrices.source) + '.' : ''}</div>${src}`) : '');
+  VAL_PEEK = S.fallback ? null : S.peek('val').find((id) => box.measures.some((m) => m.id === id)) || '';
+  // a box with no peek measure and nothing else to show is hidden
+  if (!VAL_PEEK && !ms.length && !(rnSt === 'MAIN' && c.valuationInputs.readerNotes?.valuation?.length)) return '';
+  const hasMain = ms.some((m) => S.st(m.id, 'MAIN') === 'MAIN') || (rnSt === 'MAIN' && !!c.valuationInputs.readerNotes?.valuation?.length);
+  // the peek: the resolver's peek measure, filled at the live price; none named, no peek (never a lone dash)
+  return tile('val', 'Valuation', VAL_PEEK === '' ? '' : '<span id="vb-peek">—</span>', std, full, '', !hasMain);
 }
 function fillValuation(q) {
   const box = C.valuationInputs?.box;
   const now = q?.valuation?.valuationBox;
   if (!box || box.status !== 'ok' || !now || now.status !== 'ok') return;
   for (const m of now.measures) {
-    const row = document.getElementById('vb-' + m.id); if (!row) continue;
     const def = box.measures.find((x) => x.id === m.id);
+    if (!def) continue;
     const v = def.kind === 'yield' ? m.pct : m.v;
-    $('.vv', row).innerHTML = v != null ? mfmt(def, v) : m.nm ? `<span${T('n.m.: ' + (m.reason || ''))}>n.m.</span>` : `<span${T(m.reason || '')}>—</span>`;
-    const bar = $('.vbar', row), lo = parseFloat(bar.dataset.lo), hi = parseFloat(bar.dataset.hi), md = parseFloat(bar.dataset.md);
+    const html = v != null ? mfmt(def, v) : m.nm ? `<span${T('n.m.: ' + (m.reason || ''))}>n.m.</span>` : `<span${T(m.reason || '')}>—</span>`;
+    fillLive(m.id, html);
+    const row = document.getElementById('vb-' + m.id); if (!row) continue;
+    $('.vv', row).innerHTML = html;
+    const bar = $('.vbar', row);
+    if (!bar) continue; // drawn as a number only
+    const lo = parseFloat(bar.dataset.lo), hi = parseFloat(bar.dataset.hi), md = parseFloat(bar.dataset.md);
     if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi <= lo) { bar.style.visibility = 'hidden'; continue; }
     const a = v != null ? Math.min(lo, v) : lo, b = v != null ? Math.max(hi, v) : hi, at = (x) => ((x - a) / (b - a) * 100).toFixed(1) + '%';
     $('.mid', bar).style.left = at(md);
     const nw = $('.now', bar); if (v != null) nw.style.left = at(v); else nw.style.display = 'none';
     bar.style.setProperty('--lo', at(lo)); bar.style.setProperty('--hi', at(hi));
   }
-  const hd = box.measures.find((x) => x.headline), hn = hd && now.measures.find((m) => m.id === hd.id);
+  const hd = VAL_PEEK === null ? box.measures.find((x) => x.headline) : box.measures.find((x) => x.id === VAL_PEEK), hn = hd && now.measures.find((m) => m.id === hd.id);
   const pk = document.getElementById('vb-peek');
   if (pk && hn) { const v = hd.kind === 'yield' ? hn.pct : hn.v; pk.innerHTML = v != null ? `${esc(hd.name)} <b>${mfmt(hd, v)}</b>` : ''; }
 }
+
+/* a figure as short text, for the headline strip and a peek that falls through to another item; figures the live price
+   fills are placeholders (data-hs) filled by fillLive; '' when the company has no such figure */
+const LIVE_IDS = ['marketValue', 'dividendYield', 'buybackYield'];
+// returns {html, title}: the title carries the period, the source and whether Mowgli computed it
+function metricValue(c, id) {
+  const f = c.fin, h = f?.headline || {}, cur = f?.currency;
+  const none = { html: '', title: '' };
+  const cell = f?.tile?.cells?.find((x) => x.id === id);
+  if (cell) { const n = cell.now; return n ? { html: n.nm ? 'n.m.' : fmtUnit(cell.unit, n.v, cur), title: [n.label, n.computed && 'computed by Mowgli', n.nm && 'n.m.: ' + n.reason, n.src].filter(Boolean).join('\n') } : none; }
+  if (id === 'peek.revenueGrowthQ' || id === 'revenueGrowth') { const q = h.revenueGrowth?.quarter; return q?.pct != null ? { html: `<span class="${cls(q.pct)}">${spct(q.pct)}</span>`, title: [q.label, q.src].filter(Boolean).join('\n') } : none; }
+  const m = /^(?:margins|headline|peek)\.(\w+)$/.exec(id);
+  if (m && h[m[1]]) { const x = h[m[1]]; const html = x.nm ? 'n.m.' : x.pct != null ? pct(x.pct) : x.v != null ? money(x.v, cur) : ''; return html ? { html, title: [x.label, x.computed && 'computed by Mowgli', x.src].filter(Boolean).join('\n') } : none; }
+  if (LIVE_IDS.includes(id) || (c.valuationInputs?.box?.measures || []).some((x) => x.id === id)) return { html: `<span data-hs="${esc(id)}">—</span>`, title: 'At the live price; computed by Mowgli' };
+  const vi = c.valuationInputs || {};
+  const text = {
+    hq: c.hq?.text, 'identity.hq': c.hq?.text, legalName: c.legalName, fiscalYearEnd: c.fiscalYearEnd, founded: c.founded?.value,
+    employees: c.employees?.value?.toLocaleString('en-US'), sharesOutstanding: vi.shares ? (vi.shares.value / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M' : '',
+    sharesPerADS: vi.sharesPerADS ? String(vi.sharesPerADS) : '', exchangeTicker: [c.displayTicker, c.exchange].filter(Boolean).join(' · '),
+  }[id];
+  return text ? { html: esc(text), title: profileSrc(c) } : none;
+}
+// the figure's own short name where the payload has one (a Financials cell, a valuation measure), else the catalog label
+const shortLabel = (c, id) => c.fin?.tile?.cells?.find((x) => x.id === id)?.label || c.valuationInputs?.box?.measures?.find((x) => x.id === id)?.name || S.label(id).replace(/ \(series\)$/, '');
+const peekPart = (c, id) => { const v = metricValue(c, id); return v.html ? `<span${T(v.title)}>${esc(shortLabel(c, id))} <b>${v.html}</b></span>` : ''; };
+const fillLive = (id, html) => document.querySelectorAll(`[data-hs="${id}"]`).forEach((e) => { e.innerHTML = html; });
 
 /* Stylised low-detail world map for the geography box (D71): areas shaded by share; unmappable labels are listed in the rows only. */
 const GEO_AREAS = {
@@ -408,19 +641,26 @@ function geoMap(regs, y) {
 
 function geoTile(c) {
   const g = c.geography;
-  if (!g) return '';
+  if (!g || !S.box('geo')) return '';
+  const P = S.peek('geo', ['geoRegions', 'geoUsOnly']);
   if (g.usOnly) {
-    const u = g.usOnly;
-    return tile('geo', 'Revenue by region', 'United States only', `<div class="note" style="font-size:.88em;color:var(--ink2)"${T(u.note || '')}>${u.substantially ? 'Substantially all revenue is in the United States' : 'Revenue is entirely in the United States'}.</div><div class="note">${esc(u.form || '')} filed ${esc(u.filed || '')}: “${esc(String(u.text).slice(0, 200))}”</div>`, '');
+    const u = g.usOnly, s = S.st('geoUsOnly', 'MAIN');
+    if (!s) return '';
+    return tile('geo', 'Revenue by region', xPeek(c, 'geo', ['geoRegions', 'geoUsOnly'], natPeek('geo', ['geoUsOnly'], s !== 'MAIN') ? 'United States only' : ''), put(s, `<div class="note" style="font-size:.88em;color:var(--ink2)"${T(u.note || '')}>${u.substantially ? 'Substantially all revenue is in the United States' : 'Revenue is entirely in the United States'}.</div><div class="note">${esc(u.form || '')} filed ${esc(u.filed || '')}: “${esc(String(u.text).slice(0, 200))}”</div>`), '', '', s !== 'MAIN');
   }
   const y = (g.years || [])[0];
   if (!y || !y.regions?.length) return '';
+  const s = S.st('geoRegions', 'MAIN'), form = S.form('geoRegions', 'tableAndMap');
   const regs = [...y.regions].sort((a, b) => b.share - a.share);
   const srcT = (r) => `${r.label}: ${money(r.value, y.currency)} of ${money(y.total, y.currency)}\n${y.src?.form || ''} filed ${y.src?.filed || ''} · accession ${y.src?.accn || ''} · ${y.src?.tag || ''}`;
   const rows = regs.map((r, i) => `<div class="grow"${T(srcT(r))}><span class="gn"><i style="background:${SW[i % SW.length]}"></i>${esc(r.label)}</span><span class="gbar"><i style="width:${(r.share * 100).toFixed(1)}%;background:${SW[i % SW.length]}"></i></span><b>${pct(r.share * 100, r.share < .1 ? 1 : 0)}</b><span class="gm">${money(r.value, y.currency)}</span></div>`).join('');
-  const std = `<div class="geowrap"><div class="georows">${rows}</div>${geoMap(regs, y)}</div><div class="note vnote">${esc(y.period)}, ${esc(y.src?.form || '')} annual report, revenue ${money(y.total, y.currency)}${y.complete ? '' : '. The regions shown do not add up to all revenue.'}</div>`;
-  const others = (g.years || []).slice(1).map((yy) => `<div class="efq"><h5>${esc(yy.period)} · revenue ${money(yy.total, yy.currency)}</h5>${[...yy.regions].sort((a, b) => b.share - a.share).map((r) => `<div class="kv"><span>${esc(r.label)}</span><b>${pct(r.share * 100, 1)}</b><i>${money(r.value, yy.currency)}</i></div>`).join('')}</div>`).join('');
-  return tile('geo', 'Revenue by region', `<b>${esc(regs[0].label)}</b> ${pct(regs[0].share * 100, 0)}`, std, others ? sec('Earlier years', others) : '');
+  // form: tableAndMap (day one), table (the rows only) or map (the map only, drawn larger)
+  const std = put(s, `<div class="geowrap${form === 'map' ? ' gmo' : ''}">${form !== 'map' ? `<div class="georows">${rows}</div>` : ''}${form !== 'table' ? geoMap(regs, y) : ''}</div><div class="note vnote">${esc(y.period)}, ${esc(y.src?.form || '')} annual report, revenue ${money(y.total, y.currency)}${y.complete ? '' : '. The regions shown do not add up to all revenue.'}</div>`);
+  const efq = (list) => list.map((yy) => `<div class="efq"><h5>${esc(yy.period)} · revenue ${money(yy.total, yy.currency)}</h5>${[...yy.regions].sort((a, b) => b.share - a.share).map((r) => `<div class="kv"><span>${esc(r.label)}</span><b>${pct(r.share * 100, 1)}</b><i>${money(r.value, yy.currency)}</i></div>`).join('')}</div>`).join('');
+  const others = S.st('geoEarlierYears', 'ON') ? efq((g.years || []).slice(1)) : '';
+  const quarters = S.st('geoQuarters', null) ? efq((g.quarters || []).filter((x) => x.regions?.length)) : '';
+  const full = (others ? sec('Earlier years', others) : '') + (quarters ? sec('Quarters', quarters) : '');
+  return tile('geo', 'Revenue by region', xPeek(c, 'geo', ['geoRegions', 'geoUsOnly'], natPeek('geo', ['geoRegions'], s !== 'MAIN', ['geoRegions', 'geoEarlierYears']) ? `<b>${esc(regs[0].label)}</b> ${pct(regs[0].share * 100, 0)}` : ''), std, full, '', s !== 'MAIN');
 }
 
 function resultClass(r) { const s = String(r || '').toLowerCase(); return /beat|raised/.test(s) ? 'beat' : /miss|cut|lower/.test(s) ? 'miss' : 'inl'; }
@@ -433,9 +673,10 @@ function metricMoney(metric, v) {
   if (/EPS/i.test(m)) return `${sign}$${Math.abs(v).toFixed(2)}`;
   return `${sign}${Math.abs(v).toLocaleString('en-US')}`;
 }
-function expectationRows(q) {
+// items: the expected-vs-actual rows; guidance: the guidance row (separate switches in the latest quarter)
+function expectationRows(q, { items = true, guidance = true } = {}) {
   if (!q) return '';
-  const rows = (q.items || []).filter((it) => typeof it.expected === 'number' && typeof it.actual === 'number').map((it) => {
+  const rows = !items ? '' : (q.items || []).filter((it) => typeof it.expected === 'number' && typeof it.actual === 'number').map((it) => {
     const rc = resultClass(it.result), gp = it.gap != null && it.expected ? (it.gap / Math.abs(it.expected)) * 100 : null;
     const w = gp != null ? Math.min(50, Math.max(2, Math.abs(gp) * 5)) : 0;
     const bar = gp != null ? `<span class="gb"><i class="${rc}" style="${gp >= 0 ? 'left' : 'right'}:50%;width:${w.toFixed(1)}%"></i></span>` : '';
@@ -443,7 +684,7 @@ function expectationRows(q) {
     return `<div class="er2"${T(`Expected: ${it.expectedBy || 'source not named'}\n${it.source || ''}`)}><span>${esc(it.metric.replace(/\s*\(\$[MB]\)/, ''))}</span><span><span class="bd ${rc}">${esc(String(it.result).toUpperCase())}</span>${bar}<small class="g-${rc}">${esc(gapTxt)}</small> <span class="efig">${metricMoney(it.metric, it.actual)} vs ${metricMoney(it.metric, it.expected)}</span></span></div>`;
   }).join('');
   const gd = q.guidance ? `<div class="er2"${T((q.guidance.prior ? 'Prior: ' + q.guidance.prior + '\n' : '') + (q.guidance.source || ''))}><span>Guidance</span><span><span class="bd ${resultClass(q.guidance.change)}">${esc(String(q.guidance.change || '').toUpperCase())}</span> <small>${esc(q.guidance.new || '')}</small></span></div>` : '';
-  return rows + gd;
+  return rows + (guidance ? gd : '');
 }
 function reactionLine(q, note) {
   const r = q?.reaction;
@@ -456,8 +697,9 @@ function actualRows(qq, cur) {
 }
 function earnTile(c) {
   const qs = c.fin?.quarters || [];
-  if (!qs.length) return '';
+  if (!qs.length || !S.box('earn')) return '';
   const cur = c.fin.currency, latest = qs[0];
+  const st = (id) => S.st(id, id === 'earnEarlierQuarters' ? 'ON' : 'MAIN');
   const E = c.earnings, byLabel = new Map((E?.quarters || []).map((q) => [q.period, q]));
   const eq = byLabel.get(latest.label);
   const briefs = (eq?.briefs || []).slice(0, 3).map((b) => `<li${T(b.text + (b.source ? '\n' + b.source : ''))}><b>${esc(b.text.split(/[:;]/)[0])}</b>${b.text.includes(':') ? ' · ' + esc(b.text.split(':').slice(1).join(':').trim().split(/;\s|\.\s/)[0]) : ''}</li>`).join('');
@@ -467,25 +709,35 @@ function earnTile(c) {
     const exp = (nx.items || []).filter((i) => typeof i.expected === 'number' && i.source).map((i) => `<span${T(`${i.expectedBy || ''}\n${i.source}`)}>${esc(i.metric)} expected <b>${metricMoney(/EPS/i.test(i.metric) ? 'EPS' : i.metric, i.expected)}</b></span>`).join(' · ');
     upNext = `<div class="enx"${T(nx.dateSource)}>Up next · <b>${esc(shortDate(nx.expectedDate))}</b>${nx.dateConfirmed ? '' : ' (expected, not confirmed)'}${exp ? ' · ' + exp : ''}</div>`;
   }
-  const std = `<div class="ers">${actualRows(latest, cur)}${expectationRows(eq)}</div>${briefs ? `<ul class="eb">${briefs}</ul>` : ''}${reactionLine(eq, E?.reactionNote)}${upNext}`;
+  // each part of the latest quarter is its own switch
+  const parts = { earnActuals: actualRows(latest, cur), earnExpectations: expectationRows(eq, { guidance: false }), earnGuidance: expectationRows(eq, { items: false }), earnBriefs: briefs ? `<ul class="eb">${briefs}</ul>` : '', earnReaction: reactionLine(eq, E?.reactionNote), earnNext: upNext };
+  const P_ = (id) => put(st(id), parts[id]);
+  const std = `<div class="ers">${P_('earnActuals')}${P_('earnExpectations')}${P_('earnGuidance')}</div>${P_('earnBriefs')}${P_('earnReaction')}${P_('earnNext')}`;
+  const hasMain = Object.keys(parts).some((id) => parts[id] && st(id) === 'MAIN');
   const efq = qs.slice(1).map((q) => {
     const e = byLabel.get(q.label);
     const efb = (e?.briefs || []).map((b) => `<li${T(b.source)}>${esc(b.text)}</li>`).join('');
     return `<div class="efq"><h5>${esc(q.label)}${e?.reportDate ? ' · ' + esc(shortDate(e.reportDate)) : q.filed ? ` · ${esc(q.form || '')} filed ${esc(shortDate(q.filed))}` : ''}</h5>${actualRows(q, cur)}${expectationRows(e)}${e ? reactionLine(e, E.reactionNote).replace('class="er1"', 'class="er2"') : ''}${efb ? `<ul class="efb">${efb}</ul>` : ''}${e?.reaction?.note ? `<div class="ecov">${esc(e.reaction.note)}</div>` : ''}</div>`;
   }).join('');
-  const full = efq ? `<div class="efqs">${efq}</div>` : '';
+  const full = efq && st('earnEarlierQuarters') ? `<div class="efqs">${efq}</div>` : '';
   const when = eq?.reportDate ? `, ${shortDate(eq.reportDate).replace(/ \d{4}$/, '')}` : '';
-  const peek = [latest.revenue && `Revenue <b>${money(latest.revenue.v, cur)}</b>${latest.revenue.yoy?.pct != null ? ` <b class="${cls(latest.revenue.yoy.pct)}">${spct(latest.revenue.yoy.pct)}</b>` : ''}`, latest.eps && `EPS <b>${perShare(latest.eps.v, cur)}</b>`].filter(Boolean).join(' · ');
-  return tile('earn', `Earnings · ${esc(latest.label)}${esc(when)}`, peek, std, full);
+  const peek0 = !natPeek('earn', ['earnActuals'], !hasMain) ? '' : [latest.revenue && `Revenue <b>${money(latest.revenue.v, cur)}</b>${latest.revenue.yoy?.pct != null ? ` <b class="${cls(latest.revenue.yoy.pct)}">${spct(latest.revenue.yoy.pct)}</b>` : ''}`, latest.eps && `EPS <b>${perShare(latest.eps.v, cur)}</b>`].filter(Boolean).join(' · ');
+  const peek = xPeek(c, 'earn', ['earnActuals'], peek0);
+  return tile('earn', `Earnings · ${esc(latest.label)}${esc(when)}`, peek, std, full, '', !hasMain);
 }
 
 function nextTile(c) {
   const w = c.whatsNext;
-  if (!w.length) return '';
+  if (!w.length || !S.box('next')) return '';
+  const sMain = S.st('whatsNext', 'MAIN'), sAll = S.st('whatsNextAll', 'ON');
   const src = (x) => profileSrc(c, [x.note, x.source].filter(Boolean).join(' · '));
-  const std = `<div>${w.slice(0, 4).map((x) => `<div class="nx"${T(src(x))}><time>${esc(x.when)}</time><div>${esc(x.text.length > 150 ? x.text.slice(0, 147) + '…' : x.text)}</div></div>`).join('')}</div>`;
-  const full = sec('Everything dated in the company profile', w.map((x) => `<div class="nx"${T(src(x))}><time>${esc(x.when)}</time><div>${esc(x.text)}${x.note ? `<div class="note">${esc(x.note)}</div>` : ''}${x.source ? `<div class="note">Source: ${esc(x.source)}</div>` : ''}</div></div>`).join(''));
-  return tile('next', 'What’s next', `<b>${esc(w[0].when)}</b> ${esc(w[0].text.slice(0, 90))}${w[0].text.length > 90 ? '…' : ''}`, std, full);
+  const std = put(sMain, `<div>${w.slice(0, 4).map((x) => `<div class="nx"${T(src(x))}><time>${esc(x.when)}</time><div class="cl3">${esc(x.text)}</div></div>`).join('')}</div>`);
+  const full = !sAll ? '' : sec('Everything dated in the company profile', w.map((x) => `<div class="nx"${T(src(x))}><time>${esc(x.when)}</time><div>${esc(x.text)}${x.note ? `<div class="note">${esc(x.note)}</div>` : ''}${x.source ? `<div class="note">Source: ${esc(x.source)}</div>` : ''}</div></div>`).join(''));
+  // the whole first item, wrapped to at most three lines by the page (never cut inside a word, number or date)
+  const peek0 = !natPeek('next', ['whatsNext'], sMain !== 'MAIN', ['whatsNext', 'whatsNextAll']) ? ''
+    : `<span class="pk3"><b>${esc(w[0].when)}</b> ${esc(w[0].text)}</span>`;
+  const peek = xPeek(c, 'next', ['whatsNext'], peek0);
+  return tile('next', 'What’s next', peek, std, full, '', sMain !== 'MAIN');
 }
 
 /* ---------- expand in place (from the design) ---------- */
@@ -500,7 +752,9 @@ function setOpen(id) {
 
 /* ---------- quote ---------- */
 let C = null;
+let lastQuote = null; // the last quote drawn, redrawn after the switches change
 function renderQuote(q) {
+  lastQuote = q;
   const p = $('#pxp'), cEl = $('#pxc');
   if (!q || q.price == null) { p.textContent = '—'; cEl.className = 'c stale'; cEl.innerHTML = `<small${T(q?.error || '')}>price unavailable</small>`; return; }
   const ads = C.valuationInputs.sharesPerADS ? ' per ADS' : '';
@@ -519,11 +773,15 @@ function renderQuote(q) {
   const bp = v.buybackPrev, bn = v.buybackNext;
   const prevTxt = bp && bp.pct != null ? pct(bp.pct) : DASH;
   const nextTxt = bn && bn.pct != null ? pct(bn.pct) : bn && bn.longWindow ? money(bn.amount) + ' to ' + shortDate(bn.expiry) : DASH;
+  fillLive('marketValue', mv ? money(mv.v) : DASH);
+  fillLive('dividendYield', dy && dy.pct != null ? pct(dy.pct, 2) : DASH);
+  fillLive('buybackYield', `${prevTxt} / ${nextTxt}`);
   set('v-by', `${prevTxt} / ${nextTxt}`, [bp ? 'Prev 12: ' + bp.src : 'Prev 12: no buyback figure for the last 12 months in the filings data', bn ? 'Next 12: ' + bn.src : 'Next 12: ' + (v.buybackNextNote || 'no dated authorisation stated')].join('\n\n'));
   const pk = document.getElementById('v-peek');
-  if (pk && mv) pk.innerHTML = `Worth <b>${money(mv.v)}</b>${C.hq ? ' · ' + esc(C.hq.text) : ''}`;
+  if (pk && mv && BASICS_PEEK.mv) pk.innerHTML = `Worth <b>${money(mv.v)}</b>${BASICS_PEEK.hq ? ' · ' + esc(C.hq.text) : ''}${BASICS_PEEK.extra ? ' · ' + BASICS_PEEK.extra : ''}`;
   const line = document.getElementById('v-mvline');
-  if (line && mv) line.innerHTML = kv(`Market value: today's price${C.valuationInputs.sharesPerADS ? ' per ADS ÷ ' + C.valuationInputs.sharesPerADS : ''} × shares at ${esc(shortDate(mv.sharesDate))}`, money(mv.v), 'computed', mv.src);
+  if (line && !mv) line.innerHTML = kv('Market value: today’s price × shares', DASH, 'computed', 'No share count in the filings data');
+  else if (line) line.innerHTML = kv(`Market value: today's price${C.valuationInputs.sharesPerADS ? ' per ADS ÷ ' + C.valuationInputs.sharesPerADS : ''} × shares at ${esc(shortDate(mv.sharesDate))}`, money(mv.v), 'computed', mv.src);
   const d2 = document.getElementById('v-dy2');
   if (d2) d2.textContent = dy && dy.pct != null ? pct(dy.pct, 2) : '—';
 }
@@ -596,20 +854,7 @@ function render(c) {
     im.src = c.logo.url;
   } else { hero.classList.add('nologo'); b.dataset.named = '0'; }
 
-  const tiles = { company: basicsTile(c), cls: classTile(c), money: moneyTile(c), brands: brandsTile(c), fin: finTile(c), val: valTile(c), geo: geoTile(c), next: nextTile(c), earn: earnTile(c) };
-  const field = $('#field');
-  // three content-sized columns; each tile goes to the shortest column, so an absent tile leaves no gap
-  field.innerHTML = '<div class="fcol"></div><div class="fcol"></div><div class="fcol"></div>';
-  const cols = [...field.children];
-  for (const id of ['company', 'cls', 'money', 'next', 'brands', 'fin', 'val', 'geo', 'earn']) {
-    if (!tiles[id]) continue;
-    const tmp = document.createElement('div'); tmp.innerHTML = tiles[id];
-    // the Classification box always sits directly under Basics, in its column
-    const target = id === 'cls' && tiles.company ? cols.find((x) => x.querySelector('.tile.company')) : cols.reduce((a, x) => (x.offsetHeight < a.offsetHeight ? x : a));
-    target.appendChild(tmp.firstElementChild);
-  }
-  cols.forEach((x, i) => { if (!x.children.length) x.remove(); else [...x.children].forEach((t) => { t.dataset.c = i; }); });
-  field.querySelectorAll('.tile').forEach((t) => t.addEventListener('click', (e) => { if (e.target.closest('a') || !t.dataset.id) return; setOpen(t.dataset.id); }));
+  drawTiles(c);
 
   const lf = c.fin?.latestFiling;
   const parts = [
@@ -625,13 +870,55 @@ function render(c) {
   sizeBand();
 }
 
+// the boxes, the headline strip and the switchboard notice; run again in place when the switches change (D90)
+function drawTiles(c) {
+  S = selection(c);
+  open = null;
+  const tiles = { company: basicsTile(c), cls: classTile(c), money: moneyTile(c), brands: brandsTile(c), fin: finTile(c), val: valTile(c), geo: geoTile(c), next: nextTile(c), earn: earnTile(c) };
+  const field = $('#field');
+  // three content-sized columns; each box goes to the shortest column, so an absent box leaves no gap; a pinned box
+  // (Classification under Basics on day one) goes directly under its host, in the host's column
+  field.innerHTML = '<div class="fcol"></div><div class="fcol"></div><div class="fcol"></div>';
+  field.removeAttribute('data-n');
+  const cols = [...field.children];
+  for (const id of S.order) {
+    if (!tiles[id]) continue;
+    const tmp = document.createElement('div'); tmp.innerHTML = tiles[id];
+    const el = tmp.firstElementChild, pin = S.pin(id), host = pin && field.querySelector(`.tile.${pin}`);
+    if (host) host.after(el);
+    else cols.reduce((a, x) => (x.offsetHeight < a.offsetHeight ? x : a)).appendChild(el);
+  }
+  cols.forEach((x, i) => { if (!x.children.length) x.remove(); else [...x.children].forEach((t) => { t.dataset.c = i; }); });
+  // fewer than three columns: each keeps a third of the width, so a lone box does not stretch across the page
+  if (field.children.length && field.children.length < 3) field.dataset.n = field.children.length;
+  field.querySelectorAll('.tile').forEach((t) => t.addEventListener('click', (e) => { if (e.target.closest('a') || !t.dataset.id) return; setOpen(t.dataset.id); }));
+
+  // headline strip under the logo: the metrics Adam marks for it, in his order (none on day one, so nothing is drawn)
+  $('#hstrip')?.remove();
+  const hs = S.headline.map((id) => { const v = metricValue(c, id); return `<span${T([S.label(id), v.title].filter(Boolean).join('\n'))}>${esc(shortLabel(c, id))}<b>${v.html || DASH}</b></span>`; }).join('');
+  if (hs) $('#htick').insertAdjacentHTML('afterend', `<div class="hstrip" id="hstrip">${hs}</div>`);
+
+  $('#sbn')?.remove();
+  if (S.fallback) document.body.insertAdjacentHTML('beforeend', `<div class="sbn" id="sbn"${T('Switchboard: ' + S.why)}>Display settings could not be loaded; showing the standard layout.</div>`);
+  else if (SBSTALE) document.body.insertAdjacentHTML('beforeend', `<div class="sbn" id="sbn"${T('Switchboard: ' + SBSTALE)}>Display settings could not be refreshed; showing the last loaded.</div>`);
+  sizeBand();
+}
+
 addEventListener('resize', () => { sizeBand(); drawStars(); });
 addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) setOpen(open); });
 setupSwitcher();
 document.body.classList.add('instant');
-fetch(MG.companyUrl(ticker)).then(async (r) => {
+// the settings page posts on this channel after a save: re-read the switches and redraw the boxes in place
+try {
+  new BroadcastChannel('mowgli-switchboard').onmessage = async () => {
+    if (!(await loadSwitchboard()) || !C) return;
+    drawTiles(C);
+    if (lastQuote) renderQuote(lastQuote);
+  };
+} catch { /* no BroadcastChannel: the page keeps its switches until reloaded */ }
+Promise.all([fetch(MG.companyUrl(ticker)), loadSwitchboard()]).then(async ([r]) => {
   const j = await r.json();
-  if (!r.ok) { applyTheme({ sky: 'default' }); document.body.insertAdjacentHTML('beforeend', `<div class="err">${esc(j.error || 'Not found')}</div>`); return; }
+  if (!r.ok) { applyTheme({ sky: 'default' }); document.body.insertAdjacentHTML('beforeend', `<div class="err">${esc(j.error?.message || j.error || 'Not found')}</div>`); return; }
   render(j);
   loadQuote();
   setInterval(loadQuote, 30000);

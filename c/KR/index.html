@@ -556,6 +556,34 @@ body .hero.nologo .hr{display:none!important}
 .grow b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}.grow .gm{text-align:right;color:var(--mut);font-variant-numeric:tabular-nums}
 .geowrap{display:flex;gap:.9em;align-items:center}.georows{flex:1 1 0;min-width:0}.geomap{flex:0 0 27%;width:27%;max-width:240px;height:auto}.geomap .ga polygon{fill:var(--sub2);stroke:var(--line);stroke-width:.6;stroke-linejoin:round}.geomap .ga.on polygon{fill:var(--acc);fill-opacity:var(--o);stroke:var(--acc);stroke-opacity:.5}.geomap .ga.on:hover polygon{stroke-opacity:1;stroke-width:1.2}
 .err{position:fixed;inset:0;display:grid;place-items:center;font:600 1.2rem Manrope;color:#dfe3ee;z-index:5}
+/* D90 switchboard: an item switched ON shows only in the expanded box; a box with only such items is slim (header, chip, peek) */
+.tile .xo{display:contents}.tile:not(.open) .xo{display:none}
+.tile.slim:not(.open) .body{display:none}.tile.open .body:has(>.full:empty){grid-template-columns:minmax(0,1fr)}.tile.slim:not(.open) .peek{display:block}
+.sg.b4.bn{grid-template-columns:repeat(var(--n),minmax(0,1fr))}.tile.open .sg.b4.bn{grid-template-columns:1fr 1fr}.sg.b4.bn b{font-size:1.05em}
+.bxr,.fkv{margin-top:.7em}
+.fgr.c1{grid-template-columns:minmax(0,1fr)}.fgr.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.fgr.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.vhead.nr,.vrow.nr{grid-template-columns:minmax(0,1.35fr) 4.4em 5.6em}.vhead.nr span:nth-child(3){text-align:right}
+.geowrap.gmo .geomap{flex:1 1 auto;width:100%;max-width:520px;margin:0 auto}
+.field[data-n]{justify-content:center}.field[data-n]:not(:has(.tile.open)) .fcol{max-width:calc((100% - 2 * var(--gap)) / 3)}
+.hero .hstrip{display:flex;gap:1.3rem;margin-top:.15rem;font-size:.74rem;font-weight:700;letter-spacing:.4px;color:color-mix(in oklab,var(--tint) 35%,#d8dbe6);white-space:nowrap}
+.hero .hstrip span{opacity:.85}.hero .hstrip b{margin-left:.45em;font-weight:800;color:#f4f1ea;font-variant-numeric:tabular-nums}
+/* balanced Financials rows (5 a row in a wide box), one-line Basics labels, prose clamped to 3 lines, header pills flush right,
+   narrower region bars, capped sparklines */
+@container (min-width:900px){.fgr.w2{grid-template-columns:repeat(2,minmax(0,1fr))}.fgr.w3{grid-template-columns:repeat(3,minmax(0,1fr))}.fgr.w4{grid-template-columns:repeat(4,minmax(0,1fr))}.fgr.w5{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.sg.b4.bn{grid-auto-flow:row dense}.sg.b4 span{white-space:nowrap}
+/* Basics grid: every value on one line; on the day-one fields Headquarters and Buyback yield take two of four columns */
+.sg.b4{grid-auto-flow:row dense}.sg.b4:not(.bn){grid-template-columns:repeat(4,minmax(0,1fr))}
+.sg.b4:not(.bn)>div:not([id]),.sg.b4:not(.bn)>#v-by{grid-column:span 2}
+.sg.b4>div>b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lx{font-style:normal}.tile.open .sg .lx{display:none}
+.tile.shrunk.company .peek{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* an expanded box with nothing in its main column gives the expanded list the full width */
+.tile.open .body:has(>.std:empty){grid-template-columns:minmax(0,1fr)}.tile.open .body>.std:empty{display:none}
+.pk3,.nx .cl3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.tile.open .nx .cl3{display:block}
+.fin .doorl{margin-left:auto}
+.grow{grid-template-columns:minmax(0,2fr) minmax(2em,.7fr) 3em 4.4em}
+.fc .fsp,.fc .fax{max-width:360px}
+.sbn{position:fixed;left:16px;bottom:12px;z-index:6;padding:.35rem .8rem;border-radius:12px;background:rgba(20,22,34,.82);color:#e9e4da;font:600 .78rem Manrope,sans-serif;cursor:help}
 </style></head>
 <body data-cards="frost" data-layout="centre" data-sky="bold" data-blur="on" data-hero="real" data-sig="off" data-dens="compact" data-fin="self" data-acc="brand" data-page="live" data-multi="0" data-named="1">
 <div id="bg">

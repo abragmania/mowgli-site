@@ -13,6 +13,8 @@
     quoteWorker: isStatic ? String(cfg.quoteWorker || '').replace(/\/+$/, '') : '',
     companyUrl: (t) => (isStatic ? `${base}data/company/${enc(t)}.json` : `/api/company/${enc(t)}`),
     companiesUrl: () => (isStatic ? `${base}data/companies.json` : '/api/companies'),
+    // D90 switchboard (catalog, Adam's switches, rev): the local server answers live; the published site reads the baked copy
+    switchboardUrl: () => (isStatic ? `${base}data/switchboard.json` : '/api/switchboard'),
     // Monitor: local server answers /api/monitor; the published site asks the Worker, and falls back to the copy baked at publish
     monitorUrl() { return isStatic ? (this.quoteWorker ? `${this.quoteWorker}/monitor` : '') : '/api/monitor'; },
     logosUrl: () => (isStatic ? `${base}data/logos.json` : '/api/monitor/logos'),
