@@ -6,6 +6,8 @@
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const T = (s) => (s ? ` title="${esc(s)}"` : '');
+// D89 accounting notes: at most two muted lines, the full sentence on hover; any beyond two ride on the last line's hover
+const readerNotes = (list) => { const l = (list || []).slice(); if (!l.length) return ''; const shown = l.slice(0, 2); if (l.length > 2) shown[1] = { ...shown[1], title: l.slice(1).map((x) => x.title).join('\n\n') }; return shown.map((x) => `<div class="v-self note rnote"${T(x.title)}>ⓘ ${esc(x.text)}</div>`).join(''); };
 const DASH = '<span class="dash">—</span>';
 const ticker = MG.tickerFromPath();
 
@@ -259,9 +261,10 @@ function finTile(c) {
   };
   const notes = [];
   if (cells.length) notes.push(withTtm ? 'Bars: ten fiscal years, then the trailing twelve months (bright); change vs the twelve months a year earlier.' : 'Bars: ten fiscal years, the latest bright; change vs the year before.');
-  if (c.isInsurer) notes.push('Insurers collect premiums long before claims are paid, so a growing insurer’s cash flow looks better than its profit.');
+  const rn = c.valuationInputs?.readerNotes?.financials || [];
+  if (c.isInsurer && !rn.some((x) => x.id === 'A9')) notes.push('Insurers collect premiums long before claims are paid, so a growing insurer’s cash flow looks better than its profit.');
   if (cur !== 'USD') notes.push(`Figures in ${cur}, as filed.`);
-  const std = `<div class="v-self fgr">${cells.map(cell).join('')}</div><div class="v-self note fnt"${T(notes.join('\n'))}>${esc(notes.join(' '))}</div>`;
+  const std = `<div class="v-self fgr">${cells.map(cell).join('')}</div><div class="v-self note fnt"${T(notes.join('\n'))}>${esc(notes.join(' '))}</div>${readerNotes(rn)}`;
 
   // expanded view: per measure, single quarters, the rolling TTM line and fiscal years
   const rng = (pts) => (pts?.length ? `${shortP(pts[0].p)}–${shortP(pts[pts.length - 1].p)}` : '');
@@ -331,7 +334,7 @@ function valTile(c) {
       <span class="vr"${T(hist)}><span class="vbar" data-lo="${have ? h.low : ''}" data-md="${have ? h.median : ''}" data-hi="${have ? h.high : ''}"><i class="mid"></i><i class="now"></i></span></span>
       <span class="vp"${T(peerTitle)}>${peer}</span></div>`;
   }).join('');
-  const std = `<div class="vhead"><span></span><span>Today</span><span>10-year range</span><span>Peers</span></div>${rows}<div class="note vnote">${esc(basisTxt)} · live price</div>`;
+  const std = `<div class="vhead"><span></span><span>Today</span><span>10-year range</span><span>Peers</span></div>${rows}<div class="note vnote">${esc(basisTxt)} · live price</div>${readerNotes(c.valuationInputs.readerNotes?.valuation)}`;
   const dt = `<table class="tt vdt"><tr><th>Measure</th><th class="n">Own low · median · high</th><th class="n"${T(box.peers?.sub || '')}>Sub peers</th><th class="n"${T(catName)}>Cat median</th></tr>${detail.join('')}</table>`;
   const prices = box.peers ? `Peers ${range(box.peers.pricedFrom, box.peers.pricedTo)}. ` : '';
   const src = Object.entries(box.sources || {}).map(([k, x]) => `<div class="note" style="white-space:pre-line"><b>${esc(k)}</b>: ${esc(String(x))}</div>`).join('');

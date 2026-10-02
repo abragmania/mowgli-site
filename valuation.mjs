@@ -40,6 +40,7 @@ export function sourceOf(fin, lineId, v) {
   if (v.derived) src.derivedFrom = (v.derivedFrom || []).map((i) => fin.filings?.[i]).filter(Boolean).map((x) => ({ form: x.form, filed: x.filed, accn: x.accn }));
   if (v.splitFactor != null && v.splitFactor !== 1) { src.splitFactor = v.splitFactor; src.asFiled = v.asFiled ?? null; }
   if (v.combined) src.combined = v.combined;
+  if (v.fromFiling) src.fromFiling = v.fromFiling;
   return src;
 }
 
@@ -50,6 +51,8 @@ export function sourceText(s) {
   if (s.derivedFrom?.length) t += ` · derived by subtracting year-to-date figures (${s.derivedFrom.map((x) => `${x.form} ${x.filed}`).join(', ')})`;
   if (s.splitFactor) t += ` · split-adjusted; filed as ${s.asFiled}`;
   if (s.combined) t += ` · ${s.combined}`;
+  // D88: a figure read from the filing's own statement because SEC company facts lacks it
+  if (s.fromFiling) t += ` · from the ${s.form || 'filing'}'s ${String(s.fromFiling.statement || 'statement').toLowerCase()} (row "${s.fromFiling.row}", ${s.fromFiling.member || s.fromFiling.tag}), not in SEC company facts`;
   return t;
 }
 
