@@ -1,0 +1,6 @@
+{"entries":[
+{"t":"2026-09-30T13:41:27.876Z","machine":"laptop","text":"Publish refused: This machine could not reach GitHub to check it is up to date. What to do: Check the internet connection and run the publish again."},
+{"t":"2026-09-30T19:38:03.868Z","machine":"laptop","text":"Publish refused: GitHub refused the check that this machine is up to date (not a network problem: sign-in, remote address or repository). What to do: Run git fetch origin main by hand, fix what it reports, then publish again."},
+{"t":"2026-09-30T20:10:56.357Z","machine":"laptop","text":"Publish refused: GitHub refused the check that this machine is up to date (not a network problem: sign-in, remote address or repository). What to do: Run git fetch origin main by hand, fix what it reports, then publish again."},
+{"t":"2026-10-01T23:51:00.827Z","machine":"laptop","text":"Publish refused: GitHub refused the check that this machine is up to date (not a network problem: sign-in, remote address or repository). What to do: Run git fetch origin main by hand, fix what it reports, then publish again."}
+]}
