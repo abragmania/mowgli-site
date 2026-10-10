@@ -5,7 +5,23 @@
 // last four contiguous quarters, else the latest fiscal year labelled FY, never a mix of the two.
 
 const DAY = 86400000;
+// inlined from server/lib/periods.js by server/publish/build.js
+// Fiscal-quarter helpers shared by metrics.js and fin_cells.js (one copy of each; nothing here reads a file).
+
+// The key a quarter has in a company's financials: "FY2026 Q3".
 const qKey = (fy, fq) => `FY${fy} Q${fq}`;
+// The same key from a { fy, fq } object.
+const qk = (k) => qKey(k.fy, k.fq);
+
+const nextQ = ({ fy, fq }) => (fq === 4 ? { fy: fy + 1, fq: 1 } : { fy, fq: fq + 1 });
+const prevQ = ({ fy, fq }) => (fq === 1 ? { fy: fy - 1, fq: 4 } : { fy, fq: fq - 1 });
+// n quarters before k.
+const back = (k, n) => { for (let i = 0; i < n; i++) k = prevQ(k); return k; };
+
+// A trailing twelve months that ends before the latest fiscal year ends is stale, so the fiscal year is used instead.
+// endQ is the end date of the TTM's last quarter and endFy the end date of the latest fiscal year (ISO date strings);
+// true only when both are present and the quarter ends first. Each caller supplies its own ends.
+const ttmStale = (endQ, endFy) => !!(endQ && endFy && endQ < endFy);
 
 // ---------- periods and sources ----------
 
@@ -75,9 +91,6 @@ export function quarterMap(fin, id) {
   return m;
 }
 
-const nextQ = ({ fy, fq }) => (fq === 4 ? { fy: fy + 1, fq: 1 } : { fy, fq: fq + 1 });
-const prevQ = ({ fy, fq }) => (fq === 1 ? { fy: fy - 1, fq: 4 } : { fy, fq: fq - 1 });
-
 // The company's latest quarter and latest fiscal year over its income and cash-flow lines.
 export function reference(fin) {
   let q = null, fy = null;
@@ -118,7 +131,7 @@ export function sameBasis(fin, ids, ref = reference(fin)) {
       const endQ = periodOf(fin, ids[0], parts[ids[0]][3]).end;
       const fyV = annualMap(fin, ids[0]).get(ref.fy);
       const endFy = fyV ? periodOf(fin, ids[0], fyV).end : null;
-      if (endFy && endQ && endQ < endFy) ok = false;
+      if (ttmStale(endQ, endFy)) ok = false;
     }
     if (ok) {
       const values = {}, sources = {};
