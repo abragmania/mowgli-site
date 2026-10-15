@@ -246,14 +246,19 @@ function drawEtf() {
 // days before the series was recorded are left off; a missing day inside it (a gap marker, D84) breaks the line
 const line = (H, k, col, max = 100) => { const all = H.map((x) => x[k] ?? null), f = all.findIndex((x) => x != null), v = f < 0 ? [] : all.slice(f); if (v.filter((x) => x != null).length < 2) return ''; let pen = 'M'; const d = v.map((y, i) => { if (y == null) { pen = 'M'; return ''; } const s = pen + (i / (v.length - 1) * 200).toFixed(1) + ' ' + (30 - y / max * 30).toFixed(1); pen = 'L'; return s; }).join(''); return `<svg viewBox="0 0 200 30" preserveAspectRatio="none">${max === 100 ? '<line x1="0" x2="200" y1="15" y2="15" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>' : ''}<path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`; };
 const split = (a, b) => `<div class="bar"><i class="u" style="width:${a / (a + b || 1) * 100}%"></i><i class="d" style="width:${b / (a + b || 1) * 100}%"></i></div>`;
-const vfmt = (v) => (v / 1e9).toFixed(2) + 'B';
+const vfmt = (v) => (v == null ? '—' : (v / 1e9).toFixed(2) + 'B');
+// volume sums per side: a stock with no volume is left out, never counted as zero shares (data rules: missing is null); a side with none known is null
+const volSums = (st) => { const side = (l) => { const k = l.filter((s) => typeof s.vol === 'number' && Number.isFinite(s.vol)); return { v: k.length ? k.reduce((a, s) => a + s.vol, 0) : null, n: k.length, of: l.length }; }; return { up: side(st.filter((s) => s.d > 0)), dn: side(st.filter((s) => s.d < 0)) }; };
+const volNote = (u, d) => (u.n + d.n < u.of + d.of ? `shares, partial: ${u.n + d.n} of ${u.of + d.of} stocks` : 'shares');
+// an unknown side draws an empty bar, never a one-sided 100%
+const volBar = (u, d) => (u.v == null || d.v == null ? split(0, 0) : split(u.v, d.v));
 const pctOf = (list, k) => { const known = list.filter((s) => s[k] != null); return known.length ? known.filter((s) => s[k]).length / known.length * 100 : null; };
 const pf = (v) => (v == null ? '—' : v.toFixed(0) + '%');
 function drawBreadth() {
   const st = D.stocks.filter((s) => s.d != null), N = st.length;
   const adv = st.filter((s) => s.d > 0).length, dec = st.filter((s) => s.d < 0).length;
   const a50 = pctOf(st, 'a50'), a200 = pctOf(st, 'a200'), hlk = st.filter((s) => s.nh != null && s.nl != null), nh = hlk.filter((s) => s.nh).length, nl = hlk.filter((s) => s.nl).length;
-  const uv = st.filter((s) => s.d > 0).reduce((a, s) => a + (s.vol || 0), 0), dv = st.filter((s) => s.d < 0).reduce((a, s) => a + (s.vol || 0), 0);
+  const { up: uv, dn: dv } = volSums(st);
   const H = D.breadthHist || [];
   const HL = H.map((x) => ({ h: x.hl ? x.nh / x.hl * 100 : null, l: x.hl ? x.nl / x.hl * 100 : null })), hlMax = Math.max(5, ...HL.map((x) => Math.max(x.h ?? 0, x.l ?? 0)));
   const firstQ = H.find((x) => x.source === 'yahoo-quote')?.d, bnote = firstQ ? `Lines before ${firstQ} were rebuilt from daily closes (averages computed by Mowgli); from ${firstQ} on each line is saved after the close using Yahoo's 50- and 200-day averages.` : 'Rebuilt from daily closes (averages computed by Mowgli); today so far uses the Yahoo-supplied averages.';
@@ -263,7 +268,7 @@ function drawBreadth() {
     `<div class="br"><div class="k">Rising vs falling today</div><div class="v"><span class="up">${adv}</span> / <span class="dn">${dec}</span></div>${split(adv, dec)}</div>` +
     `<div class="br"><div class="k">Share of stocks above their average price</div><div class="v"><small title="${esc(bnote)}">last ${H.length} days, dashed = half</small></div><div class="two"><div><b>${pf(a50)}</b><span>above<br>50-day</span>${line(H, 'a50', 'var(--accx)')}</div><div><b>${pf(a200)}</b><span>above<br>200-day</span>${line(H, 'a200', '#c9c2e8')}</div></div></div>` +
     `<div class="br"><div class="k">New 52-week highs vs lows</div><div class="v"><span class="up">${nh}</span> / <span class="dn">${nl}</span><small>of ${hlk.length} stocks</small></div>${split(nh, nl)}<div class="two"><div><b class="up">${hlPct(nh)}</b><span>at a new<br>high</span>${line(HL, 'h', '#3f9a74', hlMax)}</div><div><b class="dn">${hlPct(nl)}</b><span>at a new<br>low</span>${line(HL, 'l', '#b8574e', hlMax)}</div></div></div>` +
-    `<div class="br"><div class="k">Volume in rising vs falling stocks</div><div class="v"><span class="up">${vfmt(uv)}</span> / <span class="dn">${vfmt(dv)}</span><small>shares</small></div>${split(uv, dv)}</div>`;
+    `<div class="br"><div class="k">Volume in rising vs falling stocks</div><div class="v"><span class="up">${vfmt(uv.v)}</span> / <span class="dn">${vfmt(dv.v)}</span><small>${volNote(uv, dv)}</small></div>${volBar(uv, dv)}</div>`;
   /* expanded: breadth by sector */
   $('bfull').innerHTML = `<table class="st"><tr><th>Sector</th><th>Rising / falling today</th><th>Above 50-day</th><th>Above 200-day</th><th>New highs / lows</th><th>Sector fund today</th></tr>` +
     Object.keys(ETF).map((n) => {
