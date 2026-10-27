@@ -596,6 +596,15 @@ body .hero.nologo .hr{display:none!important}
 .hero .hstrip{width:0;justify-content:center;font-size:max(.74rem,10.5px)}
 /* Financials: a cell label wraps to a second line in the expanded box instead of being cut */
 .tile.open .fc>span{white-space:normal;overflow:visible;text-overflow:clip}
+/* R4 corporate-action notes (company.js actionsHtml): one calm card per note above the boxes, label and link on one line each */
+.main:has(>.cnotes){row-gap:var(--rgap);align-content:start}
+.cnotes{display:flex;flex-direction:column;gap:.5rem;min-width:0}
+.cnote{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:1.2rem;align-items:baseline;width:100%;box-sizing:border-box;padding:.6rem 1.2rem;border-radius:14px;font-size:.84rem;line-height:1.45;color:var(--ink2)}
+.cnote .ck{font-size:.72rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);white-space:nowrap}
+.cnote .ck time{letter-spacing:.3px;text-transform:none;color:var(--ink)}
+.cnote p{margin:0;min-width:0;max-width:120ch;text-wrap:balance}
+.cnote .cl{display:flex;gap:1rem;white-space:nowrap}
+.cnote .cl a{color:var(--accx);font-weight:700;text-decoration:none}.cnote .cl a:hover{text-decoration:underline}
 .sbn{position:fixed;left:16px;bottom:12px;z-index:6;padding:.35rem .8rem;border-radius:12px;background:rgba(20,22,34,.82);color:#e9e4da;font:600 .78rem Manrope,sans-serif;cursor:help}
 </style></head>
 <body data-cards="frost" data-layout="centre" data-sky="bold" data-blur="on" data-hero="real" data-sig="off" data-dens="compact" data-fin="self" data-acc="brand" data-page="live" data-multi="0" data-named="1">

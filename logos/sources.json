@@ -177,6 +177,11 @@
    "source": "en.wikipedia.org infobox logo (Aptiv logo.svg)",
    "fetched": "2026-09-30"
   },
+  "AR": {
+   "file": "AR.svg",
+   "source": "en.wikipedia.org infobox logo (Antero Resources logo, 2018.svg)",
+   "fetched": "2026-10-27"
+  },
   "ARE": {
    "file": "ARE.png",
    "source": "en.wikipedia.org",
@@ -374,6 +379,46 @@
    "source": "en.wikipedia.org infobox logo (Citizens Financial Group logo.svg)",
    "fetched": "2026-09-30"
   },
+  "CHH": {
+   "file": "CHH.svg",
+   "source": "en.wikipedia.org infobox logo (Choice Hotels logo.svg, commons.wikimedia.org)",
+   "fetched": "2026-10-27"
+  },
+  "CE": {
+   "file": "CE.svg",
+   "source": "en.wikipedia.org infobox logo (Logo Celanese.svg, commons.wikimedia.org)",
+   "fetched": "2026-10-27"
+  },
+  "EMN": {
+   "file": "EMN.svg",
+   "source": "en.wikipedia.org infobox logo (Eastman Chemical Company logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "EPAM": {
+   "file": "EPAM.svg",
+   "source": "investors.epam.com site header logo (epam_logo_light.svg, black wordmark for light backgrounds); the only Wikimedia file found (EPAM logo.png, 288x108, 2015) is an old mark",
+   "fetched": "2026-10-27"
+  },
+  "G": {
+   "file": "G.png",
+   "source": "en.wikipedia.org infobox logo (Genpact Logo Black (3).png, commons.wikimedia.org; saved as the 500 px thumbnail, 500x263)",
+   "fetched": "2026-10-27"
+  },
+  "GFL": {
+   "file": "GFL.png",
+   "source": "en.wikipedia.org infobox logo (GFL Environmental logo.png, 290x150)",
+   "fetched": "2026-10-27"
+  },
+  "HUN": {
+   "file": "HUN.svg",
+   "source": "huntsman.com site header logo (theme/images/logo.svg); Wikipedia infobox file Huntsman Corporation - Logo.svg was rate-limited",
+   "fetched": "2026-10-27"
+  },
+  "WLK": {
+   "file": "WLK.svg",
+   "source": "en.wikipedia.org infobox logo (WLK BIG.svg)",
+   "fetched": "2026-10-27"
+  },
   "CHRN": {
    "file": "CHRN.png",
    "source": "chronoscale.com home page header logo (white ChronoScale wordmark on transparent PNG, 900x172); no Wikipedia page exists. Saved composited on the brand's own near-black (#0B0B0B, the background of the site's icon) with padding, 1020x292, because the official mark is white and would vanish on a light page",
@@ -424,6 +469,11 @@
    "file": "CNP.svg",
    "source": "en.wikipedia.org infobox logo (CenterPoint Energy logo.svg)",
    "fetched": "2026-09-30"
+  },
+  "CNX": {
+   "file": "CNX.svg",
+   "source": "en.wikipedia.org infobox logo (CNX Resources Corporation, Logo 2022.svg)",
+   "fetched": "2026-10-27"
   },
   "COF": {
    "file": "COF.svg",
@@ -506,8 +556,15 @@
    "source": "en.wikipedia.org infobox logo (Chevron_Logo.svg)",
    "fetched": "2026-09-30"
   },
+  "CWK": {
+   "file": "CWK.svg",
+   "source": "en.wikipedia.org infobox logo (Cushman & Wakefield logo.svg, hosted on Commons)",
+   "fetched": "2026-10-27"
+  },
   "CZR": {
-   "file": "CZR.svg"
+   "file": "CZR.svg",
+   "source": "en.wikipedia.org infobox logo (Caesars Entertainment logo 2020.svg)",
+   "fetched": "2026-10-27"
   },
   "D": {
    "file": "D.svg",
@@ -813,7 +870,9 @@
    "fetched": "2026-09-30"
   },
   "H": {
-   "file": "H.svg"
+   "file": "H.svg",
+   "source": "en.wikipedia.org infobox logo (Hyatt Logo.svg, commons.wikimedia.org)",
+   "fetched": "2026-10-27"
   },
   "HAL": {
    "file": "HAL.svg",
@@ -960,6 +1019,11 @@
    "file": "JBL.png",
    "source": "en.wikipedia.org infobox logo (Jabil logo (2023).png, 390x71 px)",
    "fetched": "2026-09-30"
+  },
+  "JLL": {
+   "file": "JLL.svg",
+   "source": "en.wikipedia.org infobox logo (JLL logo.svg, hosted on Commons)",
+   "fetched": "2026-10-27"
   },
   "JNJ": {
    "file": "JNJ.svg",
@@ -1800,6 +1864,11 @@
    "source": "en.wikipedia.org infobox logo (File:Warner Bros. Discovery.svg)",
    "fetched": "2026-09-30"
   },
+  "WCN": {
+   "file": "WCN.svg",
+   "source": "en.wikipedia.org infobox logo (Waste Connections logo.svg)",
+   "fetched": "2026-10-27"
+  },
   "WDAY": {
    "file": "WDAY.svg",
    "source": "commons.wikimedia.org - Wikipedia infobox logo file: Workday logo.svg",
@@ -2199,6 +2268,11 @@
    "source": "en.wikipedia.org infobox logo (Mid-America Apartment Communities logo.svg)",
    "fetched": "2026-09-30"
   },
+  "MLCO": {
+   "file": "MLCO.png",
+   "source": "en.wikipedia.org infobox logo (Melco logo.png, 500x168)",
+   "fetched": "2026-10-27"
+  },
   "UDR": {
    "file": "UDR.svg",
    "source": "companieslogo.com vector of the UDR monogram (the Wikipedia infobox PNG and udr.com header PNG are only 70x80 px, too small)",
@@ -2483,11 +2557,6 @@
   "RDDT": {
    "file": "RDDT.svg",
    "source": "en.wikipedia.org infobox logo (Reddit logo 2023.svg)",
-   "fetched": "2026-10-01"
-  },
-  "PSKY": {
-   "file": "PSKY.svg",
-   "source": "en.wikipedia.org infobox logo (Paramount Skydance Logo.svg)",
    "fetched": "2026-10-01"
   },
   "NWSA": {
@@ -2781,6 +2850,160 @@
    "file": "TPG.svg",
    "source": "en.wikipedia.org infobox logo (TPG Capital logo.svg, commons.wikimedia.org)",
    "fetched": "2026-10-01"
+  },
+  "CRDO": {
+   "file": "CRDO.svg",
+   "source": "credosemi.com home page header logo (inline SVG in the nav__logo link); no Wikipedia article with an infobox logo was found",
+   "fetched": "2026-10-27"
+  },
+  "CBRS": {
+   "file": "CBRS.svg",
+   "source": "en.wikipedia.org infobox logo (Cerebras logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "GFS": {
+   "file": "GFS.svg",
+   "source": "en.wikipedia.org infobox logo (GF logo horz rgb R 2025.svg)",
+   "fetched": "2026-10-27"
+  },
+  "ENTG": {
+   "file": "ENTG.png",
+   "source": "en.wikipedia.org infobox logo (Entegris Logo.png, 556x166 px)",
+   "fetched": "2026-10-27"
+  },
+  "TSEM": {
+   "file": "TSEM.svg",
+   "source": "en.wikipedia.org infobox logo (Tower Semiconductor.svg, served from commons.wikimedia.org)",
+   "fetched": "2026-10-27"
+  },
+  "QNT": {
+   "file": "QNT.svg",
+   "source": "en.wikipedia.org infobox logo (Quantinuum (word trademark).svg)",
+   "fetched": "2026-10-27"
+  },
+  "HUT": {
+   "file": "HUT.svg",
+   "source": "hut8.com home page header logo (inline SVG, the sunburst mark in the fixed nav); no Wikipedia article for Hut 8 Corp. exists and the only Commons file is the old 2018 Hut 8 Mining mark. The site draws the mark in near-white (#F8F8F8) with a difference blend; fill changed to #111111 so it shows on light pages.",
+   "fetched": "2026-10-27"
+  },
+  "BTDR": {
+   "file": "BTDR.png",
+   "source": "en.wikipedia.org infobox logo (Bitdeer logo.png)",
+   "fetched": "2026-10-27",
+   "note": "PNG 358x278"
+  },
+  "DOCN": {
+   "file": "DOCN.svg",
+   "source": "en.wikipedia.org infobox logo (DigitalOcean logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "SNOW": {
+   "file": "SNOW.svg",
+   "source": "en.wikipedia.org infobox logo (Snowflake Logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "NET": {
+   "file": "NET.svg",
+   "source": "en.wikipedia.org infobox logo (Cloudflare Logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "INIO": {
+   "file": "INIO.svg",
+   "source": "innio.com site header logo (https://www.innio.com/wp-content/uploads/2024/07/innio_logo_black.svg); no Wikipedia page or Commons SVG for INNIO N.V.",
+   "fetched": "2026-10-27"
+  },
+  "MAIR": {
+   "file": "MAIR.svg",
+   "source": "investors.madisonair.com site header logo (https://investors.madisonair.com/images/MadisonAir_2026_H_FullColor_RGB.svg); no Wikipedia page",
+   "fetched": "2026-10-27"
+  },
+  "UEC": {
+   "file": "UEC.svg",
+   "source": "uraniumenergy.com pinned-tab vector (https://www.uraniumenergy.com/safari-pinned-tab.svg), the UEC lettermark with company name; monochrome black; viewBox cropped to the artwork. The site's PNG logo is only 152x64 and there is no Wikipedia page.",
+   "fetched": "2026-10-27"
+  },
+  "CIFR": {
+   "file": "CIFR.svg",
+   "source": "cipherdigital.com header logo (inline SVG, Cipher Digital wordmark and dot mark)",
+   "fetched": "2026-10-27",
+   "note": "Wordmark fill changed from near-white #eff0f1 to #1f2937 so it shows on light pages; the animated duplicate dot in the header was left out. No Wikipedia page for the 2026 rename."
+  },
+  "GLXY": {
+   "file": "GLXY.svg",
+   "source": "galaxy.com header icon (inline SVG, the Galaxy symbol); the site's 'galaxy' wordmark is live text, not an image; fill set to black",
+   "fetched": "2026-10-27"
+  },
+  "TWLO": {
+   "file": "TWLO.svg",
+   "source": "commons.wikimedia.org (Twilio-logo-red.svg, the en.wikipedia.org Twilio infobox logo)",
+   "fetched": "2026-10-27"
+  },
+  "SKYD": {
+   "file": "SKYD.svg",
+   "source": "commons.wikimedia.org (Skydance Corporation Dark Logo 2026.svg, the en.wikipedia.org Skydance infobox logo, 'used since 2026')",
+   "fetched": "2026-10-27"
+  },
+  "VYLR": {
+   "file": "VYLR.svg",
+   "source": "vylor.com header logo (Brand Logo.svg from the site's AEM content store, linked in the site's nav fragment)",
+   "fetched": "2026-10-27",
+   "note": "The site serves the wordmark in white for its dark header; fill changed from white to #2b2b2b, the site's own --color-primary in styles.css, so it shows on light pages. No Wikipedia or Commons logo exists for the October 2026 spin-off."
+  },
+  "TEAM": {
+   "file": "TEAM.svg",
+   "source": "commons.wikimedia.org (Atlassian-horizontal-blue-rgb.svg, the en.wikipedia.org Atlassian infobox logo)",
+   "fetched": "2026-10-27"
+  },
+  "ZS": {
+   "file": "ZS.svg",
+   "source": "en.wikipedia.org infobox logo (Zscaler logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "OKTA": {
+   "file": "OKTA.svg",
+   "source": "commons.wikimedia.org (Okta logo (2023).svg, the en.wikipedia.org Okta infobox logo, in use since 2022)",
+   "fetched": "2026-10-27"
+  },
+  "CLS": {
+   "file": "CLS.svg",
+   "source": "en.wikipedia.org infobox logo (Celestica logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "STM": {
+   "file": "STM.png",
+   "source": "commons.wikimedia.org (ST logo 2020 blue V.svg, the en.wikipedia.org STMicroelectronics infobox logo), saved as the 500 px PNG thumbnail (500x351) because the SVG download was rate-limited (HTTP 429) for this machine",
+   "fetched": "2026-10-27"
+  },
+  "TLN": {
+   "file": "TLN.png",
+   "source": "talenenergy.com site header logo (talen-logo-white.png, 300x91, white wordmark on transparent; no Wikipedia or Commons logo exists). Saved composited on near-black (#0B0B0B) with padding, 380x171, because the official mark is white and would vanish on a light page",
+   "fetched": "2026-10-27"
+  },
+  "NVT": {
+   "file": "NVT.svg",
+   "source": "en.wikipedia.org infobox logo (NVent_Electric_Logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "WCC": {
+   "file": "WCC.svg",
+   "source": "en.wikipedia.org infobox logo (WESCO International logo.svg)",
+   "fetched": "2026-10-27"
+  },
+  "BWXT": {
+   "file": "BWXT.png",
+   "source": "en.wikipedia.org infobox logo (BWX Technologies logo.svg), saved as the 500 px PNG rendering Wikimedia serves because the SVG download was rate-limited (429) at the time",
+   "fetched": "2026-10-27",
+   "check": "replace with the SVG original if convenient"
+  },
+  "NXT": {
+   "file": "NXT.svg",
+   "source": "investors.nextpower.com header logo (NXP_Logo_Horizontal_White.svg on s21.q4cdn.com); no Wikipedia or Commons logo exists. The site publishes only a white version, so it is saved here with the fill set to black",
+   "fetched": "2026-10-27"
+  },
+  "NNE": {
+   "file": "NNE.png",
+   "source": "nanonuclearenergy.com site header logo (NANO-Nuclear-logoHorizontal-1280x374.png, white wordmark on transparent); no Wikipedia page exists. Saved composited on near-black (#0B0B0B) with padding, 1400x494, because the official wordmark is white and would vanish on a light page",
+   "fetched": "2026-10-27"
   }
  }
 }

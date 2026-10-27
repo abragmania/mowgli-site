@@ -139,7 +139,7 @@ function draw(q) {
   const table = (ts) => { ts = ts.filter(hit).sort((a, b) => cap(b) - cap(a) || a.localeCompare(b)); if (!ts.length) return ''; return ts; };
   const tb = (ts, extra) => `<div class="tb"${extra || ''}>${hd}${ts.map(row).join('')}</div>`;
   const inCat = {};
-  for (const [t, v] of Object.entries(G.co)) {
+  for (const [t, v] of Object.entries(G.all)) {
     if (v[4] || !v[0]) continue;
     ((inCat[v[0]] ||= {})[v[1] || ''] ||= []).push(t);
   }
@@ -151,7 +151,8 @@ function draw(q) {
     c.subs.forEach((s, j) => { const x = table(m[s.id] || []); if (x.length) { const id = `s-${i + 1}-${j + 1}`, o = filt || OPEN.has(id) || id === JUMP; nsub++; body += `<div class="sub" id="${id}"><h3><button type="button" class="tg" aria-expanded="${o}" aria-controls="${id}-t"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}.${j + 1}</i>${esc(s.name)}<em>${x.length}</em></button></h3>${tb(x, ` id="${id}-t"${o ? '' : ' hidden'}`)}</div>`; sn += `<a class="s" href="#s-${i + 1}-${j + 1}"><i>${i + 1}.${j + 1}</i>${esc(s.name)}</a>`; } });
     if (body) { html += `<section class="cat pad" id="c-${i + 1}"><h2><i>${i + 1}</i>${esc(c.name)}${nsub > 1 ? '<button type="button" class="ea"></button>' : ''}</h2>${body}</section>`; const ro = RAILOPEN.has(`c-${i + 1}`) || filt || JUMPCAT === `c-${i + 1}`; nav += `<div class="rc" id="rc-${i + 1}"><button type="button" class="rt" data-c="c-${i + 1}" aria-expanded="${ro}" aria-controls="rs-${i + 1}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1.5 7 5 3 8.5"/></svg><i>${i + 1}</i>${esc(c.name)}</button><div class="rs" id="rs-${i + 1}"${ro ? '' : ' hidden'}>${sn}</div></div>`; chips += `<a class="chip" href="#c-${i + 1}"><i>${i + 1}</i>${esc(c.name)}</a>`; }
   });
-  const loose = all.filter((c) => { const v = G.co[sym(c.ticker)]; return !(v && (v[4] ? G.co[v[4]]?.[0] : v[0])); }).map((c) => sym(c.ticker));
+  // R4: a company that left the universe through a corporate action (G.former) is off the List; its page stays
+  const loose = all.filter((c) => { const s = sym(c.ticker), v = G.all[s]; return !(G.former || {})[s] && !(v && (v[4] ? G.all[v[4]]?.[0] : v[0])); }).map((c) => sym(c.ticker));
   const lb = table(loose);
   if (lb.length) { html += `<section class="cat pad" id="c-x"><h2>Not yet placed</h2>${tb(lb)}</section>`; nav += '<a class="c" href="#c-x"><i></i>Not yet placed</a>'; chips += '<a class="chip" href="#c-x">Not yet placed</a>'; }
   document.getElementById('cc').innerHTML = chips;
@@ -245,7 +246,8 @@ function setupSwitcher() {
   try { const u = MG.monitorUrl(); if (!u) throw 0; p = await fetch(u).then((r) => { if (!r.ok) throw 0; return r.json(); }); stale = !!p.stale; }
   catch { try { p = await fetch(MG.monitorBakedUrl()).then((r) => r.json()); stale = true; } catch { return; } }
   if (!p.groupings) { try { const u = MG.monitorBakedUrl(); if (u) { const b = await fetch(u).then((r) => (r.ok ? r.json() : null)); p.groupings = b?.groupings || null; } } catch {} }
-  if (p.groupings) { G = p.groupings; for (const x of [...(p.extra || []), ...(p.stocks || [])]) Q[sym(x.s)] = x; for (const [t, v] of Object.entries(G.co)) if (v[4] && Q[t] && !Q[v[4]]) Q[v[4]] = Q[t]; draw(document.getElementById('f').value); }
+  // G.all: the index universe (co) plus the profiled picks outside it (picks), each priced from its own list
+  if (p.groupings) { G = { ...p.groupings, all: { ...p.groupings.co, ...(p.groupings.picks || {}) } }; for (const x of [...(p.picks || []), ...(p.extra || []), ...(p.stocks || [])]) Q[sym(x.s)] = x; for (const [t, v] of Object.entries(G.all)) if (v[4] && Q[t] && !Q[v[4]]) Q[v[4]] = Q[t]; draw(document.getElementById('f').value); }
   const q = new Date(p.quoteTime || p.asOf);
   const et = q.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
   const d = q.toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', day: 'numeric', month: 'short' });

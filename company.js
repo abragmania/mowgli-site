@@ -792,6 +792,16 @@ function renderQuote(q) {
   const d2 = document.getElementById('v-dy2');
   if (d2) d2.textContent = dy && dy.pct != null ? pct(dy.pct, 2) : '—';
 }
+// R4: a stock that stopped trading gets no live price: its last stored price, dated, or a dash, and nothing at today's price
+function renderStopped(c) {
+  const t = c.trading, lp = t.lastPrice, why = `No longer trading since ${noteDate(t.stopped)}`;
+  const p = $('#pxp'), cEl = $('#pxc');
+  p.innerHTML = lp ? `$${lp.price.toFixed(2)}` : DASH;
+  p.title = lp ? `Last stored price, ${lp.date}: ${lp.source}` : `${why}; no price was stored before then`;
+  cEl.className = 'c';
+  cEl.innerHTML = `<small${T(why)}>no longer trading${lp ? ` · last stored price ${esc(noteDate(lp.date))}` : ''}</small>`;
+  for (const id of ['v-mv', 'v-dy', 'v-by']) { const el = document.getElementById(id); if (el) el.title = `${why}; nothing is computed at a price`; }
+}
 let lastLive = null;
 async function loadQuote() {
   if (!MG.isStatic) {
@@ -842,6 +852,20 @@ function setupSwitcher() {
   fetch(MG.companiesUrl()).then((r) => r.json()).then((l) => { LIST = l; }).catch(() => {});
 }
 
+/* ---------- R4 corporate-action notes: dated, under the header, each linking to the other company's page; sources on hover ---------- */
+const KIND = { renamed: 'Renamed', acquired: 'Acquired', spinOff: 'Spin-off', indexChange: 'Index change' };
+// the notes' one date style, as their text writes it: "Oct 6, 2026"
+const noteDate = (d) => { const t = Date.parse(d); return Number.isFinite(t) ? new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : d; };
+// index names and dates ("Oct 6, 2026") never break across lines
+const keepTogether = (s) => s.replace(/S&P (MidCap 400|SmallCap 600|500)|\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.? \d{1,2}(, \d{4})?\b/g, (m) => m.replace(/ /g, ' ')).replace(/Nasdaq-100/g, 'Nasdaq‑100');
+function actionsHtml(c) {
+  const list = c.corporateActions || [];
+  if (!list.length) return '';
+  const src = (a) => a.sources.map((s) => [s.document, s.accession && `accession ${s.accession}`, s.url, s.covers].filter(Boolean).join(' · ')).join('\n');
+  const link = (l) => (l.page ? `<a href="${MG.pageUrl(l.page)}">${esc(l.name || l.page)} (${esc(l.page)}) →</a>` : `<span${T('No Mowgli page for ' + l.ticker)}>${esc(l.ticker)}</span>`);
+  return `<div class="cnotes" id="cnotes">${list.map((a) => `<div class="cnote pad"${T('Sources:\n' + src(a))}><span class="ck">${esc(KIND[a.kind] || a.kind)} · <time>${esc(noteDate(a.date))}</time></span><p>${esc(keepTogether(a.text))}</p>${a.links.length ? `<span class="cl">${a.links.map(link).join('')}</span>` : ''}</div>`).join('')}</div>`;
+}
+
 /* ---------- page ---------- */
 function render(c) {
   C = c;
@@ -861,6 +885,9 @@ function render(c) {
     im.src = c.logo.url;
   } else { hero.classList.add('nologo'); b.dataset.named = '0'; }
 
+  $('#cnotes')?.remove();
+  const notes = actionsHtml(c);
+  if (notes) $('#field').insertAdjacentHTML('beforebegin', notes);
   drawTiles(c);
 
   const lf = c.fin?.latestFiling;
@@ -920,15 +947,16 @@ try {
   new BroadcastChannel('mowgli-switchboard').onmessage = async () => {
     if (!(await loadSwitchboard()) || !C) return;
     drawTiles(C);
-    if (lastQuote) renderQuote(lastQuote);
+    if (C.trading) renderStopped(C);
+    else if (lastQuote) renderQuote(lastQuote);
   };
 } catch { /* no BroadcastChannel: the page keeps its switches until reloaded */ }
 Promise.all([fetch(MG.companyUrl(ticker)), loadSwitchboard()]).then(async ([r]) => {
   const j = await r.json();
   if (!r.ok) { applyTheme({ sky: 'default' }); document.body.insertAdjacentHTML('beforeend', `<div class="err">${esc(j.error?.message || j.error || 'Not found')}</div>`); return; }
   render(j);
-  loadQuote();
-  setInterval(loadQuote, 30000);
+  if (j.trading) renderStopped(j);
+  else { loadQuote(); setInterval(loadQuote, 30000); }
   requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('instant')));
 }).catch((e) => { document.body.insertAdjacentHTML('beforeend', `<div class="err">Could not load: ${esc(e.message)}</div>`); });
 })();
