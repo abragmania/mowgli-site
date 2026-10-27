@@ -156,6 +156,12 @@
    "source": "en.wikipedia.org infobox logo (Logo_Amphenol.svg)",
    "fetched": "2026-09-30"
   },
+  "APLD": {
+   "file": "APLD.svg",
+   "source": "applieddigital.com site header logo (APLD - Logo.svg, dark version used on the light header)",
+   "fetched": "2026-10-27",
+   "note": "No Wikipedia article or Commons file found for Applied Digital"
+  },
   "APO": {
    "file": "APO.svg",
    "source": "en.wikipedia.org infobox logo (Apollo_Global_Management_logo.svg)",
@@ -368,6 +374,11 @@
    "source": "en.wikipedia.org infobox logo (Citizens Financial Group logo.svg)",
    "fetched": "2026-09-30"
   },
+  "CHRN": {
+   "file": "CHRN.png",
+   "source": "chronoscale.com home page header logo (white ChronoScale wordmark on transparent PNG, 900x172); no Wikipedia page exists. Saved composited on the brand's own near-black (#0B0B0B, the background of the site's icon) with padding, 1020x292, because the official mark is white and would vanish on a light page",
+   "fetched": "2026-10-27"
+  },
   "CHRW": {
    "file": "CHRW.svg",
    "source": "en.wikipedia.org infobox logo (C. H. Robinson logo.svg)",
@@ -434,6 +445,11 @@
    "file": "COP.svg",
    "source": "en.wikipedia.org infobox logo (ConocoPhillips_Company_logo.svg)",
    "fetched": "2026-09-30"
+  },
+  "CORZ": {
+   "file": "CORZ.svg",
+   "source": "commons.wikimedia.org (Core Scientific logo.svg; Wikipedia infobox logo)",
+   "fetched": "2026-10-27"
   },
   "COST": {
    "file": "COST.svg",
@@ -918,6 +934,11 @@
    "file": "IQV.svg",
    "source": "en.wikipedia.org infobox logo (IQVIA.svg)",
    "fetched": "2026-09-30"
+  },
+  "IREN": {
+   "file": "IREN.svg",
+   "source": "en.wikipedia.org infobox logo (IREN logo.svg)",
+   "fetched": "2026-10-27"
   },
   "IRM": {
    "file": "IRM.svg",
@@ -1832,10 +1853,20 @@
    "source": "commons.wikimedia.org (File:Logo WTW.png, 1920x1080 current lowercase purple mark; the en.wikipedia infobox PNG is only 146x67)",
    "fetched": "2026-09-30"
   },
+  "WULF": {
+   "file": "WULF.svg",
+   "source": "investors.terawulf.com site header logo (horizontal wolf-shield lockup, image.svg); en.wikipedia infobox has no logo and Commons has none",
+   "fetched": "2026-10-27"
+  },
   "WY": {
    "file": "WY.svg",
    "source": "en.wikipedia.org infobox logo (Weyerhaeuser.svg)",
    "fetched": "2026-09-30"
+  },
+  "WYFI": {
+   "file": "WYFI.svg",
+   "source": "whitefiber.com home page header logo (inline SVG, viewBox 154x20); no Wikipedia page exists. The site draws the mark with currentColor (white on its dark header), so it is saved here with the fill set to black",
+   "fetched": "2026-10-27"
   },
   "WYNN": {
    "file": "WYNN.svg",
