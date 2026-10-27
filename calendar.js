@@ -229,6 +229,43 @@ function startPage(M) {
     const wide = arOf(t) > 1.9, mono = wide && (4.6 * .9 / arOf(t)) * RF * RP * Z < 5;
     return mono ? '<span class="lgo n"></span>' : `<span class="lgo${wide ? ' w' : ''}" data-t="${esc(t)}"><canvas></canvas></span>`;
   }
+  /* Logos are drawn straight onto the dark tile, with no plate: the near-white background that touches the image edge is made transparent
+     (flood fill from opaque near-white edge pixels, so white inside the mark stays), and a mark whose visible pixels are mostly dark is
+     recolored light (#e6edef) keeping its alpha. Done once per logo at up to 256px, then reused for every tile. */
+  const PROC = {};
+  const NEAR_WHITE = 232, DARK_MARK = .35, LIGHT_INSIDE = .04;
+  function keyOutBackground(p, w, h) {
+    const white = (i) => p[i + 3] >= 128 && p[i] >= NEAR_WHITE && p[i + 1] >= NEAR_WHITE && p[i + 2] >= NEAR_WHITE;
+    const seen = new Uint8Array(w * h), stack = [];
+    const push = (x, y) => { const k = y * w + x; if (!seen[k] && white(k * 4)) { seen[k] = 1; stack.push(k); } };
+    for (let x = 0; x < w; x++) { push(x, 0); push(x, h - 1); }
+    for (let y = 0; y < h; y++) { push(0, y); push(w - 1, y); }
+    while (stack.length) {
+      const k = stack.pop(), x = k % w, y = (k - x) / w;
+      p[k * 4 + 3] = 0;
+      if (x > 0) push(x - 1, y); if (x < w - 1) push(x + 1, y); if (y > 0) push(x, y - 1); if (y < h - 1) push(x, y + 1);
+    }
+  }
+  function lightenIfDark(p) {
+    let sum = 0, wt = 0, light = 0;
+    for (let i = 0; i < p.length; i += 4) {
+      const a = p[i + 3]; if (!a) continue;
+      const l = (.2126 * p[i] + .7152 * p[i + 1] + .0722 * p[i + 2]) / 255;
+      sum += a * l; wt += a; if (l >= .9) light += a;
+    }
+    /* a dark mark with real light areas inside it (white letters on a navy badge) is a badge with its own colors: left as it is */
+    if (!wt || sum / wt >= DARK_MARK || light / wt >= LIGHT_INSIDE) return;
+    for (let i = 0; i < p.length; i += 4) { p[i] = 230; p[i + 1] = 237; p[i + 2] = 239; }
+  }
+  function processed(t, im) {
+    if (PROC[t]) return PROC[t];
+    const big = Math.max(im.naturalWidth, im.naturalHeight), svg = /\.svg$/i.test(im.src), k = svg ? 256 / big : Math.min(1, 256 / big);
+    const w = Math.max(1, Math.round(im.naturalWidth * k)), h = Math.max(1, Math.round(im.naturalHeight * k));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0, w, h);
+    try { const d = g.getImageData(0, 0, w, h); keyOutBackground(d.data, w, h); lightenIfDark(d.data); g.putImageData(d, 0, 0); }
+    catch (e) { console.warn(`calendar: logo ${t} could not be cleaned (${e.message}); drawn as is`); }
+    return (PROC[t] = c);
+  }
   function paintLogos() {
     const dprD = Math.max(1, devicePixelRatio || 1);
     document.querySelectorAll('.lgo[data-t]').forEach((el) => {
@@ -236,10 +273,10 @@ function startPage(M) {
       const cw = Math.round(w * .9 * dprD * Z), ch = Math.round(h * .9 * dprD * Z); c.width = cw; c.height = ch; const g = c.getContext('2d');
       const ar = im && im.naturalWidth ? im.naturalWidth / im.naturalHeight : 0, dh = ar ? Math.min(ch, cw / ar) : 0;
       if (!ar || el.dataset.m === '1' || dh / dprD < 5) {
-        const tx = t; let fs = ch * .74; g.fillStyle = '#1b2428'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${fs}px Manrope,"Segoe UI",sans-serif`;
+        const tx = t; let fs = ch * .74; g.fillStyle = '#e6edef'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${fs}px Manrope,"Segoe UI",sans-serif`;
         while (g.measureText(tx).width > cw * .96 && fs > 5) { fs -= 1; g.font = `800 ${fs}px Manrope,"Segoe UI",sans-serif`; } g.fillText(tx, cw / 2, ch / 2 + fs * .04); return;
       }
-      const dw = ar >= cw / ch ? cw : ch * ar, dh2 = dw / ar; g.drawImage(im, (cw - dw) / 2, (ch - dh2) / 2, dw, dh2);
+      const dw = ar >= cw / ch ? cw : ch * ar, dh2 = dw / ar; g.drawImage(processed(t, im), (cw - dw) / 2, (ch - dh2) / 2, dw, dh2);
     });
   }
   function itemsOf(d, b, D) {
