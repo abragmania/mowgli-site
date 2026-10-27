@@ -1,0 +1,533 @@
+/* The Calendar page (PROJECT.md Part 4 "Calendar build", step 7). Built from the approved design design/calendar/calendar-mosaic.html.
+   Data (option B, the free plan): the price relay's GET /calendar gives each source's stored answer; this page runs the shared pure
+   compose code (server/lib/calendar/, copied to lib/calendar/ on the site) on it in the browser. If the relay is down or has no data yet,
+   the calendar baked at publish (data/calendar.json) is shown with a stale marker; with neither, a plain "not available yet" line.
+   The first half of this file is pure and exported (tests/calendar-page.test.mjs); the page itself starts at the bottom. */
+
+/* ===================================== data (pure) ===================================== */
+const SOURCE_NAMES = { forexfactory: 'Forex Factory', fed: 'Fed', treasury: 'Treasury' };
+const TIER_LVL = { headliner: 1, notable: 2, standard: 3, minor: 4, unknown: 4 };
+const IMPACT_KEY = { high: 'h', medium: 'm', low: 'l' };
+const DAY_MS = 86_400_000;
+const addD = (date, n) => new Date(Date.parse(`${date}T00:00:00Z`) + n * DAY_MS).toISOString().slice(0, 10);
+const mondayOf = (date) => addD(date, -((new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7));
+const hhmm = (min) => (min == null ? '' : `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`);
+const clock12 = (min) => `${Math.floor(min / 60) % 12 || 12}:${String(min % 60).padStart(2, '0')} ${min < 720 ? 'AM' : 'PM'}`;
+const NAME_TAIL = /(,?\s+(Inc\.?|Incorporated|Corporation|Corp\.?|Company|Co\.?|Limited|Ltd\.?|plc|PLC|LLC|L\.P\.|LP|S\.A\.|N\.V\.|AG|SE|Holdings?|Group))+\.?\s*$/;
+const cleanName = (n) => {
+  const s = String(n ?? '').replace(/\s+/g, ' ').trim();
+  const c = s.replace(NAME_TAIL, '').replace(/,$/, '').trim();
+  return c || s || null;
+};
+const etClock = (iso) => (iso ? `${new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' })} ET` : 'an unknown time');
+
+// The relay's answer to a calendar composed from it. lib: { assembleSources, econInputs, buildCalendar } from server/lib/calendar/.
+// A source's copy is used whenever there is one; its `stale` is carried into the status the calendar is composed with (compose.js
+// stamps stale:false on everything it parses, which is wrong for a stored copy; D98). A source with no copy is failed, so its days
+// say so and never read as quiet. Throws when the answer is not a usable calendar-sources answer or no source has any data.
+export function composeFromRelay(answer, lib) {
+  if (answer?.kind !== 'calendar-sources' || !answer.window?.dates?.length) throw new Error('the relay answer is not a calendar-sources answer');
+  if (!answer.base) throw new Error(`the relay has no calendar base (${answer.baseError || 'no reason given'})`);
+  const entries = { ...answer.nasdaq, forexfactory: answer.forexfactory, fed: answer.fed, treasury: answer.treasury };
+  if (!Object.values(entries).some((e) => e?.copy)) throw new Error('the relay has no stored calendar data yet');
+  // calendar_route.js: state 'unknown' with this exact error means nothing is stored yet (not-covered, "not loaded"); an unknown
+  // from an unreadable store or a malformed copy carries another error and stays failed
+  const NOTHING_STORED = 'nothing stored yet for this source';
+  const res = (e) => (e?.copy
+    ? { state: 'ok', payload: e.copy.payload, fetchedAt: e.copy.fetchedAt, error: null }
+    : e && e.state === 'unknown' && e.error === NOTHING_STORED && !e.failure
+      ? { state: 'not-covered', payload: null, fetchedAt: null, error: null }
+      : { state: 'failed', payload: null, fetchedAt: null, error: e?.error || `no copy stored (${e?.state ?? 'no entry'})` });
+  const fetched = { window: answer.window, nasdaq: {}, forexfactory: res(answer.forexfactory), fed: res(answer.fed), treasury: res(answer.treasury) };
+  for (const d of answer.window.dates) fetched.nasdaq[d] = res(answer.nasdaq?.[d]);
+  const a = lib.assembleSources(fetched);
+  for (const [d, st] of Object.entries(a.status.nasdaq)) if (st.state === 'ok') st.stale = !!answer.nasdaq?.[d]?.stale;
+  // a copy served although the latest fetch failed (or is suspect) is marked fetchFailed, so a day outside it reads failed, not "not yet listed" (compose.js econInputs)
+  for (const s of ['forexfactory', 'fed', 'treasury']) {
+    if (a.status[s].state === 'ok') { a.status[s].stale = !!answer[s]?.stale; if (answer[s]?.state !== 'ok') a.status[s].fetchFailed = true; }
+  }
+  const { econ, status } = lib.econInputs(a, null);
+  const b = answer.base;
+  const cal = lib.buildCalendar({
+    window: { dates: answer.window.dates }, earnings: a.earnings, econ, eventsConfig: b.eventsConfig, marketCalendar: b.marketCalendar,
+    tiers: b.tiers, researched: new Set(b.researched), cats: b.cats, shareClassOf: b.shareClassOf, status: { nasdaq: a.status.nasdaq, ...status },
+  });
+  return { ...cal, v: 1, asOf: answer.asOf, errors: a.errors };
+}
+
+// The status chips under a day heading: a stale, failed or not-yet-listed source is always said (D98).
+function dayFlags(day) {
+  const out = [];
+  const es = day.earningsStatus;
+  if (es.state === 'failed') out.push({ text: 'Earnings failed', title: 'The earnings list for this day could not be loaded.' });
+  else if (es.state === 'not-covered') out.push({ text: 'Earnings not loaded', title: 'The earnings list for this day was not requested.' });
+  else if (es.state === 'suspect') out.push({ text: 'Earnings unconfirmed', title: 'The source listed no reports on an ordinary trading day, so the empty list is not trusted.' });
+  else if (es.stale) out.push({ text: 'Earnings stale', title: `Earnings from an earlier fetch${es.fetchedAt ? ` (${es.fetchedAt})` : ''}.` });
+  const by = day.econStatus?.bySource || {};
+  const group = (pred, word, why) => {
+    const names = Object.keys(by).filter((s) => pred(by[s])).map((s) => SOURCE_NAMES[s]);
+    if (names.length) out.push({ text: `${names.join(', ')} ${word}`, title: why });
+  };
+  group((x) => x.state === 'failed', 'failed', 'This source could not be loaded, so its events for this day are unknown.');
+  group((x) => x.state === 'not-covered', 'not yet listed', 'This source does not list this day yet; it is not a quiet day.');
+  group((x) => x.state === 'ok' && x.stale, 'stale', 'Events from an earlier fetch of this source.');
+  if (day.closure) {
+    out.push(day.closure.kind === 'closed'
+      ? { text: 'Market closed', title: day.closure.name, cl: true }
+      : { text: `Early close ${day.closure.closeEt != null ? clock12(day.closure.closeEt) : ''}`.trim(), title: day.closure.name, cl: true });
+  }
+  return out;
+}
+
+// The calendar to the rows the page draws. R: one per company per day (a missing market value stays null); XV: one per economic
+// event; weeks: up to two Monday-to-Friday groups of the window's days; flags: status chips per date.
+export function pageModel(cal, { names = {}, logos = {} } = {}) {
+  const dates = cal.days.map((d) => d.date);
+  const mondays = [...new Set(dates.map(mondayOf))].sort().slice(0, 2);
+  const weeks = mondays.map((m) => ({ monday: m, dates: dates.filter((d) => mondayOf(d) === m) }));
+  const R = [];
+  const XV = [];
+  const flags = {};
+  for (const day of cal.days) {
+    const w = mondays.indexOf(mondayOf(day.date));
+    if (w < 0) continue;
+    flags[day.date] = dayFlags(day);
+    const rows = [...day.earnings.before, ...day.earnings.after, ...day.earnings.noTime, ...day.unknownValue];
+    for (const e of rows) {
+      R.push({
+        k: R.length, t: e.ticker, n: cleanName(e.name) ?? '', c: e.marketValue == null ? null : e.marketValue / 1e9,
+        tm: hhmm(e.minutesEt), e: e.dateStatus !== 'confirmed', d: day.date, w,
+        ses: e.lane === 'before' ? 'AM' : e.lane === 'after' ? 'PM' : 'NT',
+        mid: e.minutesEt != null && e.minutesEt >= 570 && e.minutesEt < 960, cat: e.cat, sub: e.sub,
+        lvl: TIER_LVL[e.tier] ?? 4, why: '', mine: 0, researched: !!e.researched,
+      });
+    }
+    for (const x of day.econ) {
+      const first = /^[A-Z][A-Z0-9&]{1,5}(?=\s|$)/.exec(x.title);
+      XV.push({
+        k: XV.length, d: day.date, w, tm: hhmm(x.minutesEt), n: x.title, i: IMPACT_KEY[x.impact] || 'n', s: '', code: first ? first[0] : '',
+        fed: x.kind === 'fed' || /^(Fed|FOMC)\b/.test(x.title),
+      });
+    }
+  }
+  const cats = Object.fromEntries(Object.entries(names.cats || {}).map(([id, v]) => [id, v.name]));
+  return { weeks, R, XV, CATS: cats, flags, logos };
+}
+
+/* ===================================== the page ===================================== */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DOWS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const dowOf = (d) => DOWS[new Date(`${d}T00:00:00Z`).getUTCDay()];
+const weekLabel = (ds) => {
+  const [a, b] = [ds[0], ds[ds.length - 1]].map((d) => ({ y: +d.slice(0, 4), m: +d.slice(5, 7) - 1, d: +d.slice(8) }));
+  return a.m === b.m ? `${MONTHS[a.m]} ${a.d}${b.d > a.d ? ` – ${b.d}` : ''}, ${b.y}` : `${MONTHS[a.m]} ${a.d} – ${MONTHS[b.m]} ${b.d}, ${b.y}`;
+};
+
+function startPage(M) {
+  const { R, XV, CATS, weeks, flags, logos } = M;
+  const $ = (id) => document.getElementById(id);
+  const ZN = ['am', 'mk', 'pm', 'nt'];
+  const todayEt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+  const days = () => weeks[F.range == 'next' && weeks[1] ? 1 : 0].dates;
+  const fday = () => (days().includes(F.day) ? F.day : days()[0]);
+  const dnum = (d) => +d.slice(8);
+  const sizeOf = (c) => (c == null ? 'unk' : c >= 200 ? 'mega' : c >= 50 ? 'large' : c >= 10 ? 'mid' : 'small');
+  const fm = (t) => { if (!t) return ''; let [h, m] = t.split(':').map(Number); const a = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12; return h + ':' + String(m).padStart(2, '0') + ' ' + a; };
+  /* market value: $3.9T, $380B, $45B, $8.2B (one decimal under $10B); a missing value is shown as missing, never zero */
+  const fv = (c) => (c == null ? 'n/a' : c >= 1000 ? '$' + (c / 1000).toFixed(1) + 'T' : c >= 10 ? '$' + Math.round(c) + 'B' : '$' + c.toFixed(1) + 'B');
+  const ph = (t) => (!t ? 'mk' : t < '09:30' ? 'am' : t < '16:00' ? 'mk' : 'pm');
+  const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const F0 = () => ({ show: 'both', imp: { h: 1, m: 1, l: 1 }, tier: { 1: 1, 2: 1, 3: 1, 4: 1 }, ses: { AM: 1, PM: 1, NT: 1 }, cat: '', size: '', date: '', mine: 0, q: '' });
+  const def = weeks[0].dates.includes(todayEt) ? todayEt : weeks[0].dates[0];
+  let F = Object.assign(F0(), { range: 'week', day: def });
+  function dataset(FF) {
+    FF = FF || F;
+    const wk = F.range == 'next' && weeks[1] ? 1 : 0;
+    const base = R.filter((r) => r.w == wk), bx = XV.filter((x) => x.w == wk);
+    const er = base.filter((r) => {
+      if (FF.show == 'econ' || !FF.tier[r.lvl] || (r.ses != 'NT' && !FF.ses[r.ses]) || (FF.cat && r.cat != FF.cat) || (FF.size && sizeOf(r.c) != FF.size) || (FF.date == 'conf' && r.e) || (FF.date == 'est' && !r.e) || (FF.mine && !r.mine)) return false;
+      return !FF.q || (r.t + ' ' + r.n).toLowerCase().includes(FF.q);
+    });
+    const xe = bx.filter((x) => {
+      if (FF.show == 'earn' || (x.i != 'n' && !FF.imp[x.i]) || FF.mine) return false;
+      return !FF.q || x.n.toLowerCase().includes(FF.q);
+    });
+    return { er, xe, nr: base.length, nx: bx.length };
+  }
+  const tmSort = (a, b) => (a.tm || '99').localeCompare(b.tm || '99');
+  /* capture aid: ?vp=WxH lays the page out for exactly that viewport */
+  const VPQ = location.search.match(/vp=(\d+)x(\d+)/), VPW = VPQ ? +VPQ[1] : 0, VPH = VPQ ? +VPQ[2] : 0;
+  if (VPW) { const de = document.documentElement, bd = document.body; de.style.width = VPW + 'px'; de.style.height = VPH + 'px'; bd.style.width = VPW + 'px'; bd.style.height = VPH + 'px'; de.style.fontSize = (VPH <= 900 ? 12.5 : Math.max(11, Math.min(18, Math.min(.007 * VPW, .0138 * VPH)))) + 'px'; bd.style.paddingLeft = bd.style.paddingRight = Math.max(20, Math.min(66, .026 * VPW)) + 'px'; }
+  const LAP = () => (VPH || innerHeight) < 900;
+  function active() { const o = (x) => JSON.stringify(Object.assign({}, x, { range: 0, day: 0 })); return o(F) != o(F0()); }
+  function sync() {
+    document.querySelectorAll('[data-a]').forEach((b) => {
+      const [a, v] = b.dataset.a.split(':'); let on = null;
+      if (a == 'show') on = F.show == v; else if (a == 'imp') on = !!F.imp[v]; else if (a == 'tier') on = !!F.tier[v]; else if (a == 'ses') on = !!F.ses[v]; else if (a == 'mine') on = !!F.mine; else if (a == 'range' && b.closest('#rng')) on = F.range == v;
+      if (on !== null) b.classList.toggle('on', on);
+    });
+    ['cat', 'size', 'date'].forEach((k) => { const s = $(k); s.value = F[k]; s.classList.toggle('chg', !!F[k]); });
+    $('sbox').classList.toggle('chg', !!F.q);
+    $('fb').classList.toggle('act', active());
+    $('fb').classList.toggle('se', F.show == 'econ'); $('fb').classList.toggle('sn', F.show == 'earn');
+    $('wklbl').textContent = weekLabel(days());
+  }
+  function initUI() {
+    $('cat').innerHTML = '<option value="">All Mowgli Cats</option>' + Object.entries(CATS).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join('');
+    $('size').innerHTML = '<option value="">Any size</option><option value="mega">Over $200B</option><option value="large">$50B-$200B</option><option value="mid">$10B-$50B</option><option value="small">Under $10B</option>';
+    $('date').innerHTML = '<option value="">Any date status</option><option value="conf">Confirmed only</option><option value="est">Estimated only</option>';
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-a]'); if (!b) return; const [a, v] = b.dataset.a.split(':');
+      if (a == 'show') F.show = v; else if (a == 'imp') F.imp[v] = F.imp[v] ? 0 : 1; else if (a == 'tier') F.tier[v] = F.tier[v] ? 0 : 1; else if (a == 'ses') F.ses[v] = F.ses[v] ? 0 : 1; else if (a == 'mine') F.mine = F.mine ? 0 : 1;
+      else if (a == 'range') F.range = v; else if (a == 'day') { F.day = v; F.range = F.range == 'next' ? 'next' : 'day'; } else if (a == 'clear') { const r = F.range, d = F.day; F = Object.assign(F0(), { range: r, day: d }); $('q').value = ''; }
+      go();
+    });
+    ['cat', 'size', 'date'].forEach((k) => $(k).addEventListener('change', (e) => { F[k] = e.target.value; go(); }));
+    $('q').addEventListener('input', (e) => { F.q = e.target.value.trim().toLowerCase(); go(); });
+  }
+  function go() { sync(); render(); }
+
+  /* ===== MOSAIC render: squarified treemap of headliners, notable names and red reports per lane; slim Ladder rows for the rest ===== */
+  const EL = $('wk'), wkin = () => EL.firstElementChild;
+  const BL = { am: ['sun', 'Before the open', 'AM'], mk: ['clk', 'Market hours', ''], pm: ['moon', 'After the close', 'PM'], nt: ['clk', 'Time not given', 'NT'] };
+  const WL = { 1: 17, 2: 9.5, 3: 5.2, 4: 3.6 };
+  const capf = (c) => (c == null ? .8 : .8 + .4 * Math.max(0, Math.min(1, (Math.log10(c) - .5) / 3.1)));
+  const wE = (r) => WL[r.lvl] * capf(r.c), wX = (x) => ({ h: 19, m: 8, l: 4.4, n: 4.4 })[x.i];
+  const REM = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const estOf = (r) => (r.ses == 'NT' ? 'time n/a' : r.ses + ' est.');
+  const fx = (x) => (x.tm ? fm(x.tm) : 'time n/a');
+  const tmx = (r) => (r.tm ? fm(r.tm) : estOf(r));
+  const tmh = (r) => (r.tm ? fm(r.tm) : `<span class="est">${estOf(r)}</span>`);
+  const mkd = (r) => `<span class="mk${r.e ? ' e' : ''}"></span>`;
+  const FEDP = (x) => (x.fed ? '<span class="fed">FED</span>' : '');
+  const plural = (n, w) => n + ' ' + w + (n == 1 ? '' : 's');
+  function fitRows() {
+    wkin().querySelectorAll('.sr .nm').forEach((el) => {
+      const over = () => el.scrollWidth > el.clientWidth;
+      if (!over()) return; const s = el.dataset.s; if (s && s !== el.textContent) { el.textContent = s; if (!over()) return; }
+      if (el.tagName == 'SPAN') el.textContent = ''; else el.style.textOverflow = 'ellipsis';
+    });
+  }
+  let TM = {}, uid = 0, Z = 1, Kfix = 0, VW = 0, VH = 0, FREEZE = false; const DEM = new Set();
+  /* real logo files, preloaded and painted onto canvases (a plain img can stay blank in a screenshot); a company with no logo file draws its ticker */
+  const IMG = {};
+  const LOGOS = [...new Set(R.map((r) => r.t))].map((t) => {
+    const file = logos[t] || logos[t.replace(/\./g, '-')];
+    if (!file) { IMG[t] = null; return Promise.resolve(); }
+    const i = new Image(); IMG[t] = i; i.onload = () => paintLogos(); i.src = window.MG.logoBase + file;
+    return i.decode().catch(() => 0);
+  });
+  const arOf = (t) => { const i = IMG[t]; return i && i.naturalWidth ? i.naturalWidth / i.naturalHeight : 1; };
+  let RP = 16;
+  const boxW = (t, h, maxW) => { const ar = arOf(t); return ar > 1.9 ? Math.min(maxW, h * Math.min(ar, maxW / h)) : h; };
+  /* a logo that would draw under about 10px tall is replaced by a ticker monogram */
+  const monoFor = (t, h, maxW) => { const ar = arOf(t), w = boxW(t, h, maxW); return Math.min(h * .9, w * .9 / ar) * RP * Z < 5; };
+  const logoA = (t, h, maxW) => `<span class="lgo" data-t="${esc(t)}"${monoFor(t, h, maxW) ? ' data-m="1"' : ''} style="--s:${h.toFixed(2)}rem;--w:${boxW(t, h, maxW).toFixed(2)}rem"><canvas></canvas></span>`;
+  /* slim rows: one fixed logo slot in every row; a wordmark scales to fit it, and one that would draw under ~10px tall becomes a plain neutral empty slot */
+  let RF = 1;
+  function rowLogo(t) {
+    const wide = arOf(t) > 1.9, mono = wide && (4.6 * .9 / arOf(t)) * RF * RP * Z < 5;
+    return mono ? '<span class="lgo n"></span>' : `<span class="lgo${wide ? ' w' : ''}" data-t="${esc(t)}"><canvas></canvas></span>`;
+  }
+  function paintLogos() {
+    const dprD = Math.max(1, devicePixelRatio || 1);
+    document.querySelectorAll('.lgo[data-t]').forEach((el) => {
+      const t = el.dataset.t, im = IMG[t], c = el.firstChild, w = el.clientWidth, h = el.clientHeight; if (!w || !h || !c) return;
+      const cw = Math.round(w * .9 * dprD * Z), ch = Math.round(h * .9 * dprD * Z); c.width = cw; c.height = ch; const g = c.getContext('2d');
+      const ar = im && im.naturalWidth ? im.naturalWidth / im.naturalHeight : 0, dh = ar ? Math.min(ch, cw / ar) : 0;
+      if (!ar || el.dataset.m === '1' || dh / dprD < 5) {
+        const tx = t; let fs = ch * .74; g.fillStyle = '#1b2428'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${fs}px Manrope,"Segoe UI",sans-serif`;
+        while (g.measureText(tx).width > cw * .96 && fs > 5) { fs -= 1; g.font = `800 ${fs}px Manrope,"Segoe UI",sans-serif`; } g.fillText(tx, cw / 2, ch / 2 + fs * .04); return;
+      }
+      const dw = ar >= cw / ch ? cw : ch * ar, dh2 = dw / ar; g.drawImage(im, (cw - dw) / 2, (ch - dh2) / 2, dw, dh2);
+    });
+  }
+  function itemsOf(d, b, D) {
+    const ee = b == 'mk' ? [] : D.er.filter((r) => r.d == d && r.ses == BL[b][2]), ex = D.xe.filter((x) => x.d == d && ph(x.tm) == b);
+    return [...ee.map((r) => ({ k: 'e', r, v: wE(r) })), ...ex.map((x) => ({ k: 'x', x, v: wX(x) }))].sort((a, b) => b.v - a.v);
+  }
+  /* tiles = headliners, notable names (unless demoted for being too small) and red high-impact reports; everything else is a slim row */
+  function splitZ(d, b, X) {
+    const it = itemsOf(d, b, X), isTile = (o) => (o.k == 'e' ? (o.r.lvl <= 2 && !DEM.has(o.r.k)) : o.x.i == 'h');
+    return { b, it, tiles: it.filter(isTile), rx: it.filter((o) => o.k == 'x' && o.x.i != 'h').map((o) => o.x).sort(tmSort), re: it.filter((o) => o.k == 'e' && !isTile(o)).map((o) => o.r).sort(tmSort) };
+  }
+  const rowsRem = (s, cols) => { const n = s.rx.length + s.re.length; return n ? Math.ceil(n / (cols || 1)) * 1.21 * RF + .3 : 0; };
+  function rowsHTML(s) {
+    const rx = s.rx.map((x) => `<div class="sr i${x.i}" title="${esc(x.n)}"><b class="nm">${esc(x.n)}</b>${FEDP(x)}<span class="tm">${fx(x)}</span></div>`);
+    const re = s.re.map((r) => `<div class="sr${r.lvl >= 4 ? ' mn' : ''}" title="${esc(r.n)}"><span class="ls">${rowLogo(r.t)}</span><b class="tk2">${esc(r.t)}</b><span class="nm">${esc(r.n)}</span><span class="vl">${fv(r.c)}</span><span class="tm">${r.mid ? '<span class="mdt">MIDDAY</span>' : ''}${tmh(r)}</span></div>`);
+    return rx.length + re.length ? `<div class="rows${s.re.some((r) => r.mid) ? ' hasmid' : ''}">${rx.join('')}${re.join('')}</div>` : '';
+  }
+  function wr(row, s) { const sum = row.reduce((a, b) => a + b.a, 0), mx = Math.max(...row.map((r) => r.a)), mn = Math.min(...row.map((r) => r.a)); return Math.max(s * s * mx / (sum * sum), sum * sum / (s * s * mn)); }
+  function squarify(items, x, y, w, h) {
+    const tot = items.reduce((a, b) => a + b.v, 0), out = []; items.forEach((i) => { i.a = i.v * w * h / tot; });
+    let rest = items.slice();
+    while (rest.length) {
+      const s = Math.min(w, h); let row = [rest[0]], worst = wr(row, s);
+      for (let i = 1; i < rest.length; i++) { const t = row.concat(rest[i]), wt = wr(t, s); if (wt <= worst) { row = t; worst = wt; } else break; }
+      rest = rest.slice(row.length); const rs = row.reduce((a, b) => a + b.a, 0);
+      if (w >= h) { const cw = rs / h; let yy = y; row.forEach((i) => { const hh = i.a / cw; out.push({ i, x, y: yy, w: cw, h: hh }); yy += hh; }); x += cw; w -= cw; }
+      else { const rh = rs / w; let xx = x; row.forEach((i) => { const ww = i.a / rh; out.push({ i, x: xx, y, w: ww, h: rh }); xx += ww; }); y += rh; h -= rh; }
+    }
+    return out;
+  }
+  /* ---------- earnings tile: priority ticker, time, value, name (name is dropped first, time never) ---------- */
+  function earnTile(r) {
+    const t = `title="${esc(r.n)} (${esc(r.t)}), ${fv(r.c)}, ${tmx(r)}"`;
+    return { c: `tl l${r.lvl}${r.e ? ' e' : ''}`, t, h: '', attr: ` data-rk="${r.k}"` };
+  }
+  function variantHTML(r, wR, hR, v) {
+    const pad = .34, iw = wR - 2 * pad - .06, ih = hR - 2 * pad - .06, base = Math.sqrt(wR * hR), L = r.t.length, k = v.k, big = base > 12;
+    const ar = arOf(r.t), wl = ar > 1.9, sc = Math.max(1, Math.min(big ? 1.7 : 1.3, base / 6.8)), f2 = Math.max(.68 * RF, .72 * sc * k);/* time and value never go below about the row text size */
+    const lg = Math.max(.75, Math.max(1, Math.min(big ? 5 : 3.2, base * .27)) * k), fk = Math.max(.68, Math.max(.82, Math.min(big ? 3.2 : 1.9, base * .15)) * k);
+    const vt = fv(r.c), F2 = f2.toFixed(2), physPx = RP * Z;
+    const tline = () => `<div class="tt" style="font-size:${F2}rem">${mkd(r)} ${tmh(r)}${v.vp == 'in' ? ` <span class="v">&middot; ${vt}</span>` : ''}</div>` + (v.vp == 'ln' ? `<div class="tt" style="font-size:${F2}rem"><span class="v">${vt}</span></div>` : '');
+    const nameH = `<div class="nmx" style="font-size:${F2}rem">${esc(r.n)}</div>`;
+    const logoBox = (h, maxW) => { const w = wl ? Math.min(h * ar, Math.max(h, maxW)) : h, hd = Math.min(h * .9, w * .9 / ar) * physPx; if (hd < 5) return null; return logoA(r.t, h, w); };
+    const T = esc(r.t);
+    if (v.lay == 'top') {
+      const lh = Math.min(lg, ih * .42), lgh = logoBox(lh, iw); if (!lgh) return null;
+      return `<div class="hd">${lgh}</div><div class="trow"><div class="tk" style="font-size:${fk.toFixed(2)}rem">${T}</div>${tline()}</div>` + (v.c >= 4 ? nameH : '');
+    }
+    if (v.lay == 'wd') {
+      const lfW = Math.min(iw * .5, Math.max(10, L * fk * .9 + 4)), lh = Math.min(lg, ih * .5), lgh = logoBox(lh, lfW - .4 - L * fk * .8); if (!lgh) return null;
+      return `<div class="lf" style="width:${lfW.toFixed(2)}rem"><div class="hd">${lgh}<div class="tk" style="font-size:${fk.toFixed(2)}rem">${T}</div></div>${tline()}</div><div class="rt"><div class="nmx" style="font-size:${(f2 * 1.1).toFixed(2)}rem;color:#fff">${esc(r.n)}</div></div>`;
+    }
+    if (v.lay == 'side') {
+      const maxW = iw - .45 - L * fk * .78, lgh = logoBox(lg, maxW); if (!lgh) return null;
+      return `<div class="hd">${lgh}<div><div class="tk" style="font-size:${fk.toFixed(2)}rem">${T}</div>${v.c >= 4 ? nameH : ''}</div></div>` + tline();
+    }
+    const lgh = logoBox(lg, iw); if (!lgh) return null;
+    return `<div class="hd st">${lgh}<div class="tk" style="font-size:${fk.toFixed(2)}rem">${T}</div></div>` + (v.c >= 4 ? nameH : '') + tline();
+  }
+  const tileFits = (el) => {
+    const cs = getComputedStyle(el), pb = parseFloat(cs.paddingBottom), pr = parseFloat(cs.paddingRight), H = el.clientHeight - pb + 1, Wd = el.clientWidth - pr + 1;
+    return el.scrollHeight <= el.clientHeight + 1 && el.scrollWidth <= el.clientWidth + 1 && [...el.querySelectorAll('*')].every((n) => n.tagName == 'CANVAS' || (n.offsetTop + n.offsetHeight <= H && n.offsetLeft + n.offsetWidth <= Wd)) && [...el.querySelectorAll('.tk,.tt,.hd,.lf')].every((n) => n.scrollWidth <= n.clientWidth + 1) && [...el.querySelectorAll('.nmx')].every((n) => n.scrollWidth <= n.clientWidth);
+  };
+  function fitTile(el, r, wR, hR) {
+    const seq = [], wide = wR >= 7.4 && hR <= wR * .7 && hR >= 3.1, wl = arOf(r.t) > 1.9, tall = hR > 4.5, base = Math.sqrt(wR * hR);
+    /* type size is the outer loop (largest first, with a floor); content level (name) is the inner loop, so the name is dropped before type gets small */
+    const ks = base > 4.2 ? [1.5, 1.3, 1.15, 1, .88, .76, .66, .56, .48] : [1, .88, .76, .66, .56, .48];
+    const lays = (wl ? ['top'] : []).concat(tall ? ['stack', 'side'] : ['side', 'stack']);
+    ks.forEach((k) => { [5, 4, 3].forEach((c) => { if (wide && c >= 4 && k <= 1.3) seq.push({ c, lay: 'wd', vp: 'in', k }); lays.forEach((lay) => ['in', 'ln'].forEach((vp) => seq.push({ c, lay, vp, k }))); }); });
+    for (const v of seq) {
+      const h = variantHTML(r, wR, hR, v); if (h == null) continue;
+      el.classList.toggle('wd', v.lay == 'wd'); el.innerHTML = h;
+      if (tileFits(el)) { el.dataset.v = [v.c, v.lay, v.vp, v.k].join(' '); return true; }
+    }
+    return false;
+  }
+  function fitAll() {
+    const bad = [], rem = REM();
+    wkin().querySelectorAll('.tmap:not([data-mini]) .tl[data-rk]').forEach((el) => { const r = R[+el.dataset.rk]; if (!fitTile(el, r, el.clientWidth / rem, el.clientHeight / rem)) bad.push(r.k); });
+    wkin().querySelectorAll('.tmap:not([data-mini]) .tl[data-xk]').forEach((el) => fitEcon(el, XV[+el.dataset.xk], el.clientWidth / rem, el.clientHeight / rem));
+    return bad;
+  }
+  /* ---------- red high-impact tile: name, time, HIGH and FED badges ---------- */
+  function econTile(x) { return { c: 'tl x ih', t: `title="${esc(x.n)}, ${fx(x)}"`, h: '', attr: ` data-xk="${x.k}"` }; }
+  function econHTML(x, u, subL, st) {
+    const lg = Math.min(4.4, 1.7 * u), fn = Math.min(2.6, .98 * u), f2 = .74 * u, fb = Math.max(.5, .52 * u);
+    const badge = x.code ? `<span class="cd" style="--s:${lg.toFixed(2)}rem;font-size:${(lg * .27).toFixed(2)}rem">${esc(x.code)}</span>` : '';
+    return `<div class="hd${st ? ' st' : ''}">${badge}<div class="tk" style="font-size:${fn.toFixed(2)}rem">${esc(x.n)}</div></div><div class="tt" style="font-size:${f2.toFixed(2)}rem;white-space:normal"><span style="white-space:nowrap">${fx(x)}</span> <span style="white-space:nowrap"><span class="hg" style="font-size:${fb.toFixed(2)}rem;margin-left:0">HIGH</span>${x.fed ? ` <span class="fed" style="margin-left:.15rem;font-size:${fb.toFixed(2)}rem">FED</span>` : ''}</span></div>`;
+  }
+  function fitEcon(el, x, wR, hR) {
+    /* type size outer (largest first, floor = row text) */
+    const base = Math.sqrt(wR * hR), k0 = Math.max(1, Math.min(2.4, base / 4.6)), uf = .68 * RF / .74;
+    for (let u = k0; u >= uf * .999; u *= .93) for (const st of [0, 1]) { el.innerHTML = econHTML(x, u, 0, st); if (tileFits(el)) return true; }
+    for (let u = uf * .93; u >= .72; u *= .93) for (const st of [0, 1]) { el.innerHTML = econHTML(x, u, 0, st); if (tileFits(el)) return true; }
+    el.innerHTML = econHTML(x, .72, 0, 1); return true;
+  }
+  function miniTile(it, wR, hR) {
+    const m = Math.min(wR, hR);
+    if (it.k == 'e') {
+      const r = it.r, t = `title="${esc(r.n)} (${esc(r.t)}), ${fv(r.c)}, ${tmx(r)}"`, c = `tl l${r.lvl} zs${r.e ? ' e' : ''}`;
+      const lh = Math.max(.9, Math.min(2.4, m * .62));
+      return { c, t, h: (it.top || (m >= 2.3 && r.lvl <= 2)) ? logoA(r.t, lh, Math.max(lh, Math.min(lh * 3, wR - .25))) : '' };
+    }
+    const x = it.x, t = `title="${esc(x.n)}, ${fx(x)}"`;
+    return { c: `tl x i${x.i} zs`, t, h: x.i == 'h' && x.code && m >= 2.3 ? `<span class="cd" style="--s:${(m * .6).toFixed(2)}rem">${esc(x.code)}</span>` : '' };
+  }
+  function tileHTML(it, wR, hR, mini) { return mini ? miniTile(it, wR, hR) : it.k == 'e' ? earnTile(it.r) : econTile(it.x); }
+  function layoutAll() {
+    const rem = REM();
+    wkin().querySelectorAll('.tmap').forEach((el) => {
+      const it = TM[el.dataset.id], mini = el.dataset.mini == '1'; if (!it || !it.length) { el.innerHTML = ''; return; }
+      const W = el.clientWidth, H = el.clientHeight; if (!W || !H) return;
+      const rects = squarify(it.map((o) => Object.assign({}, o)), 0, 0, W, H);
+      el.innerHTML = rects.map((r) => { const o = tileHTML(r.i, r.w / rem, r.h / rem, mini); return `<div class="${o.c}" ${o.t}${o.attr || ''} style="left:${(r.x + 1).toFixed(1)}px;top:${(r.y + 1).toFixed(1)}px;width:${Math.max(0, r.w - 2).toFixed(1)}px;height:${Math.max(0, r.h - 2).toFixed(1)}px">${o.h}</div>`; }).join('');
+    });
+  }
+  /* a notable tile that cannot be at least 4rem wide and 2.6rem tall becomes a slim row instead */
+  function planDemote() {
+    const rem = REM(); let any = false;
+    wkin().querySelectorAll('.zn .tmap').forEach((el) => {
+      const it = TM[el.dataset.id]; if (!it || !it.length) return; const W = el.clientWidth, H = el.clientHeight; if (!W || !H) return;
+      const bad = squarify(it.map((o) => Object.assign({}, o)), 0, 0, W, H).filter((q) => q.i.k == 'e' && (q.w < Math.max(4 * rem, 80) || (q.h < 2.6 * rem && q.i.r.lvl > 1))).sort((a, b) => a.i.v - b.i.v)[0];
+      if (bad) { DEM.add(bad.i.r.k); any = true; }
+    });
+    return any;
+  }
+  function zoneHTML(s) {
+    if (!s.it.length) return '';
+    let tm = ''; if (s.tiles.length) { const id = 'z' + (uid++); TM[id] = s.tiles; tm = `<div class="tmap" data-id="${id}"></div>`; }
+    const ne = s.it.filter((o) => o.k == 'e').length, nx = s.it.length - ne;
+    return `<section class="zn ${s.b == 'mk' ? 'mk2' : s.b}" data-b="${s.b}"><div class="zh"><svg class="ico"><use href="#${BL[s.b][0]}"/></svg>${BL[s.b][1]}<em>${ne ? plural(ne, 'report') : ''}${ne && nx ? ' + ' : ''}${nx ? plural(nx, 'event') : ''}</em></div>${tm}${rowsHTML(s)}</section>`;
+  }
+  function counts(er, xe) { const a = []; if (F.show != 'econ') a.push(`<b>${er.length}</b> ${er.length == 1 ? 'report' : 'reports'}`); if (F.show != 'earn') a.push(`<b>${xe.length}</b> ${xe.length == 1 ? 'event' : 'events'}`); return a.join(' &middot; '); }
+  const flagsHTML = (d) => ((flags[d] || []).length ? `<div class="fl">${flags[d].map((f) => `<span class="flg${f.cl ? ' cl' : ''}" title="${esc(f.title)}">${esc(f.text)}</span>`).join('')}</div>` : '');
+  function dayHTML(d, D, wide) {
+    const er = D.er.filter((r) => r.d == d), xe = D.xe.filter((x) => x.d == d), hi = xe.filter((x) => x.i == 'h').length;
+    const zs = ZN.map((b) => splitZ(d, b, D)), band = wide ? zs.find((s) => s.b == 'mk' && s.it.length && !s.tiles.length) : null;
+    return `<article class="day pad${wide ? ' wide' : ''}" data-d="${d}"><div class="dh"><button class="dn" data-a="day:${d}"><b>${dowOf(d)}</b><span>${dnum(d)}</span></button>${hi ? `<span class="hp">${hi} high-impact</span>` : ''}<span class="cnt">${counts(er, xe)}</span></div>${flagsHTML(d)}${band ? `<div class="mkband"><span class="mbh"><svg class="ico"><use href="#clk"/></svg>Market hours</span>${rowsHTML(band)}</div>` : ''}<div class="zones">${zs.filter((s) => s !== band).map(zoneHTML).join('')}</div></article>`;
+  }
+  function miniHTML(d, D) {
+    const er = D.er.filter((r) => r.d == d), xe = D.xe.filter((x) => x.d == d), hi = xe.filter((x) => x.i == 'h').length;
+    const it = ZN.flatMap((b) => itemsOf(d, b, D)).sort((a, b) => b.v - a.v), id = 'z' + (uid++); if (it[0]) it[0].top = true; TM[id] = it;
+    const cn = []; if (F.show != 'econ') cn.push(`<b>${er.length}</b>`); if (F.show != 'earn') cn.push(`${xe.length}`);
+    return `<div class="mini pad${d == fday() ? ' on' : ''}" data-a="day:${d}"><div class="dh"><button class="dn"><b>${dowOf(d)}</b><span>${dnum(d)}</span></button>${hi ? `<span class="hp">${hi} high</span>` : ''}<span class="cnt">${cn.join(' &middot; ')}</span></div><div class="tmap" data-id="${id}" data-mini="1"></div></div>`;
+  }
+  /* Scale rule: one area-per-weight constant K, fixed by the busiest UNFILTERED day, so a tile keeps its importance size under any filter and a filtered day block shrinks to its content. */
+  function sizeAll(D, U, focus, rem) {
+    const tw = (s) => s.tiles.reduce((a, o) => a + o.v, 0), fw = (d, b, X) => itemsOf(d, b, X).reduce((s, o) => s + o.v, 0);
+    const SU = (d, wide) => ZN.map((b) => splitZ(d, b, U)).filter((s) => s.it.length && !(wide && s.b == 'mk' && !s.tiles.length));
+    const maxFull = Math.max(1, ...days().map((d) => ZN.reduce((a, b) => a + fw(d, b, U), 0)));
+    const W = wkin();
+    if (focus) {
+      /* week strip: each day's map keeps one shared scale; the strip is only as tall as its tallest map */
+      const minis = [...W.querySelectorAll('.mini .tmap')];
+      if (minis.length) {
+        const mw = minis[0].clientWidth, Hm = 5.2 * rem, K = mw * Hm / maxFull;
+        minis.forEach((el, i) => { const sum = ZN.reduce((a, b) => a + fw(days()[i], b, D), 0); el.style.height = Math.max(1.4 * rem, Math.min(Hm, sum * K / mw)) + 'px'; });
+      }
+      const day = W.querySelector('.day.wide'); if (!day) return;
+      const zl = [...day.querySelectorAll('.zn')]; if (!zl.length) return;
+      const ZH = day.querySelector('.zones').clientHeight, zcw = .6 * rem + 2, zcv = zl[0].querySelector('.zh').offsetHeight + .6 * rem + 5, gap = .5 * rem;
+      const minOf = (s, c) => (s.re.length ? (c > 1 ? c * 24 : 26) * RF : s.rx.length ? 14 * RF : 12) * rem, lim = VW - 1.2 * rem - 4;
+      /* K comes from the unfiltered day so tiles keep their size. Row columns per lane are settled first, then K is solved with those columns held fixed. */
+      const colsOf = (inner) => Math.max(1, Math.floor(inner / (24 * RF * rem)), Math.ceil(inner / (40 * rem)));
+      const Hof = (s, c) => ZH - zcv - rowsRem(s, c) * rem, laneK = (s, K, c) => Math.max(minOf(s, c), s.tiles.length ? K * tw(s) / Hof(s, c) : 0) + zcw;
+      const su = SU(fday(), true); let K = 0, cols = {};
+      const solve = (cm) => { const need = (k) => su.reduce((a, s) => a + laneK(s, k, cm[s.b] || 1), 0) + (su.length - 1) * gap; let lo = 0, hi = 1e7; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (need(m) > lim) hi = m; else lo = m; } return lo * .99; };
+      for (let pass = 0; pass < 4; pass++) {
+        K = solve(cols); const nc = {}; su.forEach((s) => { nc[s.b] = colsOf(laneK(s, K, cols[s.b] || 1) - zcw); });
+        if (su.every((s) => nc[s.b] == (cols[s.b] || 1))) break; cols = pass == 3 ? cols : nc;
+      }
+      /* feasibility: the lanes' minimum widths (with their row columns) must fit the panel; otherwise drop a row column from the widest lane */
+      for (let g = 0; g < 6; g++) {
+        const mins = su.reduce((a, s) => a + minOf(s, cols[s.b] || 1) + zcw, 0) + (su.length - 1) * gap; if (mins <= lim) break;
+        const w = su.filter((s) => (cols[s.b] || 1) > 1).sort((a, b) => (cols[b.b] || 1) - (cols[a.b] || 1))[0]; if (!w) break; cols[w.b] = (cols[w.b] || 1) - 1;
+      }
+      K = solve(cols);
+      const sd = zl.map((zn) => splitZ(fday(), zn.dataset.b, D)), wd = sd.map((s) => laneK(s, K, cols[s.b] || 1)), extra = Math.max(0, lim - wd.reduce((a, b) => a + b, 0) - (sd.length - 1) * gap);
+      zl.forEach((zn, i) => {
+        const w = wd[i] + extra / zl.length, s = sd[i], c = cols[s.b] || 1; zn.style.width = w + 'px'; const rw = zn.querySelector('.rows'); if (rw) rw.style.gridTemplateColumns = `repeat(${c},minmax(0,1fr))`;
+        const tm = zn.querySelector('.tmap');
+        if (tm) { const inner = w - zcw, Hh = Hof(s, c); tm.style.flex = 'none'; const l1 = s.tiles.some((o) => o.k == 'e' && o.r.lvl == 1), minT = Math.min(Hh, (l1 ? 8 : 5.2) * rem); tm.style.height = Math.max(3.6 * rem, minT, Math.min(Hh, ZH * .62, s.tiles.length ? tw(s) * K / inner : 0)) + 'px'; }
+      });
+      /* the day panel shrinks to its content once the lanes are sized */
+      day.style.flex = '0 0 auto'; day.querySelector('.zones').style.flex = 'none';
+    } else {
+      const zn0 = W.querySelector('.zn'); if (!zn0) return;
+      const W0 = zn0.clientWidth - .6 * rem - 2, zcv = zn0.querySelector('.zh').offsetHeight + .6 * rem + 5, gap = .35 * rem;
+      const dayEl = W.querySelector('.day'), zns = [...dayEl.querySelectorAll('.zn')], base = dayEl.offsetHeight - zns.reduce((a, z) => a + z.offsetHeight, 0) - Math.max(0, zns.length - 1) * gap;
+      let K = Kfix;
+      if (Z === 1 && !FREEZE) {
+        K = 1e9;
+        days().forEach((d) => { const su = SU(d, false), t = su.reduce((a, s) => a + tw(s), 0); if (!t) return; const avail = VH - base - su.reduce((a, s) => a + zcv + rowsRem(s) * rem, 0) - (su.length - 1) * gap - 4; K = Math.min(K, W0 * avail / t); });
+        if (K >= 1e9) K = 3 * rem * rem; if (LAP()) K = Math.max(K, 3.0 * rem * rem); Kfix = K;
+      }
+      W.querySelectorAll('.zn .tmap').forEach((el) => { const it = TM[el.dataset.id] || [], sum = it.reduce((s, o) => s + o.v, 0); el.style.flex = 'none'; const red = it.some((o) => o.k == 'x' && o.x.i == 'h'); el.style.height = Math.max((red ? 6.2 : 3.6) * rem, sum * K / el.clientWidth) + 'px'; });
+    }
+  }
+  function build(D, focus) {
+    TM = {}; uid = 0; VW = EL.clientWidth / Z; VH = EL.clientHeight / Z;
+    const inner = focus ? `<div class="strip">${days().map((d) => miniHTML(d, D)).join('')}</div>${dayHTML(fday(), D, true)}` : days().map((d) => dayHTML(d, D, false)).join('');
+    const dmin = active() ? (RF > 1 ? '17rem' : '19rem') : D.er.length ? '21rem' : '19rem';
+    EL.innerHTML = `<div class="wkin${focus ? ' focus' : ''}" style="--dmin:${dmin};width:${VW}px;height:${VH}px;transform:scale(${Z})">${inner}</div>`;
+  }
+  let laidFor = '';
+  function render() {
+    const D = dataset(), U = dataset(F0()), rem = REM(), focus = F.range == 'day' || (LAP() && !active());
+    RF = LAP() ? 1.25 : 1;
+    const pass = (zv) => { Z = zv; let n = 0; do { build(D, focus); sizeAll(D, U, focus, rem); n++; } while (!FREEZE && planDemote() && n < 6); layoutAll(); fitRows(); };
+    RP = rem; DEM.clear(); Kfix = 0; pass(1);
+    /* filtered week: scale the whole week by one uniform factor (up to 2x) so the tallest day fills the height; relative sizes stay comparable */
+    let zUsed = 1;
+    if (!focus) {
+      const avail = EL.clientHeight, ht = () => Math.max(...[...wkin().querySelectorAll('.day')].map((d) => d.offsetHeight)) * Z;
+      const rowsOk = () => [...wkin().querySelectorAll('.sr')].every((r) => r.scrollWidth <= r.clientWidth + 1) && [...wkin().querySelectorAll('.sr span.nm')].every((n) => n.textContent !== '') && [...wkin().querySelectorAll('.sr b.nm')].every((n) => n.scrollWidth <= n.clientWidth + 1);
+      const fits = () => ht() <= avail * .985 && wkin().scrollWidth <= wkin().clientWidth + 1 && rowsOk();
+      if (ht() < avail * .82) { let lo = 1, hi = 2; for (let i = 0; i < 7; i++) { const m = (lo + hi) / 2; pass(m); if (fits()) lo = m; else hi = m; } pass(lo); zUsed = lo; }
+    }
+    /* fill every tile from the richest variant that fits; a tile that cannot show logo, ticker, time and value becomes a slim row */
+    FREEZE = true; for (let i = 0; i < 4; i++) { const bad = fitAll(); if (!bad.length) break; bad.forEach((k) => DEM.add(k)); pass(zUsed); } FREEZE = false;
+    fitRows();
+    $('stt').innerHTML = `Showing <b>${D.er.length}</b> of ${D.nr} reports &middot; <b>${D.xe.length}</b> of ${D.nx} events`;
+    paintLogos();
+    laidFor = innerWidth + 'x' + innerHeight + '/' + EL.clientWidth + 'x' + EL.clientHeight;
+  }
+  /* the layout is computed for one viewport size; if the window has a different size when it is next looked at, it is laid out again */
+  let rsF = 0, rsT = 0;
+  const sizeNow = () => innerWidth + 'x' + innerHeight + '/' + EL.clientWidth + 'x' + EL.clientHeight;
+  const recheck = () => { if (laidFor && sizeNow() != laidFor) render(); };
+  const watch = () => { new ResizeObserver(() => { if (rsF) return; rsF = requestAnimationFrame(() => { rsF = 0; recheck(); }); }).observe(EL); addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(recheck, 60); }); [600, 1500, 3000].forEach((ms) => setTimeout(recheck, ms)); };
+  initUI(); sync();
+  /* first layout waits until the logos are decoded and the window has its final size (tile areas are computed from it) */
+  return Promise.race([Promise.all(LOGOS), new Promise((ok) => setTimeout(ok, 4000))]).then(() => new Promise((done) => setTimeout(() => { sync(); render(); watch(); done(); }, 300)));
+}
+
+/* ===================================== loading ===================================== */
+const getJson = async (url, ms = 15000) => {
+  const r = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(ms) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+};
+
+// The relay first (composed here); else the calendar baked at publish, marked stale; else null with the reasons.
+async function loadCalendar(lib) {
+  const MG = window.MG;
+  const relay = String((window.MOWGLI_CONFIG || {}).quoteWorker || '').replace(/\/+$/, '');
+  const why = [];
+  if (relay) {
+    try {
+      const answer = await getJson(`${relay}/calendar`);
+      const cal = composeFromRelay(answer, lib);
+      const notes = [`Updated ${etClock(answer.asOf)}`];
+      if (answer.relay?.state === 'down') notes.push(`Feed not refreshed since ${answer.relay.lastRunAt ? etClock(answer.relay.lastRunAt) : 'it started'}: saved copies shown`);
+      if (answer.baseError) notes.push(`Reference data: ${answer.baseError}`);
+      return { cal, names: answer.base.names, logos: answer.base.logos, note: notes.join(' · ') };
+    } catch (e) { why.push(`relay: ${e.message}`); }
+  } else why.push('relay: no relay address configured');
+  if (!MG.isStatic) {
+    // the local server composes the calendar itself (GET /api/calendar) and marks it stale when it had to fall back, so it is used as it comes
+    try {
+      const cal = await getJson('/api/calendar');
+      const logos = await getJson(MG.logosUrl()).catch(() => undefined);
+      return { cal, names: undefined, logos, note: `Updated ${etClock(cal.asOf)} (local server; the relay is not available: ${why.join('; ')})` };
+    } catch (e) { why.push(`local server: ${e.message}`); }
+  }
+  try {
+    const baked = await getJson(`${MG.base}data/calendar.json`);
+    const base = await getJson(`${MG.base}data/calendar-base.json`).catch(() => null);
+    return { cal: lib.staleCopy(baked), names: base?.names, logos: base?.logos, note: `Saved copy from ${etClock(baked.asOf)}: the live feed is not available (${why.join('; ')})` };
+  } catch (e) { why.push(`saved copy: ${e.message}`); }
+  return { cal: null, note: why.join('; ') };
+}
+
+async function main() {
+  const wk = document.getElementById('wk'), note = document.getElementById('note');
+  const none = (text) => { wk.innerHTML = `<div class="none">${text}</div>`; };
+  let lib;
+  try {
+    const [c, m] = await Promise.all([import(`${window.MG.base}lib/calendar/compose.js`), import(`${window.MG.base}lib/calendar/merge.js`)]);
+    lib = { ...c, ...m };
+  } catch (e) { none('Calendar data not available yet.'); note.textContent = `The calendar code could not be loaded (${e.message})`; return; }
+  const got = await loadCalendar(lib);
+  note.textContent = got.note; note.title = got.note;
+  if (!got.cal) { none('Calendar data not available yet.'); return; }
+  let model;
+  try { model = pageModel(got.cal, { names: got.names, logos: got.logos }); } catch (e) { none('Calendar data not available yet.'); note.textContent = `The calendar could not be read (${e.message})`; return; }
+  if (!model.weeks.length) { none('Calendar data not available yet.'); return; }
+  await startPage(model);
+}
+
+if (typeof document !== 'undefined' && document.getElementById('wk')) main();
