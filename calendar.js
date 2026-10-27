@@ -192,7 +192,9 @@ function startPage(M) {
   const BL = { am: ['sun', 'Before the open', 'AM'], mk: ['clk', 'Market hours', ''], pm: ['moon', 'After the close', 'PM'], nt: ['clk', 'Time not given', 'NT'] };
   const WL = { 1: 17, 2: 9.5, 3: 5.2, 4: 3.6 };
   const capf = (c) => (c == null ? .8 : .8 + .4 * Math.max(0, Math.min(1, (Math.log10(c) - .5) / 3.1)));
-  const wE = (r) => WL[r.lvl] * capf(r.c), wX = (x) => ({ h: 19, m: 8, l: 4.4, n: 4.4 })[x.i];
+  /* a tile's area follows market value: weight = square root of the value in $B (a missing value counts as 0), headliners 1.6 times that;
+     rows (tiers 3 and 4) keep the old weights, which only order them */
+  const wE = (r) => (r.lvl <= 2 ? Math.sqrt(r.c ?? 0) * (r.lvl == 1 ? 1.6 : 1) : WL[r.lvl] * capf(r.c)), wX = (x) => ({ h: 19, m: 8, l: 4.4, n: 4.4 })[x.i];
   const REM = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
   const estOf = (r) => (r.ses == 'NT' ? 'time n/a' : r.ses + ' est.');
   const fx = (x) => (x.tm ? fm(x.tm) : 'time n/a');
@@ -422,7 +424,20 @@ function startPage(M) {
     const cn = []; if (F.show != 'econ') cn.push(`<b>${er.length}</b>`); if (F.show != 'earn') cn.push(`${xe.length}`);
     return `<div class="mini pad${d == fday() ? ' on' : ''}" data-a="day:${d}"><div class="dh"><button class="dn"><b>${dowOf(d)}</b><span>${dnum(d)}</span></button>${hi ? `<span class="hp">${hi} high</span>` : ''}<span class="cnt">${cn.join(' &middot; ')}</span></div><div class="tmap" data-id="${id}" data-mini="1"></div></div>`;
   }
-  /* Scale rule: one area-per-weight constant K, fixed by the busiest UNFILTERED day, so a tile keeps its importance size under any filter and a filtered day block shrinks to its content. */
+  /* A lane's tile map height (px) from its tiles alone: area per unit of weight is set so the smallest tile is at least the design's small
+     tile (about 5rem x 3.4rem) and a headliner at least the design's big tile (about 11rem x 6rem), with a margin for the treemap's
+     uneven shapes; an economic red tile is at least 6rem x 5rem. Relative sizes inside the lane stay proportional to value. */
+  const TILE_FLOOR_REM2 = { x: 30, 1: 66, 2: 17 };
+  function tileMapH(it, width, rem) {
+    const tot = it.reduce((s, o) => s + o.v, 0);
+    if (!tot || !width) return 3.6 * rem;
+    const floor = (o) => (o.k == 'x' ? TILE_FLOOR_REM2.x : TILE_FLOOR_REM2[o.r.lvl] || TILE_FLOOR_REM2[2]);
+    /* RF is 1.25 on the laptop, where the type floor is larger, so the floors grow with it (a tile must still fit logo, ticker, time and value) */
+    const area = 1.7 * RF * RF * Math.max(...it.map((o) => floor(o) * tot / o.v)) * rem * rem;
+    const tall = it.some((o) => o.k == 'x' || o.r.lvl == 1);
+    return Math.max((tall ? 6.2 : 3.6) * rem, area / width);
+  }
+  /* Scale rule (laptop day view only): one area-per-weight constant K, fixed by the busiest UNFILTERED day, so a tile keeps its importance size under any filter and a filtered day block shrinks to its content. */
   function sizeAll(D, U, focus, rem) {
     const tw = (s) => s.tiles.reduce((a, o) => a + o.v, 0), fw = (d, b, X) => itemsOf(d, b, X).reduce((s, o) => s + o.v, 0);
     const SU = (d, wide) => ZN.map((b) => splitZ(d, b, U)).filter((s) => s.it.length && !(wide && s.b == 'mk' && !s.tiles.length));
@@ -458,21 +473,14 @@ function startPage(M) {
       zl.forEach((zn, i) => {
         const w = wd[i] + extra / zl.length, s = sd[i], c = cols[s.b] || 1; zn.style.width = w + 'px'; const rw = zn.querySelector('.rows'); if (rw) rw.style.gridTemplateColumns = `repeat(${c},minmax(0,1fr))`;
         const tm = zn.querySelector('.tmap');
-        if (tm) { const inner = w - zcw, Hh = Hof(s, c); tm.style.flex = 'none'; const l1 = s.tiles.some((o) => o.k == 'e' && o.r.lvl == 1), minT = Math.min(Hh, (l1 ? 8 : 5.2) * rem); tm.style.height = Math.max(3.6 * rem, minT, Math.min(Hh, ZH * .62, s.tiles.length ? tw(s) * K / inner : 0)) + 'px'; }
+        if (tm) { const inner = w - zcw, Hh = Hof(s, c); tm.style.flex = 'none'; tm.style.height = tileMapH(s.tiles, inner, rem) + 'px'; }
       });
       /* the day panel shrinks to its content once the lanes are sized */
       day.style.flex = '0 0 auto'; day.querySelector('.zones').style.flex = 'none';
     } else {
-      const zn0 = W.querySelector('.zn'); if (!zn0) return;
-      const W0 = zn0.clientWidth - .6 * rem - 2, zcv = zn0.querySelector('.zh').offsetHeight + .6 * rem + 5, gap = .35 * rem;
-      const dayEl = W.querySelector('.day'), zns = [...dayEl.querySelectorAll('.zn')], base = dayEl.offsetHeight - zns.reduce((a, z) => a + z.offsetHeight, 0) - Math.max(0, zns.length - 1) * gap;
-      let K = Kfix;
-      if (Z === 1 && !FREEZE) {
-        K = 1e9;
-        days().forEach((d) => { const su = SU(d, false), t = su.reduce((a, s) => a + tw(s), 0); if (!t) return; const avail = VH - base - su.reduce((a, s) => a + zcv + rowsRem(s) * rem, 0) - (su.length - 1) * gap - 4; K = Math.min(K, W0 * avail / t); });
-        if (K >= 1e9) K = 3 * rem * rem; if (LAP()) K = Math.max(K, 3.0 * rem * rem); Kfix = K;
-      }
-      W.querySelectorAll('.zn .tmap').forEach((el) => { const it = TM[el.dataset.id] || [], sum = it.reduce((s, o) => s + o.v, 0); el.style.flex = 'none'; const red = it.some((o) => o.k == 'x' && o.x.i == 'h'); el.style.height = Math.max((red ? 6.2 : 3.6) * rem, sum * K / el.clientWidth) + 'px'; });
+      /* each lane's tile map is sized from its own tiles, never from the busiest day's rows: the lane grows as tall as its tiles need
+         (the page scrolls), so every $50B+ company stays a box */
+      W.querySelectorAll('.zn .tmap').forEach((el) => { el.style.flex = 'none'; el.style.height = tileMapH(TM[el.dataset.id] || [], el.clientWidth, rem) + 'px'; });
     }
   }
   function build(D, focus) {
