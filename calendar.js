@@ -21,6 +21,8 @@ const cleanName = (n) => {
 };
 const etClock = (iso) => (iso ? `${new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' })} ET` : 'an unknown time');
 
+const todayNy = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+
 // The relay's answer to a calendar composed from it. lib: { assembleSources, econInputs, buildCalendar } from server/lib/calendar/.
 // A source's copy is used whenever there is one; its `stale` is carried into the status the calendar is composed with (compose.js
 // stamps stale:false on everything it parses, which is wrong for a stored copy; D98). A source with no copy is failed, so its days
@@ -29,13 +31,15 @@ export function composeFromRelay(answer, lib) {
   if (answer?.kind !== 'calendar-sources' || !answer.window?.dates?.length) throw new Error('the relay answer is not a calendar-sources answer');
   if (!answer.base) throw new Error(`the relay has no calendar base (${answer.baseError || 'no reason given'})`);
   const entries = { ...answer.nasdaq, forexfactory: answer.forexfactory, fed: answer.fed, treasury: answer.treasury };
-  if (!Object.values(entries).some((e) => e?.copy)) throw new Error('the relay has no stored calendar data yet');
-  // calendar_route.js: state 'unknown' with this exact error means nothing is stored yet (not-covered, "not loaded"); an unknown
-  // from an unreadable store or a malformed copy carries another error and stays failed
+  if (!Object.values(entries).some((e) => e?.copy)) throw Object.assign(new Error('the relay has no stored calendar data yet'), { noData: true });
+  // calendar_route.js: state 'unknown' with this exact error means nothing is stored yet (not-covered, "not loaded"), or for a
+  // ?week= answer nothing saved in the archive; an unknown from an unreadable store or a malformed copy carries another error and
+  // stays failed
   const NOTHING_STORED = 'nothing stored yet for this source';
+  const NOT_ARCHIVED = 'nothing saved in the calendar archive for this source';
   const res = (e) => (e?.copy
     ? { state: 'ok', payload: e.copy.payload, fetchedAt: e.copy.fetchedAt, error: null }
-    : e && e.state === 'unknown' && e.error === NOTHING_STORED && !e.failure
+    : e && e.state === 'unknown' && (e.error === NOTHING_STORED || e.error === NOT_ARCHIVED) && !e.failure
       ? { state: 'not-covered', payload: null, fetchedAt: null, error: null }
       : { state: 'failed', payload: null, fetchedAt: null, error: e?.error || `no copy stored (${e?.state ?? 'no entry'})` });
   const fetched = { window: answer.window, nasdaq: {}, forexfactory: res(answer.forexfactory), fed: res(answer.fed), treasury: res(answer.treasury) };
@@ -56,19 +60,23 @@ export function composeFromRelay(answer, lib) {
 }
 
 // The status chips under a day heading: a failed or not-yet-listed source is always said (D98); no stale chip, since scheduled dates rarely change (Adam, 2026-10-27).
-function dayFlags(day) {
+// A day already past: a source with nothing for it reads "not stored" (it only lists upcoming days, or the archive holds no copy),
+// never "not yet listed".
+function dayFlags(day, today = null) {
   const out = [];
+  const past = today != null && day.date < today;
   const es = day.earningsStatus;
   if (es.state === 'failed') out.push({ text: 'Earnings failed', title: 'The earnings list for this day could not be loaded.' });
-  else if (es.state === 'not-covered') out.push({ text: 'Earnings not loaded', title: 'The earnings list for this day was not requested.' });
+  else if (es.state === 'not-covered') out.push(past ? { text: 'Earnings not stored', title: 'No copy of the earnings list for this day was saved.' } : { text: 'Earnings not loaded', title: 'The earnings list for this day was not requested.' });
   else if (es.state === 'suspect') out.push({ text: 'Earnings unconfirmed', title: 'The source listed no reports on an ordinary trading day, so the empty list is not trusted.' });
   const by = day.econStatus?.bySource || {};
+  // Treasury lists only upcoming auctions, so a past day with no Treasury copy is expected, not a gap: no chip (Adam, 2026-10-28)
   const group = (pred, word, why) => {
-    const names = Object.keys(by).filter((s) => pred(by[s])).map((s) => SOURCE_NAMES[s]);
+    const names = Object.keys(by).filter((s) => pred(by[s]) && !(past && s === 'treasury' && by[s].state === 'not-covered')).map((s) => SOURCE_NAMES[s]);
     if (names.length) out.push({ text: `${names.join(', ')} ${word}`, title: why });
   };
   group((x) => x.state === 'failed', 'failed', 'This source could not be loaded, so its events for this day are unknown.');
-  group((x) => x.state === 'not-covered', 'not yet listed', 'This source does not list this day yet; it is not a quiet day.');
+  group((x) => x.state === 'not-covered', past ? 'not stored' : 'not yet listed', past ? 'This source has nothing saved for this day, which is already past; it is not a quiet day.' : 'This source does not list this day yet; it is not a quiet day.');
   if (day.closure) {
     out.push(day.closure.kind === 'closed'
       ? { text: 'Market closed', title: day.closure.name, cl: true }
@@ -79,7 +87,7 @@ function dayFlags(day) {
 
 // The calendar to the rows the page draws. R: one per company per day (a missing market value stays null); XV: one per economic
 // event; weeks: up to two Monday-to-Friday groups of the window's days; flags: status chips per date.
-export function pageModel(cal, { names = {}, logos = {} } = {}) {
+export function pageModel(cal, { names = {}, logos = {}, today = null } = {}) {
   const dates = cal.days.map((d) => d.date);
   const mondays = [...new Set(dates.map(mondayOf))].sort().slice(0, 2);
   const weeks = mondays.map((m) => ({ monday: m, dates: dates.filter((d) => mondayOf(d) === m) }));
@@ -89,7 +97,7 @@ export function pageModel(cal, { names = {}, logos = {} } = {}) {
   for (const day of cal.days) {
     const w = mondays.indexOf(mondayOf(day.date));
     if (w < 0) continue;
-    flags[day.date] = dayFlags(day);
+    flags[day.date] = dayFlags(day, today);
     const rows = [...day.earnings.before, ...day.earnings.after, ...day.earnings.noTime, ...day.unknownValue];
     for (const e of rows) {
       R.push({
@@ -121,11 +129,16 @@ const weekLabel = (ds) => {
   return a.m === b.m ? `${MONTHS[a.m]} ${a.d}${b.d > a.d ? ` – ${b.d}` : ''}, ${b.y}` : `${MONTHS[a.m]} ${a.d} – ${MONTHS[b.m]} ${b.d}, ${b.y}`;
 };
 
-function startPage(M) {
-  const { R, XV, CATS, weeks, flags, logos } = M;
+/* nav (only when the relay answered): { loadWeek(monday) } gives { model, archive } for a saved earlier week, or { none, error?, archive? }.
+   The model on show is swapped when an earlier week is opened (R, XV, weeks, flags) and swapped back for this week and next week. */
+function startPage(M, nav = null) {
+  let { R, XV, weeks, flags } = M;
+  const { CATS, logos } = M;
+  const LIVE = { R, XV, weeks, flags };
+  let HV = null, ARCH = null, BUSY = false; /* HV: an earlier saved week on show { monday, none, error }; ARCH: how far back the archive reaches, known after the first earlier week is asked for */
   const $ = (id) => document.getElementById(id);
   const ZN = ['am', 'mk', 'pm', 'nt'];
-  const todayEt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+  const todayEt = todayNy();
   const days = () => weeks[F.range == 'next' && weeks[1] ? 1 : 0].dates;
   const fday = () => (days().includes(F.day) ? F.day : days()[0]);
   const dnum = (d) => +d.slice(8);
@@ -161,9 +174,10 @@ function startPage(M) {
   function sync() {
     document.querySelectorAll('[data-a]').forEach((b) => {
       const [a, v] = b.dataset.a.split(':'); let on = null;
-      if (a == 'show') on = F.show == v; else if (a == 'imp') on = !!F.imp[v]; else if (a == 'tier') on = !!F.tier[v]; else if (a == 'ses') on = !!F.ses[v]; else if (a == 'mine') on = !!F.mine; else if (a == 'range' && b.closest('#rng')) on = F.range == v;
+      if (a == 'show') on = F.show == v; else if (a == 'imp') on = !!F.imp[v]; else if (a == 'tier') on = !!F.tier[v]; else if (a == 'ses') on = !!F.ses[v]; else if (a == 'mine') on = !!F.mine; else if (a == 'range' && b.closest('#rng')) on = v == 'day' ? F.range == 'day' : !HV && F.range == v;
       if (on !== null) b.classList.toggle('on', on);
     });
+    $('prv').disabled = !navTarget(-1); $('nxt').disabled = !navTarget(1);
     ['cat', 'size', 'date'].forEach((k) => { const s = $(k); s.value = F[k]; s.classList.toggle('chg', !!F[k]); });
     $('sbox').classList.toggle('chg', !!F.q);
     $('fb').classList.toggle('act', active());
@@ -175,7 +189,9 @@ function startPage(M) {
     $('size').innerHTML = '<option value="">Any size</option><option value="mega">Over $200B</option><option value="large">$50B-$200B</option><option value="mid">$10B-$50B</option><option value="small">Under $10B</option>';
     $('date').innerHTML = '<option value="">Any date status</option><option value="conf">Confirmed only</option><option value="est">Estimated only</option>';
     document.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-a]'); if (!b) return; const [a, v] = b.dataset.a.split(':');
+      const b = e.target.closest('[data-a]'); if (!b || b.disabled) return; const [a, v] = b.dataset.a.split(':');
+      if (a == 'nav') { const t = navTarget(+v); if (t) gotoWeek(t); return; }
+      if (a == 'range' && HV && v != 'day') { gotoWeek(LIVE.weeks[v == 'next' && LIVE.weeks[1] ? 1 : 0].monday); return; }
       if (a == 'show') F.show = v; else if (a == 'imp') F.imp[v] = F.imp[v] ? 0 : 1; else if (a == 'tier') F.tier[v] = F.tier[v] ? 0 : 1; else if (a == 'ses') F.ses[v] = F.ses[v] ? 0 : 1; else if (a == 'mine') F.mine = F.mine ? 0 : 1;
       else if (a == 'more') { if (EXP.has(v)) EXP.delete(v); else EXP.add(v); }
       else if (a == 'range') F.range = v; else if (a == 'day') { F.day = v; F.range = F.range == 'next' ? 'next' : 'day'; } else if (a == 'clear') { const r = F.range, d = F.day; F = Object.assign(F0(), { range: r, day: d }); $('q').value = ''; }
@@ -186,6 +202,36 @@ function startPage(M) {
     $('q').addEventListener('input', (e) => { F.q = e.target.value.trim().toLowerCase(); go(); });
   }
   function go() { sync(); render(); }
+  /* week arrows: the week shown, and the week an arrow leads to (null when there is none). Forward stops at next week; back goes through
+     this week's own days, then as far as the archive reaches (unknown until the first earlier week has been asked for) */
+  const viewMonday = () => (HV ? HV.monday : weeks[F.range == 'next' && weeks[1] ? 1 : 0].monday);
+  function navTarget(dir) {
+    const t = addD(viewMonday(), 7 * dir);
+    if (LIVE.weeks.some((w) => w.monday === t)) return t;
+    if (dir > 0) return HV && nav && t < LIVE.weeks[0].monday ? t : null; /* forward from an earlier week steps back toward this week */
+    if (!nav) return null;
+    return ARCH && (ARCH.error || !ARCH.earliestWeek || t < ARCH.earliestWeek) ? null : t;
+  }
+  /* open a week: this week or next from the page's own data, any earlier one from the relay's archive (one request, only when asked for) */
+  async function gotoWeek(mon) {
+    if (BUSY) return;
+    BUSY = true;
+    try {
+      const li = LIVE.weeks.findIndex((w) => w.monday === mon);
+      if (li >= 0) {
+        HV = null; ({ R, XV, weeks, flags } = LIVE);
+        F.range = li ? 'next' : F.range == 'day' ? 'day' : 'week'; F.day = weeks[li].dates.includes(todayEt) ? todayEt : weeks[li].dates[0];
+      } else {
+        const got = await nav.loadWeek(mon);
+        if (got.archive) ARCH = got.archive;
+        HV = { monday: mon, none: !!got.none, error: got.error || null };
+        if (got.model) { await Promise.race([Promise.all(loadLogos(got.model.R)), new Promise((ok) => setTimeout(ok, 4000))]); ({ R, XV, weeks, flags } = got.model); }
+        else { R = []; XV = []; flags = {}; weeks = [{ monday: mon, dates: [0, 1, 2, 3, 4].map((n) => addD(mon, n)) }]; }
+        F.range = F.range == 'day' ? 'day' : 'week'; F.day = weeks[0].dates[0];
+      }
+      EXP.clear(); go();
+    } finally { BUSY = false; }
+  }
 
   /* ===== MOSAIC render: squarified treemap of headliners, notable names and red reports per lane; slim Ladder rows for the rest ===== */
   const EL = $('wk'), wkin = () => EL.firstElementChild;
@@ -207,18 +253,20 @@ function startPage(M) {
     wkin().querySelectorAll('.sr .nm').forEach((el) => {
       const over = () => el.scrollWidth > el.clientWidth;
       if (!over()) return; const s = el.dataset.s; if (s && s !== el.textContent) { el.textContent = s; if (!over()) return; }
-      if (el.tagName == 'SPAN') el.textContent = ''; else el.style.textOverflow = 'ellipsis';
+      /* a company name that still does not fit is cut with an ellipsis (the row's tooltip has it whole); only a name with under about 3 characters of room is left out */
+      if (el.tagName == 'SPAN' && el.clientWidth < 3.2 * REM()) el.textContent = ''; else el.style.textOverflow = 'ellipsis';
     });
   }
-  let TM = {}, uid = 0, Z = 1, Kfix = 0, VW = 0, VH = 0, FREEZE = false; const DEM = new Set();
+  let TM = {}, TMD = {}, uid = 0, Z = 1, Kfix = 0, VW = 0, VH = 0; /* TMD: tile map id to its day */
   /* real logo files, preloaded and painted onto canvases (a plain img can stay blank in a screenshot); a company with no logo file draws its ticker */
   const IMG = {};
-  const LOGOS = [...new Set(R.map((r) => r.t))].map((t) => {
+  const loadLogos = (rows) => [...new Set(rows.map((r) => r.t))].filter((t) => !(t in IMG)).map((t) => {
     const file = logos[t] || logos[t.replace(/\./g, '-')];
     if (!file) { IMG[t] = null; return Promise.resolve(); }
     const i = new Image(); IMG[t] = i; i.onload = () => paintLogos(); i.src = window.MG.logoBase + file;
     return i.decode().catch(() => 0);
   });
+  const LOGOS = loadLogos(R);
   const arOf = (t) => { const i = IMG[t]; return i && i.naturalWidth ? i.naturalWidth / i.naturalHeight : 1; };
   let RP = 16;
   const boxW = (t, h, maxW) => { const ar = arOf(t); return ar > 1.9 ? Math.min(maxW, h * Math.min(ar, maxW / h)) : h; };
@@ -288,12 +336,23 @@ function startPage(M) {
   /* tiles = headliners, notable names (unless demoted for being too small) and red high-impact reports; everything else is a slim row */
   /* R3 "Expand to see N more": a lane shows as many earnings rows as fit the window height (LIM, set by fitHeight), biggest value first;
      the rest sit behind one "+N more" row that opens them in place (EXP) and folds them back. Economic rows never collapse. */
-  let LIM = {}, TF = 1, FITTING = false; const EXP = new Set(), LIMD = new Set();
+  /* TFD: each day's box scale (1 = the design's floors), lowered only for a day that is still taller than the window once every lane's rows are cut */
+  let LIM = {}, TFD = {}, FITTING = false; const EXP = new Set(), LIMD = new Set(), MINTF = .1;
+  /* no one box takes more than about 30% of its lane's box area: a giant's weight is capped (only in a lane of four or more boxes, where 30% is possible) */
+  function capBoxes(tiles) {
+    let t = tiles;
+    for (let i = 0; i < 6 && t.length >= 4; i++) {
+      const cap = .3 * t.reduce((s, o) => s + o.v, 0);
+      if (t.every((o) => o.v <= cap * 1.001)) break;
+      t = t.map((o) => (o.v > cap ? { ...o, v: cap } : o));
+    }
+    return t;
+  }
   function splitZ(d, b, X) {
-    const it = itemsOf(d, b, X), isTile = (o) => (o.k == 'e' ? (o.r.lvl <= 2 && !DEM.has(o.r.k)) : o.x.i == 'h');
+    const it = itemsOf(d, b, X), isTile = (o) => (o.k == 'e' ? o.r.lvl <= 2 : o.x.i == 'h');
     const key = d + '|' + b, all = it.filter((o) => o.k == 'e' && !isTile(o)).map((o) => o.r);/* itemsOf orders by value, biggest first */
     const open = !FITTING && EXP.has(key) && LIMD.has(key), lim = open ? undefined : LIM[key], shown = lim == null ? all : all.slice(0, lim), hidden = all.length - shown.length;
-    return { b, key, it, tiles: it.filter(isTile), rx: it.filter((o) => o.k == 'x' && o.x.i != 'h').map((o) => o.x).sort(tmSort), re: [...shown].sort(tmSort), hidden, open, extra: hidden > 0 || open ? 1 : 0 };
+    return { b, key, it, tiles: capBoxes(it.filter(isTile)), rx: it.filter((o) => o.k == 'x' && o.x.i != 'h').map((o) => o.x).sort(tmSort), re: [...shown].sort(tmSort), hidden, open, extra: hidden > 0 || open ? 1 : 0 };
   }
   const rowsRem = (s, cols) => { const n = s.rx.length + s.re.length; return n || s.extra ? (Math.ceil(n / (cols || 1)) + s.extra) * 1.21 * RF + .3 : 0; };
   function rowsHTML(s) {
@@ -361,13 +420,23 @@ function startPage(M) {
       el.classList.toggle('wd', v.lay == 'wd'); el.innerHTML = h;
       if (tileFits(el)) { el.dataset.v = [v.c, v.lay, v.vp, v.k].join(' '); return true; }
     }
+    /* a very small box (a crowded day scaled down to fit the window): the logo goes first, then the time, then the name was already gone;
+       ticker and value never go, their type shrinking until they fit */
+    const T = esc(r.t), vt = fv(r.c);
+    el.classList.remove('wd'); el.style.padding = '.18rem';
+    for (const withTime of [true, false]) {
+      for (const k of [1.1, .95, .82, .7, .6, .5, .42]) {
+        el.innerHTML = `<div class="tk" style="font-size:${k.toFixed(2)}rem">${T}</div><div class="tt" style="font-size:${(k * .85).toFixed(2)}rem">${withTime && r.tm ? `${mkd(r)} ${tmh(r)} ` : ''}<span class="v">${vt}</span></div>`;
+        if (tileFits(el)) { el.dataset.v = `min ${withTime ? 'time' : 'tv'} ${k}`; return true; }
+      }
+    }
     return false;
   }
   function fitAll() {
-    const bad = [], rem = REM();
-    wkin().querySelectorAll('.tmap:not([data-mini]) .tl[data-rk]').forEach((el) => { const r = R[+el.dataset.rk]; if (!fitTile(el, r, el.clientWidth / rem, el.clientHeight / rem)) bad.push(r.k); });
+    const rem = REM();
+    /* a tile that fits no variant keeps the smallest one tried: a box is never turned into a row */
+    wkin().querySelectorAll('.tmap:not([data-mini]) .tl[data-rk]').forEach((el) => fitTile(el, R[+el.dataset.rk], el.clientWidth / rem, el.clientHeight / rem));
     wkin().querySelectorAll('.tmap:not([data-mini]) .tl[data-xk]').forEach((el) => fitEcon(el, XV[+el.dataset.xk], el.clientWidth / rem, el.clientHeight / rem));
-    return bad;
   }
   /* ---------- red high-impact tile: name, time, HIGH and FED badges ---------- */
   function econTile(x) { return { c: 'tl x ih', t: `title="${esc(x.n)}, ${fx(x)}"`, h: '', attr: ` data-xk="${x.k}"` }; }
@@ -403,19 +472,9 @@ function startPage(M) {
       el.innerHTML = rects.map((r) => { const o = tileHTML(r.i, r.w / rem, r.h / rem, mini); return `<div class="${o.c}" ${o.t}${o.attr || ''} style="left:${(r.x + 1).toFixed(1)}px;top:${(r.y + 1).toFixed(1)}px;width:${Math.max(0, r.w - 2).toFixed(1)}px;height:${Math.max(0, r.h - 2).toFixed(1)}px">${o.h}</div>`; }).join('');
     });
   }
-  /* a notable tile that cannot be at least 4rem wide and 2.6rem tall becomes a slim row instead */
-  function planDemote() {
-    const rem = REM(); let any = false;
-    wkin().querySelectorAll('.zn .tmap').forEach((el) => {
-      const it = TM[el.dataset.id]; if (!it || !it.length) return; const W = el.clientWidth, H = el.clientHeight; if (!W || !H) return;
-      const bad = squarify(it.map((o) => Object.assign({}, o)), 0, 0, W, H).filter((q) => q.i.k == 'e' && (q.w < Math.max(4 * rem, 80) || (q.h < 2.6 * rem && q.i.r.lvl > 1))).sort((a, b) => a.i.v - b.i.v)[0];
-      if (bad) { DEM.add(bad.i.r.k); any = true; }
-    });
-    return any;
-  }
   function zoneHTML(s) {
     if (!s.it.length) return '';
-    let tm = ''; if (s.tiles.length) { const id = 'z' + (uid++); TM[id] = s.tiles; tm = `<div class="tmap" data-id="${id}"></div>`; }
+    let tm = ''; if (s.tiles.length) { const id = 'z' + (uid++); TM[id] = s.tiles; TMD[id] = s.key.split('|')[0]; tm = `<div class="tmap" data-id="${id}"></div>`; }
     const ne = s.it.filter((o) => o.k == 'e').length, nx = s.it.length - ne;
     return `<section class="zn ${s.b == 'mk' ? 'mk2' : s.b}" data-b="${s.b}"><div class="zh"><svg class="ico"><use href="#${BL[s.b][0]}"/></svg>${BL[s.b][1]}<em>${ne ? plural(ne, 'report') : ''}${ne && nx ? ' + ' : ''}${nx ? plural(nx, 'event') : ''}</em></div>${tm}${rowsHTML(s)}</section>`;
   }
@@ -424,7 +483,7 @@ function startPage(M) {
   function dayHTML(d, D, wide) {
     const er = D.er.filter((r) => r.d == d), xe = D.xe.filter((x) => x.d == d), hi = xe.filter((x) => x.i == 'h').length;
     const zs = ZN.map((b) => splitZ(d, b, D)), band = wide ? zs.find((s) => s.b == 'mk' && s.it.length && !s.tiles.length) : null;
-    return `<article class="day pad${wide ? ' wide' : ''}" data-d="${d}"><div class="dh"><button class="dn" data-a="day:${d}"><b>${dowOf(d)}</b><span>${dnum(d)}</span></button>${hi ? `<span class="hp">${hi} high-impact</span>` : ''}<span class="cnt">${counts(er, xe)}</span></div>${flagsHTML(d)}${band ? `<div class="mkband"><span class="mbh"><svg class="ico"><use href="#clk"/></svg>Market hours</span>${rowsHTML(band)}</div>` : ''}<div class="zones">${zs.filter((s) => s !== band).map(zoneHTML).join('')}</div></article>`;
+    return `<article class="day pad${wide ? ' wide' : ''}${d == todayEt ? ' today' : ''}" data-d="${d}"><div class="dh"><button class="dn" data-a="day:${d}"><b>${dowOf(d)}</b><span>${dnum(d)}</span></button>${d == todayEt ? '<span class="tdy">Today</span>' : ''}${hi ? `<span class="hp">${hi} high-impact</span>` : ''}<span class="cnt">${counts(er, xe)}</span></div>${flagsHTML(d)}${band ? `<div class="mkband"><span class="mbh"><svg class="ico"><use href="#clk"/></svg>Market hours</span>${rowsHTML(band)}</div>` : ''}<div class="zones">${zs.filter((s) => s !== band).map(zoneHTML).join('')}</div></article>`;
   }
   function miniHTML(d, D) {
     const er = D.er.filter((r) => r.d == d), xe = D.xe.filter((x) => x.d == d), hi = xe.filter((x) => x.i == 'h').length;
@@ -436,12 +495,12 @@ function startPage(M) {
      tile (about 5rem x 3.4rem) and a headliner at least the design's big tile (about 11rem x 6rem), with a margin for the treemap's
      uneven shapes; an economic red tile is at least 6rem x 5rem. Relative sizes inside the lane stay proportional to value. */
   const TILE_FLOOR_REM2 = { x: 30, 1: 66, 2: 17 };
-  function tileMapH(it, width, rem) {
+  function tileMapH(it, width, rem, tf = 1) {
     const tot = it.reduce((s, o) => s + o.v, 0);
     if (!tot || !width) return 3.6 * rem;
     const floor = (o) => (o.k == 'x' ? TILE_FLOOR_REM2.x : TILE_FLOOR_REM2[o.r.lvl] || TILE_FLOOR_REM2[2]);
     /* RF is 1.25 on the laptop, where the type floor is larger, so the floors grow with it (a tile must still fit logo, ticker, time and value) */
-    const area = TF * 1.7 * RF * RF * Math.max(...it.map((o) => floor(o) * tot / o.v)) * rem * rem;
+    const area = tf * 1.7 * RF * RF * Math.max(...it.map((o) => floor(o) * tot / o.v)) * rem * rem;
     const tall = it.some((o) => o.k == 'x' || o.r.lvl == 1);
     return Math.max((tall ? 6.2 : 3.6) * rem, area / width);
   }
@@ -481,29 +540,29 @@ function startPage(M) {
       zl.forEach((zn, i) => {
         const w = wd[i] + extra / zl.length, s = sd[i], c = cols[s.b] || 1; zn.style.width = w + 'px'; const rw = zn.querySelector('.rows'); if (rw) rw.style.gridTemplateColumns = `repeat(${c},minmax(0,1fr))`;
         const tm = zn.querySelector('.tmap');
-        if (tm) { const inner = w - zcw, Hh = Hof(s, c); tm.style.flex = 'none'; tm.style.height = tileMapH(s.tiles, inner, rem) + 'px'; }
+        if (tm) { const inner = w - zcw, Hh = Hof(s, c); tm.style.flex = 'none'; tm.style.height = tileMapH(s.tiles, inner, rem, TFD[fday()] ?? 1) + 'px'; }
       });
       /* the day panel shrinks to its content once the lanes are sized */
       day.style.flex = '0 0 auto'; day.querySelector('.zones').style.flex = 'none';
     } else {
       /* each lane's tile map is sized from its own tiles, never from the busiest day's rows: the lane grows as tall as its tiles need
          (the page scrolls), so every $50B+ company stays a box */
-      W.querySelectorAll('.zn .tmap').forEach((el) => { el.style.flex = 'none'; el.style.height = tileMapH(TM[el.dataset.id] || [], el.clientWidth, rem) + 'px'; });
+      W.querySelectorAll('.zn .tmap').forEach((el) => { el.style.flex = 'none'; el.style.height = tileMapH(TM[el.dataset.id] || [], el.clientWidth, rem, TFD[TMD[el.dataset.id]] ?? 1) + 'px'; });
     }
   }
   function build(D, focus) {
-    TM = {}; uid = 0; VW = EL.clientWidth / Z; VH = EL.clientHeight / Z;
+    TM = {}; TMD = {}; uid = 0; VW = EL.clientWidth / Z; VH = EL.clientHeight / Z;
     const inner = focus ? `<div class="strip">${days().map((d) => miniHTML(d, D)).join('')}</div>${dayHTML(fday(), D, true)}` : days().map((d) => dayHTML(d, D, false)).join('');
     const dmin = active() ? (RF > 1 ? '17rem' : '19rem') : D.er.length ? '21rem' : '19rem';
     EL.innerHTML = `<div class="wkin${focus ? ' focus' : ''}" style="--dmin:${dmin};width:${VW}px;height:${VH}px;transform:scale(${Z})">${inner}</div>`;
   }
   /* Fit the window height without page scrolling: cut earnings rows (smallest value first) into each lane's "+N more" row until every day
      fits (week view: lanes stack, so the day's cut is shared across its lanes; day view: lanes sit side by side, so each tall lane is cut
-     on its own). If the boxes alone are too tall, the tile floor shrinks a little (TF, never below .7). Expanded lanes (EXP) are laid out
+     on its own). If the boxes alone are too tall, that day's boxes scale down uniformly (TFD, never below MINTF). Expanded lanes (EXP) are laid out
      after this, so a click grows the page instead of cutting other lanes. */
   function fitHeight(D, U, focus, rem) {
     const rowPx = 1.21 * RF * rem;
-    FITTING = true; LIM = {}; LIMD.clear(); TF = 1;
+    FITTING = true; LIM = {}; LIMD.clear(); TFD = {};
     build(D, focus); sizeAll(D, U, focus, rem); // start from every row shown (the pass's own build used the previous limits)
     const laneState = (d, b) => { const s = splitZ(d, b, D), n = s.re.length + s.hidden; return { key: s.key, shown: s.re.length, n, s }; };
     const cut = (L, k, cols) => { // cols rows per display row; the "+N more" row takes one display row once the lane is cut
@@ -511,18 +570,26 @@ function startPage(M) {
       if (ns >= L.shown) return false;
       L.shown = ns; LIM[L.key] = ns; LIMD.add(L.key); return true;
     };
-    for (let it = 0; it < 8; it++) {
+    /* the day's boxes shrink by the share of their height that is still over the window (the heights follow the scale), never below MINTF */
+    const shrink = (d, boxesPx, overPx) => {
+      const t = TFD[d] ?? 1; if (t <= MINTF || !boxesPx) return false;
+      TFD[d] = Math.max(MINTF, t * Math.max(.6, 1 - (overPx + 2) / boxesPx)); return true;
+    };
+    for (let it = 0; it < 14; it++) {
       let over = 0, moved = false;
       if (!focus) {
         for (const day of wkin().querySelectorAll('.day')) {
           const o = day.offsetHeight - VH + 2; if (o <= 0) continue; over += o;
           const d = day.dataset.d, lanes = ['am', 'pm', 'nt'].map((b) => laneState(d, b)).filter((L) => L.n > 0);
-          for (let need = Math.ceil(o / rowPx), g = 0; need > 0 && g < 400; g++) {
+          let need = Math.ceil(o / rowPx);
+          for (let g = 0; need > 0 && g < 400; g++) {
             const L = lanes.filter((x) => x.shown > 0).sort((a, b) => b.shown - a.shown)[0]; if (!L) break;
             const before = L.shown + (L.n > L.shown ? 1 : 0);
             if (!cut(L, 1, 1)) { L.shown = 0; continue; } // this lane cannot give a row back; skip it for this day
             moved = true; need -= before - (L.shown + 1);
           }
+          /* every row that can go is cut and the day is still too tall: its boxes scale down (this day only) */
+          if (need > 0 && shrink(d, [...day.querySelectorAll('.tmap')].reduce((s, t) => s + t.offsetHeight, 0), need * rowPx)) moved = true;
         }
       } else {
         const strip = wkin().querySelector('.strip'), day = wkin().querySelector('.day.wide'); if (!day) break;
@@ -535,10 +602,10 @@ function startPage(M) {
             const L = laneState(fday(), z.dataset.b), rows = z.querySelector('.rows'), cols = rows ? getComputedStyle(rows).gridTemplateColumns.split(' ').length : 1;
             if (L.n > 0 && cut(L, Math.ceil((z.offsetHeight - target) / rowPx), cols)) moved = true;
           }
+          if (!moved && shrink(fday(), Math.max(...zl.map((z) => z.querySelector('.tmap')?.offsetHeight ?? 0)), o)) moved = true; // no row left to cut: the boxes scale down
         }
       }
-      if (!over) break;
-      if (!moved) { if (TF > .45) TF *= .9; else break; }
+      if (!over || !moved) break; /* a $50B+ company is never demoted to a row: boxes only scale down, to MINTF */
       build(D, focus); sizeAll(D, U, focus, rem);
     }
     FITTING = false;
@@ -546,10 +613,14 @@ function startPage(M) {
   }
   let laidFor = '';
   function render() {
+    if (HV?.none) { /* an earlier week with nothing saved, or whose archive could not be read: one plain line, never an empty week */
+      EL.innerHTML = `<div class="none">${HV.error ? `The saved calendar for this week could not be loaded (${esc(HV.error)})` : 'No saved calendar for this week'}</div>`;
+      $('stt').textContent = ''; laidFor = ''; return;
+    }
     const D = dataset(), U = dataset(F0()), rem = REM(), focus = F.range == 'day' || (LAP() && !active());
     RF = LAP() ? 1.25 : 1;
-    const pass = (zv) => { Z = zv; let n = 0; do { build(D, focus); sizeAll(D, U, focus, rem); n++; } while (!FREEZE && planDemote() && n < 6); fitHeight(D, U, focus, rem); layoutAll(); fitRows(); };
-    RP = rem; DEM.clear(); Kfix = 0; pass(1);
+    const pass = (zv) => { Z = zv; build(D, focus); sizeAll(D, U, focus, rem); fitHeight(D, U, focus, rem); layoutAll(); fitRows(); };
+    RP = rem; Kfix = 0; pass(1);
     /* filtered week: scale the whole week by one uniform factor (up to 2x) so the tallest day fills the height; relative sizes stay comparable */
     let zUsed = 1;
     if (!focus) {
@@ -558,8 +629,8 @@ function startPage(M) {
       const fits = () => ht() <= avail * .985 && wkin().scrollWidth <= wkin().clientWidth + 1 && rowsOk();
       if (ht() < avail * .82) { let lo = 1, hi = 2; for (let i = 0; i < 7; i++) { const m = (lo + hi) / 2; pass(m); if (fits()) lo = m; else hi = m; } pass(lo); zUsed = lo; }
     }
-    /* fill every tile from the richest variant that fits; a tile that cannot show logo, ticker, time and value becomes a slim row */
-    FREEZE = true; for (let i = 0; i < 4; i++) { const bad = fitAll(); if (!bad.length) break; bad.forEach((k) => DEM.add(k)); pass(zUsed); } FREEZE = false;
+    /* fill every tile from the richest variant that fits */
+    fitAll();
     fitRows();
     $('stt').innerHTML = `Showing <b>${D.er.length}</b> of ${D.nr} reports &middot; <b>${D.xe.length}</b> of ${D.nx} events`;
     paintLogos();
@@ -594,7 +665,15 @@ async function loadCalendar(lib) {
       const notes = [`Updated ${etClock(answer.asOf)}`];
       if (answer.relay?.state === 'down') notes.push(`Feed not refreshed since ${answer.relay.lastRunAt ? etClock(answer.relay.lastRunAt) : 'it started'}: saved copies shown`);
       if (answer.baseError) notes.push(`Reference data: ${answer.baseError}`);
-      return { cal, names: answer.base.names, logos: answer.base.logos, note: notes.join(' · ') };
+      // an earlier week is asked for only when its arrow is pressed (GET /calendar?week=); the start loads this week alone
+      const loadWeek = async (monday) => {
+        let a;
+        try { a = await getJson(`${relay}/calendar?week=${monday}`); } catch (e) { return { none: true, error: e.message }; }
+        const archive = a.archive || null;
+        try { return { model: pageModel(composeFromRelay(a, lib), { names: a.base?.names, logos: a.base?.logos, today: todayNy() }), archive }; }
+        catch (e) { return e.noData ? { none: true, archive } : { none: true, error: e.message, archive }; }
+      };
+      return { cal, names: answer.base.names, logos: answer.base.logos, note: notes.join(' · '), nav: { loadWeek } };
     } catch (e) { why.push(`relay: ${e.message}`); }
   } else why.push('relay: no relay address configured');
   if (!MG.isStatic) {
@@ -625,9 +704,9 @@ async function main() {
   note.textContent = got.note; note.title = got.note;
   if (!got.cal) { none('Calendar data not available yet.'); return; }
   let model;
-  try { model = pageModel(got.cal, { names: got.names, logos: got.logos }); } catch (e) { none('Calendar data not available yet.'); note.textContent = `The calendar could not be read (${e.message})`; return; }
+  try { model = pageModel(got.cal, { names: got.names, logos: got.logos, today: todayNy() }); } catch (e) { none('Calendar data not available yet.'); note.textContent = `The calendar could not be read (${e.message})`; return; }
   if (!model.weeks.length) { none('Calendar data not available yet.'); return; }
-  await startPage(model);
+  await startPage(model, got.nav);
 }
 
 if (typeof document !== 'undefined' && document.getElementById('wk')) main();

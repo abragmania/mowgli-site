@@ -36,6 +36,7 @@ button,select,input{font-family:inherit;color:inherit}
 .wkn{display:flex;align-items:center;gap:.2rem;background:var(--sub);border-radius:20px;padding:.14rem}
 .wkn b{font-size:.82rem;font-weight:700;padding:0 .6rem;white-space:nowrap}
 .wkn button{width:1.5rem;height:1.5rem;border-radius:50%;border:0;background:var(--sub2);cursor:pointer;font-size:.9rem;line-height:1}
+.wkn button:disabled{opacity:.3;cursor:default}
 .hr2{margin-left:auto;display:flex;align-items:center;gap:.7rem}
 .seg{display:flex;gap:.12rem;background:var(--sub);border-radius:20px;padding:.14rem;flex:none}
 .seg button{border:0;background:none;color:var(--mut);font-weight:700;font-size:.74rem;padding:.24rem .7rem;border-radius:16px;cursor:pointer;white-space:nowrap}
@@ -111,6 +112,9 @@ button,select,input{font-family:inherit;color:inherit}
 .dh .dn b{font-size:1.2rem;font-weight:800;letter-spacing:-.3px}
 .dh .dn span{font-size:1.2rem;font-weight:500;color:var(--mut)}
 .dh .cnt{margin-left:auto;font-size:.72rem;color:var(--mut)}.dh .cnt b{color:var(--ink);font-size:.9rem}
+/* today's day block: a bright accent border and a "Today" tag by the date (Adam, 2026-10-28); teal, never the impact colors */
+.day.today{border-color:#4fd1c5;box-shadow:var(--sh),0 0 0 1px #4fd1c5,0 0 18px rgba(79,209,197,.38)}
+.tdy{font-size:.62rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#05201d;background:#4fd1c5;border-radius:12px;padding:.08rem .5rem;white-space:nowrap}
 .hp{font-size:.62rem;font-weight:800;color:#fff;background:rgba(255,92,92,.55);border:1px solid var(--hi);border-radius:12px;padding:.08rem .5rem;white-space:nowrap}
 /* status chips under the day heading: a stale, failed or not-yet-listed source is always said, never a quiet day */
 .fl{display:flex;flex-wrap:wrap;gap:.25rem;flex:none}
@@ -217,7 +221,7 @@ button,select,input{font-family:inherit;color:inherit}
 <div class="head">
  <a class="home" href="/mowgli-site/" title="Mowgli home"><img src="/mowgli-site/mowgli-mark.svg" alt=""><span>Mowgli</span></a>
  <nav class="tnav"><a href="/mowgli-site/">Monitor</a><a class="soon" title="coming">News</a><a class="soon" title="coming">Performance</a><a href="/mowgli-site/calendar/" class="on" aria-current="page">Calendar</a><a href="/mowgli-site/list/">List</a><a href="/mowgli-site/settings/">Settings</a></nav>
- <div class="ttl"><h1>Calendar</h1><div class="wkn"><button data-a="range:week" title="This week">&#8249;</button><b id="wklbl"></b><button data-a="range:next" title="Next week">&#8250;</button></div></div>
+ <div class="ttl"><h1>Calendar</h1><div class="wkn"><button id="prv" data-a="nav:-1" title="Previous week">&#8249;</button><b id="wklbl"></b><button id="nxt" data-a="nav:1" title="Next week">&#8250;</button></div></div>
  <div class="hr2">
   <div class="seg" id="rng"><button data-a="range:day">Day</button><button data-a="range:week" class="on">Week</button><button data-a="range:next">Next week</button></div>
   <label class="srch" id="sbox"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5"/><path d="M11 11l4 4"/></svg><input id="q" placeholder="Ticker or name" autocomplete="off"></label>
