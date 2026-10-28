@@ -300,7 +300,9 @@ function startPage(M) {
     const rx = s.rx.map((x) => `<div class="sr i${x.i}" title="${esc(x.n)}"><b class="nm">${esc(x.n)}</b>${FEDP(x)}<span class="tm">${fx(x)}</span></div>`);
     const re = s.re.map((r) => `<div class="sr${r.lvl >= 4 ? ' mn' : ''}" title="${esc(r.n)}"><span class="ls">${rowLogo(r.t)}</span><b class="tk2">${esc(r.t)}</b><span class="nm">${esc(r.n)}</span><span class="vl">${fv(r.c)}</span><span class="tm">${r.mid ? '<span class="mdt">MIDDAY</span>' : ''}${tmh(r)}</span></div>`);
     const more = s.hidden > 0 ? `<div class="sr more" role="button" tabindex="0" data-a="more:${s.key}" title="Show the ${s.hidden} smaller reports">+${s.hidden} more</div>` : s.open ? `<div class="sr more" role="button" tabindex="0" data-a="more:${s.key}" title="Fold the smaller reports back">Show fewer</div>` : '';
-    return rx.length + re.length + (more ? 1 : 0) ? `<div class="rows${s.re.some((r) => r.mid) ? ' hasmid' : ''}">${rx.join('')}${re.join('')}${more}</div>` : '';
+    // an opened list also gets a "Show fewer" at its top that sticks while scrolling, so it folds from either end (Adam, 2026-10-28)
+    const top = s.open ? `<div class="sr more top" role="button" tabindex="0" data-a="more:${s.key}" title="Fold the smaller reports back">Show fewer</div>` : '';
+    return rx.length + re.length + (more ? 1 : 0) ? `<div class="rows${s.re.some((r) => r.mid) ? ' hasmid' : ''}">${rx.join('')}${top}${re.join('')}${more}</div>` : '';
   }
   function wr(row, s) { const sum = row.reduce((a, b) => a + b.a, 0), mx = Math.max(...row.map((r) => r.a)), mn = Math.min(...row.map((r) => r.a)); return Math.max(s * s * mx / (sum * sum), sum * sum / (s * s * mn)); }
   function squarify(items, x, y, w, h) {
