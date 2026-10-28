@@ -159,6 +159,10 @@ button,select,input{font-family:inherit;color:inherit}
 .sr.mn .tk2,.sr.mn .nm{color:#b9c4ca}
 .sr.im{background:rgba(255,157,59,.24);border-left-color:var(--md)}.sr.im .tm{color:#ffd6a8}
 .sr.il{background:rgba(240,207,74,.1);border-left-color:var(--lo)}.sr.il b.nm{font-weight:700;color:var(--ink2)}.sr.il .tm{color:#ece0a0}
+/* R3 "+N more": the one clickable row at the bottom of a lane that opens the hidden earnings rows in place and folds them back */
+.sr.more{justify-content:center;cursor:pointer;background:rgba(255,255,255,.14);border-left-color:rgba(255,255,255,.7);color:#fff;font-size:calc(.72rem*var(--rf));font-weight:800;letter-spacing:.3px;user-select:none}
+.sr.more:hover,.sr.more:focus-visible{background:rgba(255,255,255,.26);outline:0}
+.wide .rows .sr.more{grid-column:1/-1}
 /* a market-hours lane with only events becomes a short band above the lanes (laptop day view) */
 .mkband{display:flex;align-items:center;gap:.6rem;flex:none;border:1px dashed rgba(255,255,255,.22);border-radius:11px;padding:.3rem .45rem;min-width:30rem}
 .mkband .mbh{font-size:.62rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:#e6edef;display:flex;align-items:center;gap:.35rem;white-space:nowrap}

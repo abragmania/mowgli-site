@@ -177,9 +177,11 @@ function startPage(M) {
     document.addEventListener('click', (e) => {
       const b = e.target.closest('[data-a]'); if (!b) return; const [a, v] = b.dataset.a.split(':');
       if (a == 'show') F.show = v; else if (a == 'imp') F.imp[v] = F.imp[v] ? 0 : 1; else if (a == 'tier') F.tier[v] = F.tier[v] ? 0 : 1; else if (a == 'ses') F.ses[v] = F.ses[v] ? 0 : 1; else if (a == 'mine') F.mine = F.mine ? 0 : 1;
+      else if (a == 'more') { if (EXP.has(v)) EXP.delete(v); else EXP.add(v); }
       else if (a == 'range') F.range = v; else if (a == 'day') { F.day = v; F.range = F.range == 'next' ? 'next' : 'day'; } else if (a == 'clear') { const r = F.range, d = F.day; F = Object.assign(F0(), { range: r, day: d }); $('q').value = ''; }
       go();
     });
+    document.addEventListener('keydown', (e) => { const m = e.target.closest?.('.sr.more'); if (m && (e.key == 'Enter' || e.key == ' ')) { e.preventDefault(); m.click(); } });
     ['cat', 'size', 'date'].forEach((k) => $(k).addEventListener('change', (e) => { F[k] = e.target.value; go(); }));
     $('q').addEventListener('input', (e) => { F.q = e.target.value.trim().toLowerCase(); go(); });
   }
@@ -284,15 +286,21 @@ function startPage(M) {
     return [...ee.map((r) => ({ k: 'e', r, v: wE(r) })), ...ex.map((x) => ({ k: 'x', x, v: wX(x) }))].sort((a, b) => b.v - a.v);
   }
   /* tiles = headliners, notable names (unless demoted for being too small) and red high-impact reports; everything else is a slim row */
+  /* R3 "Expand to see N more": a lane shows as many earnings rows as fit the window height (LIM, set by fitHeight), biggest value first;
+     the rest sit behind one "+N more" row that opens them in place (EXP) and folds them back. Economic rows never collapse. */
+  let LIM = {}, TF = 1, FITTING = false; const EXP = new Set(), LIMD = new Set();
   function splitZ(d, b, X) {
     const it = itemsOf(d, b, X), isTile = (o) => (o.k == 'e' ? (o.r.lvl <= 2 && !DEM.has(o.r.k)) : o.x.i == 'h');
-    return { b, it, tiles: it.filter(isTile), rx: it.filter((o) => o.k == 'x' && o.x.i != 'h').map((o) => o.x).sort(tmSort), re: it.filter((o) => o.k == 'e' && !isTile(o)).map((o) => o.r).sort(tmSort) };
+    const key = d + '|' + b, all = it.filter((o) => o.k == 'e' && !isTile(o)).map((o) => o.r);/* itemsOf orders by value, biggest first */
+    const open = !FITTING && EXP.has(key) && LIMD.has(key), lim = open ? undefined : LIM[key], shown = lim == null ? all : all.slice(0, lim), hidden = all.length - shown.length;
+    return { b, key, it, tiles: it.filter(isTile), rx: it.filter((o) => o.k == 'x' && o.x.i != 'h').map((o) => o.x).sort(tmSort), re: [...shown].sort(tmSort), hidden, open, extra: hidden > 0 || open ? 1 : 0 };
   }
-  const rowsRem = (s, cols) => { const n = s.rx.length + s.re.length; return n ? Math.ceil(n / (cols || 1)) * 1.21 * RF + .3 : 0; };
+  const rowsRem = (s, cols) => { const n = s.rx.length + s.re.length; return n || s.extra ? (Math.ceil(n / (cols || 1)) + s.extra) * 1.21 * RF + .3 : 0; };
   function rowsHTML(s) {
     const rx = s.rx.map((x) => `<div class="sr i${x.i}" title="${esc(x.n)}"><b class="nm">${esc(x.n)}</b>${FEDP(x)}<span class="tm">${fx(x)}</span></div>`);
     const re = s.re.map((r) => `<div class="sr${r.lvl >= 4 ? ' mn' : ''}" title="${esc(r.n)}"><span class="ls">${rowLogo(r.t)}</span><b class="tk2">${esc(r.t)}</b><span class="nm">${esc(r.n)}</span><span class="vl">${fv(r.c)}</span><span class="tm">${r.mid ? '<span class="mdt">MIDDAY</span>' : ''}${tmh(r)}</span></div>`);
-    return rx.length + re.length ? `<div class="rows${s.re.some((r) => r.mid) ? ' hasmid' : ''}">${rx.join('')}${re.join('')}</div>` : '';
+    const more = s.hidden > 0 ? `<div class="sr more" role="button" tabindex="0" data-a="more:${s.key}" title="Show the ${s.hidden} smaller reports">+${s.hidden} more</div>` : s.open ? `<div class="sr more" role="button" tabindex="0" data-a="more:${s.key}" title="Fold the smaller reports back">Show fewer</div>` : '';
+    return rx.length + re.length + (more ? 1 : 0) ? `<div class="rows${s.re.some((r) => r.mid) ? ' hasmid' : ''}">${rx.join('')}${re.join('')}${more}</div>` : '';
   }
   function wr(row, s) { const sum = row.reduce((a, b) => a + b.a, 0), mx = Math.max(...row.map((r) => r.a)), mn = Math.min(...row.map((r) => r.a)); return Math.max(s * s * mx / (sum * sum), sum * sum / (s * s * mn)); }
   function squarify(items, x, y, w, h) {
@@ -431,7 +439,7 @@ function startPage(M) {
     if (!tot || !width) return 3.6 * rem;
     const floor = (o) => (o.k == 'x' ? TILE_FLOOR_REM2.x : TILE_FLOOR_REM2[o.r.lvl] || TILE_FLOOR_REM2[2]);
     /* RF is 1.25 on the laptop, where the type floor is larger, so the floors grow with it (a tile must still fit logo, ticker, time and value) */
-    const area = 1.7 * RF * RF * Math.max(...it.map((o) => floor(o) * tot / o.v)) * rem * rem;
+    const area = TF * 1.7 * RF * RF * Math.max(...it.map((o) => floor(o) * tot / o.v)) * rem * rem;
     const tall = it.some((o) => o.k == 'x' || o.r.lvl == 1);
     return Math.max((tall ? 6.2 : 3.6) * rem, area / width);
   }
@@ -487,11 +495,58 @@ function startPage(M) {
     const dmin = active() ? (RF > 1 ? '17rem' : '19rem') : D.er.length ? '21rem' : '19rem';
     EL.innerHTML = `<div class="wkin${focus ? ' focus' : ''}" style="--dmin:${dmin};width:${VW}px;height:${VH}px;transform:scale(${Z})">${inner}</div>`;
   }
+  /* Fit the window height without page scrolling: cut earnings rows (smallest value first) into each lane's "+N more" row until every day
+     fits (week view: lanes stack, so the day's cut is shared across its lanes; day view: lanes sit side by side, so each tall lane is cut
+     on its own). If the boxes alone are too tall, the tile floor shrinks a little (TF, never below .7). Expanded lanes (EXP) are laid out
+     after this, so a click grows the page instead of cutting other lanes. */
+  function fitHeight(D, U, focus, rem) {
+    const rowPx = 1.21 * RF * rem;
+    FITTING = true; LIM = {}; LIMD.clear(); TF = 1;
+    build(D, focus); sizeAll(D, U, focus, rem); // start from every row shown (the pass's own build used the previous limits)
+    const laneState = (d, b) => { const s = splitZ(d, b, D), n = s.re.length + s.hidden; return { key: s.key, shown: s.re.length, n, s }; };
+    const cut = (L, k, cols) => { // cols rows per display row; the "+N more" row takes one display row once the lane is cut
+      const display = Math.ceil(L.shown / cols) + (L.n > L.shown ? 1 : 0), target = display - k, ns = Math.max(0, (target - 1) * cols);
+      if (ns >= L.shown) return false;
+      L.shown = ns; LIM[L.key] = ns; LIMD.add(L.key); return true;
+    };
+    for (let it = 0; it < 8; it++) {
+      let over = 0, moved = false;
+      if (!focus) {
+        for (const day of wkin().querySelectorAll('.day')) {
+          const o = day.offsetHeight - VH + 2; if (o <= 0) continue; over += o;
+          const d = day.dataset.d, lanes = ['am', 'pm', 'nt'].map((b) => laneState(d, b)).filter((L) => L.n > 0);
+          for (let need = Math.ceil(o / rowPx), g = 0; need > 0 && g < 400; g++) {
+            const L = lanes.filter((x) => x.shown > 0).sort((a, b) => b.shown - a.shown)[0]; if (!L) break;
+            const before = L.shown + (L.n > L.shown ? 1 : 0);
+            if (!cut(L, 1, 1)) { L.shown = 0; continue; } // this lane cannot give a row back; skip it for this day
+            moved = true; need -= before - (L.shown + 1);
+          }
+        }
+      } else {
+        const strip = wkin().querySelector('.strip'), day = wkin().querySelector('.day.wide'); if (!day) break;
+        const o = (strip ? strip.offsetHeight : 0) + .7 * rem + day.offsetHeight - VH + 2;
+        if (o > 0) {
+          over = o;
+          const zl = [...day.querySelectorAll('.zn')], target = Math.max(...zl.map((z) => z.offsetHeight)) - o;
+          for (const z of zl) {
+            if (z.offsetHeight <= target) continue;
+            const L = laneState(fday(), z.dataset.b), rows = z.querySelector('.rows'), cols = rows ? getComputedStyle(rows).gridTemplateColumns.split(' ').length : 1;
+            if (L.n > 0 && cut(L, Math.ceil((z.offsetHeight - target) / rowPx), cols)) moved = true;
+          }
+        }
+      }
+      if (!over) break;
+      if (!moved) { if (TF > .45) TF *= .9; else break; }
+      build(D, focus); sizeAll(D, U, focus, rem);
+    }
+    FITTING = false;
+    build(D, focus); sizeAll(D, U, focus, rem);
+  }
   let laidFor = '';
   function render() {
     const D = dataset(), U = dataset(F0()), rem = REM(), focus = F.range == 'day' || (LAP() && !active());
     RF = LAP() ? 1.25 : 1;
-    const pass = (zv) => { Z = zv; let n = 0; do { build(D, focus); sizeAll(D, U, focus, rem); n++; } while (!FREEZE && planDemote() && n < 6); layoutAll(); fitRows(); };
+    const pass = (zv) => { Z = zv; let n = 0; do { build(D, focus); sizeAll(D, U, focus, rem); n++; } while (!FREEZE && planDemote() && n < 6); fitHeight(D, U, focus, rem); layoutAll(); fitRows(); };
     RP = rem; DEM.clear(); Kfix = 0; pass(1);
     /* filtered week: scale the whole week by one uniform factor (up to 2x) so the tallest day fills the height; relative sizes stay comparable */
     let zUsed = 1;
