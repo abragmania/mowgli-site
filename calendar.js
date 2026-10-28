@@ -171,7 +171,7 @@ function startPage(M) {
     $('wklbl').textContent = weekLabel(days());
   }
   function initUI() {
-    $('cat').innerHTML = '<option value="">All Mowgli Cats</option>' + Object.entries(CATS).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join('');
+    $('cat').innerHTML = '<option value="">All Categories</option>' + Object.entries(CATS).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join('');
     $('size').innerHTML = '<option value="">Any size</option><option value="mega">Over $200B</option><option value="large">$50B-$200B</option><option value="mid">$10B-$50B</option><option value="small">Under $10B</option>';
     $('date').innerHTML = '<option value="">Any date status</option><option value="conf">Confirmed only</option><option value="est">Estimated only</option>';
     document.addEventListener('click', (e) => {
