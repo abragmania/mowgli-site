@@ -55,14 +55,13 @@ export function composeFromRelay(answer, lib) {
   return { ...cal, v: 1, asOf: answer.asOf, errors: a.errors };
 }
 
-// The status chips under a day heading: a stale, failed or not-yet-listed source is always said (D98).
+// The status chips under a day heading: a failed or not-yet-listed source is always said (D98); no stale chip, since scheduled dates rarely change (Adam, 2026-10-27).
 function dayFlags(day) {
   const out = [];
   const es = day.earningsStatus;
   if (es.state === 'failed') out.push({ text: 'Earnings failed', title: 'The earnings list for this day could not be loaded.' });
   else if (es.state === 'not-covered') out.push({ text: 'Earnings not loaded', title: 'The earnings list for this day was not requested.' });
   else if (es.state === 'suspect') out.push({ text: 'Earnings unconfirmed', title: 'The source listed no reports on an ordinary trading day, so the empty list is not trusted.' });
-  else if (es.stale) out.push({ text: 'Earnings stale', title: `Earnings from an earlier fetch${es.fetchedAt ? ` (${es.fetchedAt})` : ''}.` });
   const by = day.econStatus?.bySource || {};
   const group = (pred, word, why) => {
     const names = Object.keys(by).filter((s) => pred(by[s])).map((s) => SOURCE_NAMES[s]);
@@ -70,7 +69,6 @@ function dayFlags(day) {
   };
   group((x) => x.state === 'failed', 'failed', 'This source could not be loaded, so its events for this day are unknown.');
   group((x) => x.state === 'not-covered', 'not yet listed', 'This source does not list this day yet; it is not a quiet day.');
-  group((x) => x.state === 'ok' && x.stale, 'stale', 'Events from an earlier fetch of this source.');
   if (day.closure) {
     out.push(day.closure.kind === 'closed'
       ? { text: 'Market closed', title: day.closure.name, cl: true }
@@ -553,7 +551,7 @@ async function loadCalendar(lib) {
   try {
     const baked = await getJson(`${MG.base}data/calendar.json`);
     const base = await getJson(`${MG.base}data/calendar-base.json`).catch(() => null);
-    return { cal: lib.staleCopy(baked), names: base?.names, logos: base?.logos, note: `Saved copy from ${etClock(baked.asOf)}: the live feed is not available (${why.join('; ')})` };
+    return { cal: lib.staleCopy(baked), names: base?.names, logos: base?.logos, note: `As of ${etClock(baked.asOf)}` };
   } catch (e) { why.push(`saved copy: ${e.message}`); }
   return { cal: null, note: why.join('; ') };
 }
