@@ -194,7 +194,7 @@ function startPage(M) {
      rows (tiers 3 and 4) keep the old weights, which only order them */
   const wE = (r) => (r.lvl <= 2 ? Math.sqrt(r.c ?? 0) * (r.lvl == 1 ? 1.6 : 1) : WL[r.lvl] * capf(r.c)), wX = (x) => ({ h: 19, m: 8, l: 4.4, n: 4.4 })[x.i];
   const REM = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
-  const estOf = (r) => (r.ses == 'NT' ? 'time n/a' : r.ses + ' est.');
+  const estOf = () => ''; // no announced time shows nothing; the lane already says before open or after close (Adam, 2026-10-27)
   const fx = (x) => (x.tm ? fm(x.tm) : 'time n/a');
   const tmx = (r) => (r.tm ? fm(r.tm) : estOf(r));
   const tmh = (r) => (r.tm ? fm(r.tm) : `<span class="est">${estOf(r)}</span>`);
