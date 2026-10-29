@@ -87,13 +87,15 @@ button,select,input{font-family:inherit;color:inherit}
 .sw.s4{width:.5rem;height:.3rem;background:rgba(255,255,255,.22);border-radius:2px}
 .sw.sg{width:1rem;height:.7rem;border:1.5px solid #fff;border-radius:4px;box-shadow:0 0 6px rgba(255,255,255,.55)}
 .ico{width:.9rem;height:.9rem;flex:none;color:#e6edef}
-.mk{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;background:#e6edef;flex:none}
-.mk.e{background:none;border:1.5px dashed #e6edef}
 /* logo chip: square for square marks, wider (up to about 3:1) for wordmarks; a ticker monogram replaces any logo that would draw under about 10px tall */
 .lgo{display:inline-grid;place-items:center;background:none;flex:none;width:var(--w,var(--s,1rem));height:var(--s,1rem);overflow:hidden}
 .lgo canvas{width:90%;height:90%;display:block}
-.fed{font-size:.5rem;font-weight:800;letter-spacing:.8px;color:#0b1418;background:#eef3f4;border-radius:3px;padding:.02rem .25rem;margin-left:.3rem;vertical-align:.1em;white-space:nowrap;display:inline-block}
-.cd{display:grid;place-items:center;background:var(--hi);color:#fff;font-weight:800;font-size:.6rem;letter-spacing:.2px;border-radius:22%;text-align:center;line-height:1;width:var(--s,1.4rem);height:var(--s,1.4rem);flex:none}
+/* the FED tag: tone-on-tone, a darker translucent chip with a thin outline in the row's own color family, never a white sticker (Adam, 2026-10-28) */
+.fed{font-size:.5rem;font-weight:800;letter-spacing:.8px;color:var(--ink2);background:rgba(0,0,0,.32);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);border-radius:3px;padding:.02rem .3rem;margin-left:.3rem;vertical-align:.1em;white-space:nowrap;display:inline-block}
+.sr.im .fed{color:#ffd6a8;background:rgba(70,30,0,.4);box-shadow:inset 0 0 0 1px rgba(255,170,100,.55)}
+.sr.il .fed{color:#ece0a0;background:rgba(60,50,0,.4);box-shadow:inset 0 0 0 1px rgba(240,207,74,.5)}
+/* the short code badge on a red economic tile ("CPI", "Fed"): tone-on-tone, a darker translucent chip with a thin rose outline and soft rose text, never a contrasting sticker (Adam, 2026-10-28); its font size is set inline, at or above the minimum tag size, and the chip widens for its letters */
+.cd{display:grid;place-items:center;background:rgba(60,0,8,.38);color:#ffd9d9;box-shadow:inset 0 0 0 1px rgba(255,175,175,.55);font-weight:800;font-size:.6rem;letter-spacing:.2px;border-radius:calc(var(--s,1.4rem)*.22);text-align:center;line-height:1;min-width:var(--s,1.4rem);height:var(--s,1.4rem);padding:0 .3em;flex:none}
 .tm{font-size:.7rem;font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .none{color:var(--mut);padding:3rem 1rem;text-align:center;font-size:1rem;font-weight:600}
 
@@ -124,6 +126,26 @@ button,select,input{font-family:inherit;color:inherit}
 .wide .zones{flex-direction:row;gap:.5rem;align-items:flex-start}
 .zn{display:flex;flex-direction:column;min-width:0;border-radius:11px;padding:.3rem .3rem .3rem;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.17)}
 .wide .zn{min-width:0;flex:none}
+/* day view: the short lanes take no columns (Adam, 2026-10-28): market hours is a compact band across the top (red boxes at the left, the other events beside them),
+   "Time not given" a compact strip along the bottom, and Before open and After close have the prime space */
+.wide .lband{flex:none;margin-bottom:.35rem}
+.bandrow{display:flex;flex-wrap:wrap;gap:.4rem .5rem;align-items:center}
+.bandrow .sr{width:auto;min-width:17rem;flex:none;gap:.6rem}
+.chip{display:flex;align-items:center;gap:.55rem;flex:none;padding:.32rem .65rem;border-radius:8px;white-space:nowrap;font-size:calc(.8rem*var(--rf));line-height:1.2}
+.chip b{font-weight:800;font-size:calc(.95rem*var(--rf))}
+.chip .ct{font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.chip.x{background:linear-gradient(145deg,rgba(255,92,92,.7),rgba(255,92,92,.34));border:1px solid var(--hi);box-shadow:0 0 14px rgba(255,92,92,.28)}
+.chip .cd{--s:1.55rem;font-size:calc(.6rem*var(--rf));flex:none}
+.chip .hg,.chip .fed{font-size:calc(.6rem*var(--rf))}
+.chip.x .fed{background:rgba(60,0,8,.38);color:#ffd9d9;box-shadow:inset 0 0 0 1px rgba(255,175,175,.5);margin:0;vertical-align:baseline}
+.wide .lfoot{flex:none;margin-top:.35rem}
+/* the week outline's bar: a round chevron button (like the week arrows) that collapses the strip of day mosaics; collapsed, a pill per day stays */
+.sbar{display:flex;align-items:center;gap:.6rem;flex:none}
+.sbtn{width:1.5rem;height:1.5rem;border-radius:50%;border:0;background:var(--sub2);color:var(--ink);cursor:pointer;display:grid;place-items:center;flex:none}
+.sbtn:hover{background:rgba(255,255,255,.26)}
+.sbtn svg{width:.85rem;height:.85rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.sbtn[aria-expanded=false] svg{transform:rotate(-90deg)}
+.sbl{font-size:.62rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut)}
 /* Before open = warm sun lane, After close = cool moon lane; market hours = economic events only, neutral */
 .zn.am{background:rgba(190,130,255,.15);border:1px solid rgba(205,160,255,.46);border-top:3px solid #c9a2ff}
 .zn.am .zh,.zn.am .ico{color:#dcc2ff}
@@ -156,9 +178,9 @@ button,select,input{font-family:inherit;color:inherit}
 .sr .vl{flex:none;margin-left:auto;width:calc(2.9rem*var(--rf));text-align:right;font-size:calc(.7rem*var(--rf));color:var(--mut);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .sr .tm{flex:none;margin-left:auto;width:var(--tmw);display:flex;justify-content:flex-end;align-items:center;gap:.3rem;font-size:calc(.72rem*var(--rf));color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .sr .vl+.tm{margin-left:0}
-.sr.i .tm,.sr.im .tm,.sr.il .tm,.sr.ih .tm,.sr.in .tm{width:calc(3.3rem*var(--rf))}
+.sr.im .tm,.sr.il .tm,.sr.ih .tm,.sr.in .tm{width:calc(3.3rem*var(--rf))}
 .sr.im b.nm,.sr.il b.nm,.sr.ih b.nm,.sr.in b.nm{font-size:calc(.74rem*var(--rf));flex:0 1 auto}
-.sr .fed{flex:none;margin-left:0}
+.sr .fed{flex:none;margin-left:0;font-size:calc(.58rem*var(--rf))}
 .sr .mdt{font-size:calc(.5rem*var(--rf))}
 .sr.mn .tk2,.sr.mn .nm{color:#b9c4ca}
 .sr.im{background:rgba(255,157,59,.24);border-left-color:var(--md)}.sr.im .tm{color:#ffd6a8}
@@ -168,13 +190,17 @@ button,select,input{font-family:inherit;color:inherit}
 .sr.more:hover,.sr.more:focus-visible{background:rgba(255,255,255,.26);outline:0}
 .wide .rows .sr.more{grid-column:1/-1}
 .sr.more.top{position:sticky;top:0;z-index:3;background:#3a4246}
-/* a market-hours lane with only events becomes a short band above the lanes (laptop day view) */
-.mkband{display:flex;align-items:center;gap:.6rem;flex:none;border:1px dashed rgba(255,255,255,.22);border-radius:11px;padding:.3rem .45rem;min-width:30rem}
-.mkband .mbh{font-size:.62rem;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:#e6edef;display:flex;align-items:center;gap:.35rem;white-space:nowrap}
-.mkband .rows{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.12rem .7rem;margin:0}
 /* tiles: ticker, time, value are the strongest; name and reason give way first */
 .tl{position:absolute;border-radius:7px;overflow:hidden;padding:.34rem;display:flex;flex-direction:column;gap:.1rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);min-width:0}
 .tl.e{border-style:dashed}
+/* the anatomy of a box big enough for more than ticker and value: logo, ticker, name, value as one group, centered vertically, left-aligned */
+.tl:not(.wd){justify-content:center}
+.tl:not(.wd):not(.an){align-items:center}
+.tl.an{align-items:center;text-align:center}
+.tl.an.row{flex-direction:row}
+.tl.an .col{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0;gap:.12rem}
+.tl.an .tk{line-height:1.05}
+.tl.an .tt .v{color:var(--ink2)}
 .tl.l1{background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.12));border:1px solid rgba(255,255,255,.55)}
 .tl.l2{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3)}
 .tl .hd{display:flex;align-items:center;gap:.4rem;min-width:0}
@@ -184,30 +210,41 @@ button,select,input{font-family:inherit;color:inherit}
 .tl .nmx{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
 .tl .tt{font-weight:700;color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.25}
 .tl .tt .v{color:var(--mut);font-weight:600}
-.tl .tw{color:var(--mut);overflow:hidden;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;margin-top:auto}
 .tl>*,.tl .lf>*,.tl .rt>*{flex-shrink:0}
 .tl .trow{display:flex;align-items:baseline;gap:.5rem;min-width:0;white-space:nowrap}
 /* economic rows set apart from earnings rows: rounded, outlined, a small bar-chart mark, and a gap before the earnings rows (Adam, 2026-10-27) */
 .sr:is(.ih,.im,.il,.in){border-radius:6px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);gap:.35rem}
 .sr:is(.ih,.im,.il,.in)::before{content:'';flex:none;width:calc(.8rem*var(--rf));height:calc(.8rem*var(--rf));opacity:.85;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M1 15h14v-1.5H1zM2.5 12h2.5V7H2.5zm4.25 0h2.5V3h-2.5zM11 12h2.5V8.5H11z'/%3E%3C/svg%3E") center/contain no-repeat}
 .sr:is(.ih,.im,.il,.in)+.sr:not(.ih,.im,.il,.in){margin-top:.4rem}
+/* a lane where no report has an announced time drops the empty time column of its report rows, so company names get the room (the economic rows keep theirs) */
+.rows.nt0 .sr:not(.ih,.im,.il,.in) .tm{display:none}
+/* the laptop five-day grid: an economic name shows in full, wrapping to a second line, with the time still aligned at the right (Adam, 2026-10-28) */
+@media (max-height:900px){
+.wkin:not(.focus) .sr:is(.ih,.im,.il,.in){height:auto;min-height:calc(1.15rem*var(--rf));padding-block:.1rem}
+.wkin:not(.focus) .sr:is(.ih,.im,.il,.in) b.nm{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.12}
+}
 .tl.wd{flex-direction:row;gap:.5rem}
 .tl.wd .lf{display:flex;flex-direction:column;gap:.15rem;min-width:0;flex:none}
-.tl.wd .rt{display:flex;flex-direction:column;gap:.15rem;min-width:0;flex:1;overflow:hidden}
+.tl.wd .rt{display:flex;flex-direction:column;justify-content:center;gap:.15rem;min-width:0;flex:1;overflow:hidden}
+.tl.wd .lf{justify-content:center}
 /* economic tiles: the only coloured tiles */
 .tl.ih{background:linear-gradient(145deg,rgba(255,92,92,.7),rgba(255,92,92,.34));border:1px solid var(--hi);box-shadow:0 0 18px rgba(255,92,92,.34)}
-.tl.x .tk{font-weight:800;white-space:normal;line-height:1.1;overflow:hidden;overflow-wrap:normal}
-.tl.x .tn{white-space:normal;overflow:hidden;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;color:#ffe6e2}
+.tl.x .tk{font-weight:800;white-space:normal;line-height:1.2;overflow:hidden;overflow-wrap:normal}
 .tl.ih .tt{color:#fff}
-.hg{font-size:.52rem;font-weight:800;letter-spacing:1px;background:rgba(255,40,40,.85);color:#fff;border-radius:4px;padding:.02rem .3rem;margin-left:.3rem;vertical-align:.08em;white-space:nowrap}
+/* the time and the tags sit on their own lines; HIGH and FED are tone-on-tone chips in the tile's own color family (Adam, 2026-10-28); font size set inline at or above the minimum tag size */
+.etg{display:flex;align-items:center;gap:.4rem;margin-top:.25rem;white-space:nowrap}
+.hg,.tl.ih .fed{font-size:inherit;font-weight:800;letter-spacing:1px;background:rgba(60,0,8,.38);color:#ffd9d9;box-shadow:inset 0 0 0 1px rgba(255,175,175,.5);border-radius:4px;padding:.04rem .4rem;margin:0;vertical-align:baseline;line-height:1.25;white-space:nowrap}
 /* focus layout: week strip of mini mosaics + one wide day */
 .strip{display:flex;gap:.6rem;align-items:flex-start;flex:none;width:100%}
 .mini{flex:1;min-width:0;border-radius:14px;padding:.35rem .45rem .4rem;display:flex;flex-direction:column;gap:.25rem;cursor:pointer}
 .mini .tmap{flex:none}
 .mini.on{border-color:#fff;box-shadow:var(--sh),0 0 0 1px rgba(255,255,255,.6)}
+/* today's mark in the week strip, the same teal as the full week view's today block (Adam, 2026-10-28); a selected today keeps both */
+.mini.today{border-color:#4fd1c5;box-shadow:var(--sh),0 0 0 1px #4fd1c5,0 0 14px rgba(79,209,197,.38)}
+.mini.today.on{box-shadow:var(--sh),0 0 0 1px #4fd1c5,0 0 0 3px rgba(255,255,255,.75),0 0 14px rgba(79,209,197,.38)}
+.mini .tdy{font-size:.55rem;padding:.06rem .4rem}
 .mini .dh .dn b,.mini .dh .dn span{font-size:.95rem}
 .mini .tl{padding:0;border-radius:4px;border-width:1px;align-items:center;justify-content:center}
-.mini .tl .cd{font-size:.5rem}
 .mini .tl.il{background:rgba(240,207,74,.1);border:1px solid rgba(240,207,74,.6)}
 .mini .tl.im{background:rgba(255,157,59,.3);border:1px solid var(--md)}
 .wide{flex:1;width:fit-content;min-width:34rem;max-width:100%}
@@ -241,7 +278,6 @@ button,select,input{font-family:inherit;color:inherit}
  <div class="lrow">
   <div class="lg"><em>Tile size</em><span class="sw s1"></span>Headliner<span class="sw s2"></span>Notable<span class="sw s3"></span>Standard<span class="sw s4"></span>Minor<span class="sw sg"></span>Yours (soon)</div>
   <div class="lg"><svg class="ico" style="color:#dcc2ff"><use href="#sun"/></svg>Before the open (to 12:45 PM)<svg class="ico" style="color:#b9caff"><use href="#moon"/></svg>After the close (after 12:45 PM)</div>
-  <div class="lg"><span class="mk"></span>Date confirmed<span class="mk e"></span>Date estimated</div>
   <div class="stt"><span id="stt"></span><button class="clr" data-a="clear">Clear filters</button><span class="smp" id="note"></span></div>
  </div>
 </div>
