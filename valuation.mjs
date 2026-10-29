@@ -200,7 +200,8 @@ export function grossProfitFor(reported, revenue, cost) {
 
 // ---------- shares and price-dependent figures ----------
 
-// Latest combined share count: the later of the cover-page and balance-sheet counts (D61, A16).
+// Latest combined share count: the later of the cover-page and balance-sheet counts (D61, A16). A line's `dated`
+// values (cover counts of filings whose own period is not a fiscal period known here, output.js) count by their date.
 export function latestShares(fin) {
   let best = null;
   for (const id of ['sharesOutstandingCover', 'sharesOutstandingBalance']) {
@@ -211,6 +212,10 @@ export function latestShares(fin) {
       const date = periodOf(fin, id, v).end;
       if (!date) continue;
       if (!best || date > best.date) best = { value: v.value, date, line: id, source: sourceOf(fin, id, v), classes: v.classes || null, combined: v.combined || null };
+    }
+    for (const v of l.dated || []) {
+      if (!hasValue(v) || !(v.value > 0) || !v.date) continue;
+      if (!best || v.date > best.date) best = { value: v.value, date: v.date, line: id, source: { ...sourceOf(fin, id, { ...v, end: v.date }), period: 'filing cover, no fiscal period' }, classes: v.classes || null, combined: v.combined || null };
     }
   }
   return best;
