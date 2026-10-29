@@ -118,6 +118,8 @@ body{background:var(--sp);color:var(--ink);font-family:Manrope,system-ui,sans-se
 .hl{display:none;width:clamp(15rem,17vw,24rem);flex:none;flex-direction:column;min-height:0}
 .hl.on{display:flex}
 .hl h5{font-size:.7rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:.3rem}
+.hl h5{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl .note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.4rem}
 .hl .sc2{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
 .hr{display:grid;grid-template-columns:3.6rem 1fr 3.4rem 3.8rem;gap:.4rem;align-items:baseline;padding:.28rem .2rem;border-top:1px solid var(--line);font-size:.8rem;cursor:pointer}
 .hr:hover{background:var(--sub)}
@@ -180,6 +182,29 @@ body.etf #per button:not([data-p=d]){display:none}
 .wt{cursor:default}
 .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--ink2);font-size:1.05rem;padding:2rem}
 
+/* index map: the SPY and QQQ views (monitor_indexmap.js; look from design/drafts/index-map) */
+.im-cell{position:absolute;border-radius:5px;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-start;line-height:1.18;transition:filter .15s;cursor:default}
+.im-cell[data-co]{cursor:pointer}
+.im-cell:hover{filter:brightness(1.18)}
+.im-cell.ctr{align-items:center;text-align:center;justify-content:center}
+.im-nm{font-weight:800;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.im-wt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;opacity:.85}
+.im-mv{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.im-grp{position:absolute;border-radius:8px;overflow:hidden}
+.im-grp.sub{border-radius:6px}
+.im-grp[data-z]{cursor:pointer}
+.im-gh{position:absolute;left:0;right:0;top:0;padding:0 .5em;display:flex;align-items:center;gap:.4em;font-weight:800;color:var(--ink2);white-space:nowrap;overflow:hidden}
+.im-grp.sub>.im-gh{font-weight:700;opacity:.95}
+.im-gn{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.im-gp{flex:none;font-variant-numeric:tabular-nums;color:#fff}
+.im-gm{flex:none;margin-left:auto;font-style:normal;font-variant-numeric:tabular-nums;padding-left:.4em;color:#dfe7ea}
+body.etf .crumb .note{min-width:0;overflow:hidden;text-overflow:ellipsis}
+body.etf .legend{white-space:nowrap;min-height:1rem}
+body.etf .legend .note{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.legend .na{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;background:#3a4148;vertical-align:middle}
+#imtip{position:fixed;z-index:20;pointer-events:none;background:rgba(10,16,20,.96);border:1px solid var(--cardbd);border-radius:10px;padding:.55rem .75rem;font-size:.82rem;line-height:1.4;max-width:24rem;box-shadow:var(--sh);display:none}
+#imtip b{font-weight:800}#imtip .t2{color:var(--mut)}#imtip .t3{color:var(--ink2);font-variant-numeric:tabular-nums}
+
 </style></head>
 <body>
 <div id="bg">
@@ -231,5 +256,6 @@ body.etf #per button:not([data-p=d]){display:none}
 
 <script src="/mowgli-site/config.js"></script>
 <script src="/mowgli-site/site.js"></script>
+<script src="/mowgli-site/monitor_indexmap.js"></script>
 <script src="/mowgli-site/monitor.js"></script>
 </body></html>

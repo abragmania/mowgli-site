@@ -227,19 +227,11 @@ const fmtDay = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('e
 function drawEtf() {
   const E = P.etf?.[S.mode.toLowerCase()], el = $('map'); S.p = 'd';
   if (!E) { el.innerHTML = '<div class="msg">The fund’s official holdings file could not be read, so there are no weights to show.</div>'; $('hl').innerHTML = ''; $('crumb').innerHTML = `<span class="cur">${S.mode}</span>`; legend(''); return; }
-  const all = E.h.filter((h) => h.w > 0 && !/future/i.test(h.n)), fut = E.h.filter((h) => /future/i.test(h.n)).reduce((a, h) => a + h.w, 0);
-  const boxes = S.mode === 'SPY' ? all.filter((h) => +h.w.toFixed(2) >= TH) : all, rest = S.mode === 'SPY' ? all.filter((h) => +h.w.toFixed(2) < TH) : [];
-  const W = el.clientWidth, H = el.clientHeight;
-  el.innerHTML = squarify(boxes.map((h) => ({ hd: h, v: h.w })), 0, 0, W, H).map((r) => {
-    const h = r.hd, fs = Math.max(9, Math.min(R() * 1.3, Math.sqrt(r.w * r.h) / 5.5)), lg = logo(h.t);
-    const show = r.w > 30 && r.h > 18, withLogo = lg && r.h > fs * 6.5 && r.w > fs * 5;
-    const inner = !show ? '' : (withLogo ? `<div class="lg"><img src="${esc(lg)}" alt=""></div>` : '') + `<div class="nm">${esc(h.t)}</div>${r.h > fs * 2.5 && r.w > 40 ? `<div class="mv">${fp(h.d, withLogo ? 2 : 1)}</div>` : ''}${r.h > fs * 5.5 && r.w > fs * 6 ? `<div class="sm">${h.w.toFixed(2)}% of fund</div>` : ''}`;
-    return `<div class="cell co"${co(h.t)} style="${box(r, `background:${heat(h.d)};font-size:${fs}px`)}" title="${esc(h.n)} (${esc(h.t)}) · ${h.w.toFixed(2)}% of ${S.mode} · today ${fp(h.d)}${isMine(h.t) ? ' · click to open the company' : ''}">${inner}</div>`;
-  }).join('');
-  $('hl').innerHTML = S.mode === 'SPY' ? `<h5>${rest.length} smaller holdings (under ${TH}% each, ${rest.reduce((a, h) => a + h.w, 0).toFixed(1)}% of the fund)</h5><div class="sc2">${rest.map((h) => `<div class="hr"${co(h.t)} title="${esc(h.n)}${isMine(h.t) ? ' · click to open the company' : ''}"><b>${esc(h.t)}</b><span>${esc(h.n)}</span><i>${h.w.toFixed(2)}%</i><em class="${cls(h.d)}">${fp(h.d)}</em></div>`).join('')}</div>` : '';
   const d = fmtDay(E.asOf) || (E.asOfText || '').replace(/.*As of\s*/i, '') || 'an unknown date';
-  $('crumb').innerHTML = `<span class="cur">${S.mode === 'SPY' ? 'SPY · S&amp;P 500 fund' : 'QQQ · Nasdaq 100 fund'}</span><span class="note" style="margin-left:.5rem;font-weight:600">${all.length} holdings · official weights as of ${d}, ${S.mode === 'SPY' ? 'State Street' : 'Invesco'}</span>`;
-  legend(`Box size = weight in the fund (${esc(E.src)}); colour = today's move${fut ? ` · excludes index futures (${fut.toFixed(2)}%)` : ''} · click a box to open the company (where Mowgli has one)`);
+  const im = window.drawIndexMap(el, { E, fund: S.mode, asOf: d });   // monitor_indexmap.js: the Cat > Sub > stock map, also sets the crumb and legend
+  // D56: the smaller-holdings list stays as a legible index and the map holds every holding too; same rule as the map (no cash or futures; inside the zoomed Cat)
+  const rest = S.mode === 'SPY' ? E.h.filter((h) => im.has(h) && +h.w.toFixed(2) < TH) : [];
+  $('hl').innerHTML = S.mode === 'SPY' ? `<h5>${rest.length} smaller holdings, also in the map</h5><div class="note">${im.label ? esc(im.label) + ': ' : ''}each under ${TH}%, ${rest.reduce((a, h) => a + h.w, 0).toFixed(1)}% of the fund</div><div class="sc2">${rest.map((h) => `<div class="hr"${co(h.t)} title="${esc(h.n)}${isMine(h.t) ? ' · click to open the company' : ''}"><b>${esc(h.t)}</b><span>${esc(h.n)}</span><i>${h.w.toFixed(2)}%</i><em class="${cls(h.d)}">${fp(h.d)}</em></div>`).join('')}</div>` : '';
 }
 
 /* ---------- breadth ---------- */
