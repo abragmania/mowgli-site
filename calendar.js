@@ -7,7 +7,7 @@
 import { ZN, capBoxes, fitRows, fitAll, layoutAll, sizeAll, fitHeight, laneBand, sweepEmpty, earnWeight, foldFailed, settleAgain } from './calendar_layout.js';
 
 /* ===================================== data (pure) ===================================== */
-const SOURCE_NAMES = { forexfactory: 'Forex Factory', fed: 'Fed', treasury: 'Treasury' };
+const SOURCE_NAMES = { forexfactory: 'Forex Factory', fed: 'Fed', treasury: 'Treasury', tradingview: 'TradingView' };
 const TIER_LVL = { headliner: 1, notable: 2, standard: 3, minor: 4, unknown: 4 };
 const IMPACT_KEY = { high: 'h', medium: 'm', low: 'l' };
 const DAY_MS = 86_400_000;
@@ -32,7 +32,7 @@ const todayNy = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_
 export function composeFromRelay(answer, lib) {
   if (answer?.kind !== 'calendar-sources' || !answer.window?.dates?.length) throw new Error('the relay answer is not a calendar-sources answer');
   if (!answer.base) throw new Error(`the relay has no calendar base (${answer.baseError || 'no reason given'})`);
-  const entries = { ...answer.nasdaq, forexfactory: answer.forexfactory, fed: answer.fed, treasury: answer.treasury };
+  const entries = { ...answer.nasdaq, forexfactory: answer.forexfactory, fed: answer.fed, treasury: answer.treasury, tradingview: answer.tradingview };
   if (!Object.values(entries).some((e) => e?.copy)) throw Object.assign(new Error('the relay has no stored calendar data yet'), { noData: true });
   // calendar_route.js: state 'unknown' with this exact error means nothing is stored yet (not-covered, "not loaded"), or for a
   // ?week= answer nothing saved in the archive; an unknown from an unreadable store or a malformed copy carries another error and
@@ -45,21 +45,21 @@ export function composeFromRelay(answer, lib) {
       ? { state: 'not-covered', payload: null, fetchedAt: null, error: null }
       : { state: 'failed', payload: null, fetchedAt: null, error: e?.error || `no copy stored (${e?.state ?? 'no entry'})` });
   const fetched = { window: answer.window, nasdaq: {}, forexfactory: res(answer.forexfactory), fed: res(answer.fed), treasury: res(answer.treasury) };
-  /* an answer with no Kiplinger entry at all (an older relay) leaves the source absent, which compose reads as not covered; an entry with no copy is failed */
-  if (answer.kiplinger !== undefined) fetched.kiplinger = res(answer.kiplinger);
+  /* an answer with no entry at all for a later source (an older relay: Kiplinger, TradingView, Earnings Whispers) leaves it absent, which compose reads as not covered; an entry with no copy is failed */
+  for (const s of ['tradingview', 'kiplinger', 'earningswhispers']) if (answer[s] !== undefined) fetched[s] = res(answer[s]);
   for (const d of answer.window.dates) fetched.nasdaq[d] = res(answer.nasdaq?.[d]);
-  const a = lib.assembleSources(fetched);
+  const a = lib.assembleSources(fetched, { shareClassOf: answer.base.shareClassOf });
   for (const [d, st] of Object.entries(a.status.nasdaq)) if (st.state === 'ok') st.stale = !!answer.nasdaq?.[d]?.stale;
   // a copy served although the latest fetch failed (or is suspect) is marked fetchFailed, so a day outside it reads failed, not "not yet listed" (compose.js econInputs)
-  for (const s of ['forexfactory', 'fed', 'treasury']) {
+  for (const s of ['forexfactory', 'fed', 'treasury', 'tradingview']) {
     if (a.status[s].state === 'ok') { a.status[s].stale = !!answer[s]?.stale; if (answer[s]?.state !== 'ok') a.status[s].fetchFailed = true; }
   }
-  if (a.status.kiplinger?.state === 'ok') a.status.kiplinger.stale = !!answer.kiplinger?.stale; // a stored copy's stale mark (D98)
+  for (const s of ['kiplinger', 'earningswhispers']) if (a.status[s]?.state === 'ok') a.status[s].stale = !!answer[s]?.stale; // a stored copy's stale mark (D98)
   const { econ, status } = lib.econInputs(a, null);
   const b = answer.base;
   const cal = lib.buildCalendar({
     window: { dates: answer.window.dates }, earnings: a.earnings, econ, eventsConfig: b.eventsConfig, marketCalendar: b.marketCalendar,
-    tiers: b.tiers, reportTimes: b.reportTimes, researched: new Set(b.researched), cats: b.cats, shareClassOf: b.shareClassOf, status: { nasdaq: a.status.nasdaq, ...status },
+    tiers: b.tiers, reportTimes: b.reportTimes, releaseTimes: b.releaseTimes, researched: new Set(b.researched), cats: b.cats, shareClassOf: b.shareClassOf, status: { nasdaq: a.status.nasdaq, ...status },
   });
   return { ...cal, v: 1, asOf: answer.asOf, errors: a.errors };
 }
@@ -487,6 +487,8 @@ async function loadCalendar(lib) {
       const notes = [`Updated ${etClock(answer.asOf)}`];
       if (answer.relay?.state === 'down') notes.push(`Feed not refreshed since ${answer.relay.lastRunAt ? etClock(answer.relay.lastRunAt) : 'it started'}: saved copies shown`);
       if (answer.baseError) notes.push(`Reference data: ${answer.baseError}`);
+      const fell = lib.econFallbackNote(cal); // this week's releases from TradingView, Forex Factory's copy being from an earlier week
+      if (fell) notes.push(fell);
       // an earlier week is asked for only when its arrow is pressed (GET /calendar?week=); the start loads this week alone
       const loadWeek = async (monday) => {
         let a;
@@ -503,7 +505,8 @@ async function loadCalendar(lib) {
     try {
       const cal = await getJson('/api/calendar');
       const logos = await getJson(MG.logosUrl()).catch((e) => { console.warn(`calendar: the logo list could not be loaded (${e.message}); tickers are shown instead`); });
-      return { cal, names: undefined, logos, note: `Updated ${etClock(cal.asOf)} (local server; the relay is not available: ${why.join('; ')})` };
+      const fell = lib.econFallbackNote(cal);
+      return { cal, names: undefined, logos, note: `Updated ${etClock(cal.asOf)} (local server; the relay is not available: ${why.join('; ')})${fell ? ` · ${fell}` : ''}` };
     } catch (e) { why.push(`local server: ${e.message}`); }
   }
   try {
